@@ -6,11 +6,13 @@
   const filters = $("filters");
   const trashPile = $("trash-pile");
   const wooPile = $("woo-pile");
+  const unsurePile = $("unsure-pile");
   const detail = $("detail");
 
   const byId = Object.fromEntries(CLAIMS.map((c) => [c.id, c]));
 
-  // answers: { [claimId]: "yes" | "no" }, in the order they were given
+  // answers: { [claimId]: "yes" | "no" | "unsure" }, in the order they were given.
+  // "unsure" is Don't Know: off the board, but not part of the woo score.
   let answers = load();
   let activeCategory = "all";
   let query = "";
@@ -35,10 +37,14 @@
     }
   }
 
+  // The woo score only counts Yes and No; Don't Know answers sit it out.
   function score() {
-    const ids = Object.keys(answers);
-    const woo = ids.filter((id) => answers[id] === "yes").length;
-    return { answered: ids.length, woo, trash: ids.length - woo, pct: ids.length ? Math.round((woo / ids.length) * 100) : 0 };
+    const values = Object.values(answers);
+    const woo = values.filter((v) => v === "yes").length;
+    const trash = values.filter((v) => v === "no").length;
+    const unsure = values.filter((v) => v === "unsure").length;
+    const answered = woo + trash;
+    return { answered, woo, trash, unsure, pct: answered ? Math.round((woo / answered) * 100) : 0 };
   }
 
   // Lead with what people reject: most visitors turn down most of the list.
@@ -83,7 +89,16 @@
     const rows = new Set([...chips].map((c) => c.offsetTop)).size;
     if (rows > 2) filters.classList.add("one-row");
   }
-  window.addEventListener("resize", fitFilters);
+  window.addEventListener("resize", () => {
+    fitFilters();
+    renderBins();
+  });
+
+  const PILES = {
+    yes: { cls: "in-woo", label: "🔮 In your Woo Pile", title: "🔮 Woo Pile" },
+    no: { cls: "in-trash", label: "🗑️ In your Trash Bin", title: "🗑️ Trash Bin" },
+    unsure: { cls: "in-unsure", label: "🤷 In your Don't Know pile", title: "🤷 Don't Know" },
+  };
 
   function makeCard(claim) {
     const card = document.createElement("article");
@@ -118,7 +133,7 @@
     const row = document.createElement("div");
     row.className = "answer";
     const given = answers[claim.id];
-    for (const [value, label, cls] of [["yes", "Yes", "yes"], ["no", "No", "no"]]) {
+    for (const [value, label, cls] of [["yes", "Yes", "yes"], ["no", "No", "no"], ["unsure", "Don't Know", "unsure"]]) {
       const b = document.createElement("button");
       b.type = "button";
       b.className = cls;
@@ -130,13 +145,13 @@
     }
 
     // Search also shows claims you've already answered, labelled with their pile.
-    // Tapping the other button moves the claim to the other pile.
+    // Tapping another button moves the claim to that pile.
     const parts = [cat, h, q, row];
     if (given) {
-      card.classList.add("answered", given === "yes" ? "in-woo" : "in-trash");
+      card.classList.add("answered", PILES[given].cls);
       const pile = document.createElement("p");
       pile.className = "card-pile";
-      pile.textContent = given === "yes" ? "🔮 In your Woo Pile" : "🗑️ In your Trash Bin";
+      pile.textContent = PILES[given].label;
       parts.splice(3, 0, pile);
     }
 
@@ -164,8 +179,10 @@
   }
 
   // Each bin shows its newest few claims so the side panel never needs its own
-  // scrollbar; the rest open in a popup.
-  const PILE_PREVIEW = 6;
+  // scrollbar; the rest open in a popup. On wide screens the panel stays put
+  // while the board scrolls, so the previews shrink until all three bins fit.
+  // [Trash Bin and Woo Pile, Don't Know], tried in order until the panel fits.
+  const PREVIEWS = [[6, 3], [5, 3], [4, 2], [3, 2], [3, 1], [3, 0], [2, 0], [1, 0]];
 
   function pileIds(kind) {
     return Object.keys(answers).filter((id) => answers[id] === kind).reverse();
@@ -182,10 +199,29 @@
   }
 
   function renderBins() {
-    const fill = (list, kind) => {
+    const side = document.querySelector(".bins");
+    side.classList.remove("unstick");
+    // Stick just below the header, whatever height it wraps to.
+    side.style.top = `${document.querySelector(".top").offsetHeight + 16}px`;
+    for (const [n, unsure] of PREVIEWS) {
+      fillBins(n, unsure);
+      if (sideFits(side)) return;
+    }
+    // Still too tall for this window: let the panel scroll with the page.
+    side.classList.add("unstick");
+  }
+
+  function sideFits(side) {
+    const css = getComputedStyle(side);
+    if (css.display === "contents") return true; // one column: the bins sit below the board
+    return side.offsetHeight + (parseFloat(css.top) || 0) + 16 <= window.innerHeight;
+  }
+
+  function fillBins(preview, unsurePreview) {
+    const fill = (list, kind, preview) => {
       const ids = pileIds(kind);
-      const items = ids.slice(0, PILE_PREVIEW).map((id) => pileItem(id, () => openDetail(id)));
-      if (ids.length > PILE_PREVIEW) {
+      const items = ids.slice(0, preview).map((id) => pileItem(id, () => openDetail(id)));
+      if (ids.length > preview) {
         const li = document.createElement("li");
         const more = document.createElement("button");
         more.type = "button";
@@ -197,14 +233,15 @@
       }
       list.replaceChildren(...items);
     };
-    fill(trashPile, "no");
-    fill(wooPile, "yes");
+    fill(trashPile, "no", preview);
+    fill(wooPile, "yes", preview);
+    fill(unsurePile, "unsure", unsurePreview);
   }
 
   function openPile(kind) {
     const dlg = $("pile-dialog");
     const ids = pileIds(kind);
-    $("pile-title").textContent = `${kind === "yes" ? "🔮 Woo Pile" : "🗑️ Trash Bin"} (${ids.length})`;
+    $("pile-title").textContent = `${PILES[kind].title} (${ids.length})`;
     dlg.classList.toggle("trash", kind === "no");
     $("pile-all").replaceChildren(
       ...ids.map((id) =>
@@ -223,12 +260,22 @@
     $("verdict").textContent = verdictFor(s.pct, s.answered);
     $("trash-count").textContent = s.trash;
     $("woo-count").textContent = s.woo;
+    $("unsure-count").textContent = s.unsure;
     $("mini-trash-count").textContent = s.trash;
     $("mini-woo-count").textContent = s.woo;
+    $("mini-unsure-count").textContent = s.unsure;
+    showMiniUnsure(s.unsure > 0);
     $("mini-pct").textContent = `${s.pct}%`;
     // -90deg is all the way left (0%), +90deg all the way right (100%).
     $("needle").style.transform = `rotate(${-90 + s.pct * 1.8}deg)`;
     renderCat(Cat.stageFor(s.pct));
+  }
+
+  // The bottom bar's Don't Know count appears once there's something in it;
+  // on small phones the other two then drop their words to make room.
+  function showMiniUnsure(show) {
+    $("mini-unsure").hidden = !show;
+    $("mini-unsure").parentElement.classList.toggle("has-unsure", show);
   }
 
   // A different cat for every 5% of woo.
@@ -311,11 +358,17 @@
     save();
     emit("answer", { id, value });
     if (value === "yes") Sounds.woo();
-    else Sounds.trash();
+    else if (value === "no") Sounds.trash();
+    else Sounds.unsure();
 
     // On narrow screens the bins are below the grid, so aim for the bottom bar instead.
-    let bin = value === "yes" ? $("woo-bin") : $("trash-bin");
-    if (!isOnScreen(bin)) bin = value === "yes" ? $("mini-woo") : $("mini-trash");
+    const BINS = { yes: ["woo-bin", "mini-woo"], no: ["trash-bin", "mini-trash"], unsure: ["unsure-bin", "mini-unsure"] };
+    let bin = $(BINS[value][0]);
+    if (!isOnScreen(bin)) {
+      // The bottom bar's Don't Know count only shows once it has something in it.
+      if (value === "unsure") showMiniUnsure(true);
+      bin = $(BINS[value][1]);
+    }
     flyInto(card, bin, () => {
       renderAll();
       bin.classList.add("bump");

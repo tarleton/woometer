@@ -2,7 +2,7 @@
 
 A place to measure your woo. Live at [woometer.com](https://woometer.com).
 
-The page is a grid of well-known pseudoscience, paranormal, conspiracy and religious claims. Click **Yes** if you believe it or **No** if you don't, and the card flies into your **Woo Pile** or your **Trash Bin**. The meter at the top shows your woo score, the percentage of your answers that were Yes, and how much of the list you reject. Most people turn down most of it. Next to the meter is a cartoon cat that changes every 5% (21 different cats, drawn as inline SVG in [`cat.js`](cat.js)): a professor with a book at 0%, through crystals, tarot, wands and D&D dice, up to a UFO pilot at 100%. Click the cat to see them all. Tap anything in a pile to read what the evidence says, or to put it back on the board.
+The page is a grid of well-known pseudoscience, paranormal, conspiracy and religious claims. Click **Yes** if you believe it or **No** if you don't, and the card flies into your **Woo Pile** or your **Trash Bin**. Not sure? **Don't Know** puts it in a third pile that doesn't count toward your score. The meter at the top shows your woo score, the percentage of your Yes and No answers that were Yes, and how much of the list you reject. Most people turn down most of it. Next to the meter is a cartoon cat that changes every 5% (21 different cats, drawn as inline SVG in [`cat.js`](cat.js)): a professor with a book at 0%, through crystals, tarot, wands and D&D dice, up to a UFO pilot at 100%. Click the cat to see them all. Tap anything in a pile to read what the evidence says, or to put it back on the board.
 
 Answers are saved in the visitor's own browser (`localStorage`). When Supabase is configured (see below), they are also saved to the visitor's Supabase user, which powers the "N% of people agree" numbers, friend comparisons and optional Google sign-in. With no Supabase settings the site runs entirely in the browser.
 
@@ -37,7 +37,7 @@ New categories go in `CATEGORIES` at the top of the same file.
 [`cloud.js`](cloud.js) adds three things on top of the static site:
 
 - **Everyone is saved, nobody has to sign up.** Each visitor quietly gets an anonymous Supabase user. **Sign in with Google** links that same user to a Google account, so answers and friends carry over and follow you to other devices.
-- **"N% of people agree with you"** after each answer, and Yes/No totals in each claim's detail view.
+- **"N% of people agree with you"** after each answer, and Yes/No/Don't Know totals in each claim's detail view. A Don't Know on either side counts as "not both answered" in friend comparisons.
 - **Shared links and friends.** Everyone has a link (`woometer.com/?f=CODE`), copied by Share or from the Friends popup. Opening someone's link shows their woo score and Woo Pile and lets you compare, without adding anyone. Adding a friend is a deliberate tap: "Add as a Friend" on their link, or pasting their link in the Friends popup. Adding a friend needs Google sign-in (when `googleSignIn` is on), so friends stay with the account; someone not signed in is asked to sign in, and the add finishes when they come back from Google. That puts each of you in the other's friend list. Clicking a friend shows the percentage of claims you agree on, differ on, and haven't both answered (out of every claim currently on the list, so the three add up to 100 as new claims are added), plus the list of differences.
 
 Answers are stored by claim `id`, so adding claims needs no database change.

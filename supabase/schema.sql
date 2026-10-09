@@ -24,12 +24,17 @@ create table if not exists public.profiles (
 create table if not exists public.answers (
   user_id uuid not null references auth.users (id) on delete cascade,
   claim_id text not null check (char_length(claim_id) between 1 and 100),
-  answer text not null check (answer in ('yes', 'no')),
+  answer text not null check (answer in ('yes', 'no', 'unsure')),
   updated_at timestamptz not null default now(),
   primary key (user_id, claim_id)
 );
 
 create index if not exists answers_claim_id_idx on public.answers (claim_id);
+
+-- 'unsure' is the Don't Know button. Databases set up before it existed only
+-- allow 'yes' and 'no', so replace that rule.
+alter table public.answers drop constraint if exists answers_answer_check;
+alter table public.answers add constraint answers_answer_check check (answer in ('yes', 'no', 'unsure'));
 
 -- One row per direction: (me, them) puts them in my friend list.
 create table if not exists public.friends (
@@ -164,14 +169,17 @@ language sql stable security definer set search_path = public as $$
   where p.share_code = code;
 $$;
 
--- Yes and No totals per claim across everyone, for "N% of people agree".
--- Pass a list of claim ids to get just those, or nothing for every claim.
-create or replace function public.claim_stats(only_ids text[] default null)
-returns table (claim_id text, yes bigint, no bigint)
+-- Yes, No and Don't Know totals per claim across everyone, for "N% of people
+-- agree". Pass a list of claim ids to get just those, or nothing for every claim.
+-- Dropped first because the Don't Know column changed what it returns.
+drop function if exists public.claim_stats(text[]);
+create function public.claim_stats(only_ids text[] default null)
+returns table (claim_id text, yes bigint, no bigint, unsure bigint)
 language sql stable security definer set search_path = public as $$
   select a.claim_id,
          count(*) filter (where a.answer = 'yes'),
-         count(*) filter (where a.answer = 'no')
+         count(*) filter (where a.answer = 'no'),
+         count(*) filter (where a.answer = 'unsure')
   from answers a
   where only_ids is null or a.claim_id = any (only_ids)
   group by a.claim_id;

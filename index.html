@@ -118,6 +118,11 @@
         <p class="bin-hint">Claims you believe. Tap one for the evidence.</p>
         <ul class="pile" id="woo-pile"></ul>
       </section>
+      <section class="bin unsure" id="unsure-bin">
+        <h2><span aria-hidden="true">🤷</span> Don't Know <span class="count" id="unsure-count">0</span></h2>
+        <p class="bin-hint">These don't count toward your score.</p>
+        <ul class="pile" id="unsure-pile"></ul>
+      </section>
 
     </aside>
   </main>
@@ -224,9 +229,10 @@
   </dialog>
 
   <nav class="minibar" aria-label="Your piles">
-    <a href="#trash-bin" id="mini-trash" class="mini trash">🗑️ Trash <b id="mini-trash-count">0</b></a>
+    <a href="#trash-bin" id="mini-trash" class="mini trash">🗑️<span class="mini-word"> Trash</span> <b id="mini-trash-count">0</b></a>
     <span class="mini-pct"><span class="mini-cat" id="mini-cat" role="button" tabindex="0" aria-label="See every cat"></span><span id="mini-pct">0%</span></span>
-    <a href="#woo-bin" id="mini-woo" class="mini woo">🔮 Woo <b id="mini-woo-count">0</b></a>
+    <a href="#woo-bin" id="mini-woo" class="mini woo">🔮<span class="mini-word"> Woo</span> <b id="mini-woo-count">0</b></a>
+    <a href="#unsure-bin" id="mini-unsure" class="mini unsure" hidden>🤷<span class="mini-word"> Don't Know</span> <b id="mini-unsure-count">0</b></a>
   </nav>
 
   <footer class="foot">

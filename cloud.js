@@ -156,8 +156,29 @@
     const toSend = Object.entries(local)
       .filter(([id, value]) => server[id] !== value)
       .map(([id, value]) => row(id, value));
-    if (toSend.length) await db.from("answers").upsert(toSend);
+    if (toSend.length) await saveRows(toSend);
     W.setAnswers({ ...server, ...local });
+  }
+
+  // Don't Know answers are saved in their own batch. Until supabase/schema.sql
+  // has been re-run, the database refuses them; then the claim's old Yes or No
+  // is removed instead, so the server doesn't keep an answer that was changed.
+  // Returns the error from saving Yes and No answers, if any.
+  async function saveRows(rows) {
+    const sure = rows.filter((r) => r.answer !== "unsure");
+    const unsure = rows.filter((r) => r.answer === "unsure");
+    if (sure.length) {
+      const { error } = await db.from("answers").upsert(sure);
+      if (error) return error;
+    }
+    if (unsure.length) {
+      const { error } = await db.from("answers").upsert(unsure);
+      if (error) {
+        console.warn("Woometer: the database doesn't take Don't Know answers yet.", error);
+        await db.from("answers").delete().eq("user_id", user.id).in("claim_id", unsure.map((r) => r.claim_id));
+      }
+    }
+    return null;
   }
 
   function row(id, value) {
@@ -167,13 +188,16 @@
   function wireEvents() {
     document.addEventListener("woometer:answer", async (e) => {
       const { id, value } = e.detail;
-      const { error } = await db.from("answers").upsert(row(id, value));
+      const error = await saveRows([row(id, value)]);
       if (error) return logError({ error });
       const s = await statsFor(id);
-      if (!s) return;
-      const total = s.yes + s.no;
+      // No Don't Know count means the database isn't counting them yet.
+      if (!s || (value === "unsure" && !s.unsure)) return;
+      const total = s.yes + s.no + s.unsure;
+      const people = `${total.toLocaleString()} people`;
       if (total <= 1) W.toast("You're the first to answer this one.");
-      else W.toast(`${pct(value === "yes" ? s.yes : s.no, total)}% of ${total.toLocaleString()} people agree with you.`);
+      else if (value === "unsure") W.toast(`${pct(s.unsure, total)}% of ${people} don't know either.`);
+      else W.toast(`${pct(s[value], total)}% of ${people} agree with you.`);
     });
 
     document.addEventListener("woometer:remove", (e) => {
@@ -190,16 +214,22 @@
       el.hidden = false;
       el.textContent = "Counting everyone's answers…";
       const s = await statsFor(id);
-      const mine = W.getAnswers()[id];
+      let mine = W.getAnswers()[id];
       if (!s) {
         el.hidden = true;
         return;
       }
-      const total = s.yes + s.no;
-      const split = `${pct(s.yes, total)}% of ${total.toLocaleString()} ${total === 1 ? "person" : "people"} said Yes and ${pct(s.no, total)}% said No.`;
+      const total = s.yes + s.no + s.unsure;
+      const people = `${total.toLocaleString()} ${total === 1 ? "person" : "people"}`;
+      const split = s.unsure
+        ? `${pct(s.yes, total)}% of ${people} said Yes, ${pct(s.no, total)}% said No and ${pct(s.unsure, total)}% don't know.`
+        : `${pct(s.yes, total)}% of ${people} said Yes and ${pct(s.no, total)}% said No.`;
+      // A database that isn't counting Don't Know yet hasn't counted yours either.
+      if (mine === "unsure" && !s.unsure) mine = null;
       if (!mine) el.textContent = total ? split : "Nobody has answered this one yet.";
       else if (total <= 1) el.textContent = "You're the only one who has answered this so far.";
-      else el.textContent = `${split} ${pct(mine === "yes" ? s.yes : s.no, total)}% agree with you.`;
+      else if (mine === "unsure") el.textContent = split;
+      else el.textContent = `${split} ${pct(s[mine], total)}% agree with you.`;
     });
 
     $("google-login").addEventListener("click", signInWithGoogle);
@@ -246,7 +276,8 @@
     const { data, error } = await db.rpc("claim_stats", { only_ids: [id] });
     if (error) return logError({ error });
     const r = data[0];
-    return r ? { yes: Number(r.yes), no: Number(r.no) } : { yes: 0, no: 0 };
+    // unsure is missing until supabase/schema.sql has been re-run.
+    return r ? { yes: Number(r.yes), no: Number(r.no), unsure: Number(r.unsure || 0) } : { yes: 0, no: 0, unsure: 0 };
   }
 
   function pct(n, total) {
@@ -539,8 +570,9 @@
     if (await addFriend(code, name)) input.value = "";
   }
 
+  // Like the main score, only Yes and No count; Don't Know sits it out.
   function scoreOf(answers) {
-    const answered = CLAIMS.filter((c) => answers[c.id]);
+    const answered = CLAIMS.filter((c) => answers[c.id] === "yes" || answers[c.id] === "no");
     const woo = answered.filter((c) => answers[c.id] === "yes");
     return { answered: answered.length, woo, pct: pct(woo.length, answered.length) };
   }
@@ -613,20 +645,22 @@
 
   // Percentages are out of every claim currently on the list, so they add up
   // to 100 and stay honest as new claims are added that neither has answered.
+  // A Don't Know on either side counts as "not both answered".
   function compare(mine, theirs) {
     const total = CLAIMS.length;
     const differences = [];
+    const sure = (v) => (v === "yes" || v === "no" ? v : null);
     let agree = 0;
     let onlyMe = 0;
     let onlyThem = 0;
     for (const c of CLAIMS) {
-      const a = mine[c.id];
-      const b = theirs[c.id];
+      const a = sure(mine[c.id]);
+      const b = sure(theirs[c.id]);
       if (a && b) {
         if (a === b) agree++;
         else differences.push({ claim: c, mine: a, theirs: b });
-      } else if (a) onlyMe++;
-      else if (b) onlyThem++;
+      } else if (a && !theirs[c.id]) onlyMe++;
+      else if (b && !mine[c.id]) onlyThem++;
     }
     const differ = differences.length;
     const both = agree + differ;

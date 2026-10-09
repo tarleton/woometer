@@ -8,6 +8,8 @@
   --trash-soft: #e3f5ee;
   --woo: #c04ad6;
   --woo-soft: #f6e6fa;
+  --unsure: #6b7280;
+  --unsure-soft: #eef0f3;
   --accent: #6b3fd6;
   --shadow: 0 1px 2px rgb(34 26 46 / 6%), 0 4px 14px rgb(34 26 46 / 6%);
   --radius: 14px;
@@ -23,6 +25,7 @@
     --line: #362d44;
     --trash-soft: #173229;
     --woo-soft: #351b3d;
+    --unsure-soft: #262a31;
     --accent: #a78bfa;
     --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 4px 14px rgb(0 0 0 / 25%);
   }
@@ -315,7 +318,7 @@ button { font: inherit; cursor: pointer; }
 
 .card .answer { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
 
-.yes, .no {
+.yes, .no, .answer .unsure {
   border: 0;
   border-radius: 10px;
   padding: 9px 0;
@@ -324,8 +327,10 @@ button { font: inherit; cursor: pointer; }
 }
 .yes { background: var(--woo); }
 .no { background: var(--trash); }
-.yes:hover, .no:hover { filter: brightness(1.08); }
-.yes:focus-visible, .no:focus-visible, .chip:focus-visible, .btn:focus-visible {
+/* Don't Know sits under Yes and No, a step quieter. */
+.card .answer .unsure { grid-column: 1 / -1; padding: 6px 0; font-size: 14px; background: var(--unsure); }
+.yes:hover, .no:hover, .answer .unsure:hover { filter: brightness(1.08); }
+.yes:focus-visible, .no:focus-visible, .answer .unsure:focus-visible, .chip:focus-visible, .btn:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
@@ -337,6 +342,7 @@ button { font: inherit; cursor: pointer; }
 .card-pile { margin: 0; font-size: 13px; font-weight: 700; }
 .card.in-woo .card-pile { color: var(--woo); }
 .card.in-trash .card-pile { color: var(--trash); }
+.card.in-unsure .card-pile { color: var(--muted); }
 .card .answer [aria-pressed="false"] { opacity: 0.45; }
 .card .answer [aria-pressed="false"]:hover { opacity: 1; }
 .card .answer [aria-pressed="true"] { cursor: default; box-shadow: inset 0 0 0 2px rgb(255 255 255 / 55%); }
@@ -360,7 +366,8 @@ button { font: inherit; cursor: pointer; }
 
 /* Bins */
 
-.bins { display: flex; flex-direction: column; gap: 16px; align-self: start; position: sticky; top: 112px; }
+.bins { display: flex; flex-direction: column; gap: 12px; align-self: start; position: sticky; top: 112px; }
+.bins.unstick { position: static; }
 @media (max-width: 860px) {
   /* Single column: the meter goes above the claims, the piles below them. */
   .bins { display: contents; }
@@ -375,6 +382,9 @@ button { font: inherit; cursor: pointer; }
 }
 .bin.trash { background: var(--trash-soft); border-color: var(--trash); }
 .bin.woo { background: var(--woo-soft); border-color: var(--woo); }
+.bin.unsure { background: var(--unsure-soft); border-color: var(--unsure); padding: 10px 14px; }
+.bin.unsure h2 { font-size: 16px; }
+.bin.unsure .bin-hint { margin-bottom: 6px; }
 .bin.bump { transform: scale(1.04); }
 
 .bin h2 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
@@ -406,6 +416,8 @@ button { font: inherit; cursor: pointer; }
   font-size: 13px;
 }
 .pile button:hover { border-color: var(--accent); }
+/* One line per chip, so the side panel's height stays predictable. */
+.bins .pile button { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .trash .pile button { text-decoration: line-through; text-decoration-color: var(--trash); }
 .pile button.more { text-decoration: none; font-weight: 700; color: var(--accent); border-style: dashed; }
 .pile-dialog h3 { margin: 0; }
@@ -535,10 +547,12 @@ dialog a { color: var(--accent); }
     color: var(--ink);
     text-decoration: none;
     font-weight: 600;
+    white-space: nowrap;
     transition: transform 0.2s;
   }
   .mini.trash { background: var(--trash-soft); border: 1px solid var(--trash); }
   .mini.woo { background: var(--woo-soft); border: 1px solid var(--woo); }
+  .mini.unsure { background: var(--unsure-soft); border: 1px solid var(--unsure); padding: 6px 9px; }
   .mini.bump { transform: scale(1.1); }
   .mini-pct { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 20px; font-variant-numeric: tabular-nums; }
   .mini-cat { cursor: pointer; border-radius: 6px; }
@@ -765,6 +779,9 @@ dialog a { color: var(--accent); }
 
 @media (max-width: 360px) {
   .mini-cat { display: none; }
+}
+@media (max-width: 600px) {
+  .minibar.has-unsure .mini-word { display: none; }
 }
 
 .cat-icon { width: 22px; height: 22px; flex: none; display: block; }

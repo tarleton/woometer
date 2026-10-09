@@ -2,6 +2,7 @@
 // no audio files to host or license.
 //   Sounds.trash() - a bright, pleasant two-note chime
 //   Sounds.woo()   - a low, slightly ominous descending boop
+//   Sounds.unsure() - a soft, questioning "hm?" that rises at the end
 const Sounds = (function () {
   const STORAGE_KEY = "woometer.muted";
   let ctx = null;
@@ -65,6 +66,16 @@ const Sounds = (function () {
     note(ac, { freq: 110, glideTo: 77.8, start: t + 0.02, length: 0.6, volume: 0.25, out: filter });
   }
 
+  function unsure() {
+    const ac = !muted && audio();
+    if (!ac) return;
+    const t = ac.currentTime;
+    const out = ac.destination;
+    // Two gentle notes, the second bending upward like a shrug.
+    note(ac, { freq: 587.3, start: t, length: 0.16, volume: 0.12, out });
+    note(ac, { freq: 659.3, glideTo: 830.6, start: t + 0.12, length: 0.32, volume: 0.12, out });
+  }
+
   function setMuted(value) {
     muted = value;
     try {
@@ -74,5 +85,5 @@ const Sounds = (function () {
     }
   }
 
-  return { trash, woo, setMuted, isMuted: () => muted };
+  return { trash, woo, unsure, setMuted, isMuted: () => muted };
 })();

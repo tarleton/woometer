@@ -66,7 +66,12 @@
         const b = document.createElement("button");
         b.type = "button";
         b.className = "chip";
-        b.textContent = label;
+        b.dataset.cat = key;
+        const name = document.createElement("span");
+        name.textContent = label;
+        const count = document.createElement("span");
+        count.className = "chip-count";
+        b.append(name, count);
         if (full) b.title = full;
         b.setAttribute("aria-pressed", String(key === activeCategory));
         b.addEventListener("click", () => {
@@ -77,6 +82,25 @@
         return b;
       })
     );
+    updateFilterCounts();
+  }
+
+  // Each chip shows how many claims in it are still unanswered, or a ✓ once
+  // they're all done.
+  function updateFilterCounts() {
+    const left = { all: 0 };
+    for (const c of CLAIMS) {
+      if (answers[c.id]) continue;
+      left.all++;
+      left[c.category] = (left[c.category] || 0) + 1;
+    }
+    for (const chip of filters.children) {
+      const n = left[chip.dataset.cat] || 0;
+      const count = chip.querySelector(".chip-count");
+      count.textContent = n ? String(n) : "✓";
+      count.classList.toggle("finished", !n);
+      chip.setAttribute("aria-label", `${chip.title || "All"}: ${n ? `${n} left` : "all answered"}`);
+    }
     fitFilters();
   }
 
@@ -349,6 +373,7 @@
 
   function renderAll() {
     renderGrid();
+    updateFilterCounts();
     renderBins();
     renderMeter();
   }

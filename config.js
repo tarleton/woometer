@@ -16,5 +16,5 @@ window.WOOMETER_CONFIG = {
   // Cloudflare Turnstile site key (public), for the spam check on new sign-ins.
   // Set this first, then turn on CAPTCHA protection in Supabase (Authentication
   // > Attack Protection) with the matching secret. Empty means no spam check.
-  turnstileSiteKey: "",
+  turnstileSiteKey: "0x4AAAAAAFSlZf_xX0l1X1eK",
 };

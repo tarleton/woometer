@@ -125,9 +125,9 @@
   });
 
   const PILES = {
-    yes: { cls: "in-woo", label: "🔮 In your Woo Pile", title: "🔮 Woo Pile" },
+    yes: { cls: "in-woo", label: "✨ You believe it", title: "✨ Believe It" },
     no: { cls: "in-trash", label: "🗑️ In your Trash Bin", title: "🗑️ Trash Bin" },
-    unsure: { cls: "in-unsure", label: "🤷 In your Don't Know pile", title: "🤷 Don't Know" },
+    unsure: { cls: "in-unsure", label: "🤷 You don't know", title: "🤷 Don't Know" },
   };
 
   function makeCard(claim) {
@@ -215,7 +215,7 @@
   // Each bin shows its newest few claims so the side panel never needs its own
   // scrollbar; the rest open in a popup. On wide screens the panel stays put
   // while the board scrolls, so the previews shrink until all three bins fit.
-  // [Trash Bin and Woo Pile, Don't Know], tried in order until the panel fits.
+  // [Trash Bin and Believe It, Don't Know], tried in order until the panel fits.
   const PREVIEWS = [[6, 3], [5, 3], [4, 2], [3, 2], [3, 1], [3, 0], [2, 0], [1, 0]];
 
   function pileIds(kind) {

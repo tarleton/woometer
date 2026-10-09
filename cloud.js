@@ -797,7 +797,7 @@
         (mine.answered ? ` You: ${mine.pct}% woo.` : "")
       : `${friend.display_name || "They"} haven't answered anything yet.`;
     if (s.woo.length) {
-      $("their-pile-title").textContent = `${friend.display_name ? `${friend.display_name}'s` : "Their"} Woo Pile (${s.woo.length})`;
+      $("their-pile-title").textContent = `${friend.display_name ? `${friend.display_name}'s` : "Their"} ✨ Believe It (${s.woo.length})`;
       $("their-pile-list").replaceChildren(
         ...s.woo.map((claim) => {
           const li = document.createElement("li");

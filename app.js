@@ -162,6 +162,8 @@
   function answer(id, value, card) {
     answers[id] = value;
     save();
+    if (value === "yes") Sounds.woo();
+    else Sounds.trash();
 
     // On narrow screens the bins are below the grid, so aim for the bottom bar instead.
     let bin = value === "yes" ? $("woo-bin") : $("trash-bin");
@@ -263,6 +265,20 @@
     save();
     renderAll();
   });
+
+  const muteBtn = $("mute");
+  function renderMute() {
+    const m = Sounds.isMuted();
+    muteBtn.textContent = m ? "🔇" : "🔊";
+    muteBtn.setAttribute("aria-pressed", String(m));
+    muteBtn.title = m ? "Turn sound on" : "Turn sound off";
+    muteBtn.setAttribute("aria-label", muteBtn.title);
+  }
+  muteBtn.addEventListener("click", () => {
+    Sounds.setMuted(!Sounds.isMuted());
+    renderMute();
+  });
+  renderMute();
 
   function toast(message) {
     const t = document.createElement("div");

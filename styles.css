@@ -127,6 +127,8 @@ button { font: inherit; cursor: pointer; }
 .pct { font-size: 30px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
 .pct-label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .meter-verdict { font-size: 14px; margin-top: 4px; }
+.why-link { font-size: 12px; margin-top: 6px; color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
+.why-link:hover { color: var(--accent); }
 
 .top-actions {
   position: absolute;

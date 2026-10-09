@@ -404,7 +404,9 @@ dialog a { color: var(--accent); }
   border: 1px solid var(--woo);
 }
 .invite p { margin: 0 0 8px; }
-.invite .name-row { max-width: 320px; }
+.invite .name-row { max-width: 320px; margin-bottom: 8px; }
+#invite-text { color: var(--muted); font-size: 14px; }
+#invite-compare { margin-bottom: 12px; }
 .invite-close {
   position: absolute;
   top: 8px;

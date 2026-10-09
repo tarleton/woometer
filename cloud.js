@@ -150,6 +150,7 @@
       $("my-name").value = e.target.value;
     });
     $("invite-close").addEventListener("click", () => ($("invite").hidden = true));
+    W.shareUrl = friendLink;
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") refreshFriends();
     });
@@ -226,7 +227,8 @@
     } catch {}
   }
 
-  // A friend link is woometer.com/?f=CODE. Opening one adds each of you to the
+  // A friend link is woometer.com/?f=CODE ("Copy my score" uses it too). It shows
+  // the sharer's result, and opening one adds each of you to the
   // other's friend list. Links opened in this browser are remembered, so they
   // can be re-added when this browser switches to a different (existing) account.
   async function handleInvite() {
@@ -260,13 +262,27 @@
       return;
     }
     const { data: name } = await db.rpc("name_for_code", { code });
-    $("invite-title").textContent = `You and ${name || "your friend"} are now friends on Woometer.`;
+    const who = name || "Your friend";
+    const theirs = (await answersOf(friendId)) || {};
+    const answered = CLAIMS.filter((c) => theirs[c.id]);
+    const woo = answered.filter((c) => theirs[c.id] === "yes").length;
+    $("invite-title").textContent = answered.length
+      ? `${who} is ${pct(woo, answered.length)}% hoodwinked, with ${woo} of ${answered.length} claims in their Woo Pile.`
+      : `${who} shared their Woometer.`;
+    $("invite-text").textContent =
+      `You're now in each other's friend lists. Answer some claims yourself, then compare to see where you agree and differ.`;
+    $("invite-compare").textContent = `Compare with ${name || "them"}`;
+    $("invite-compare").onclick = () => openCompare({ friend_id: friendId, display_name: name });
     $("invite-name-row").hidden = Boolean(profile.display_name);
     $("invite").hidden = false;
   }
 
+  function friendLink() {
+    return `${homeUrl()}?f=${profile.share_code}`;
+  }
+
   async function copyFriendLink() {
-    const link = `${homeUrl()}?f=${profile.share_code}`;
+    const link = friendLink();
     if (!profile.display_name) $("my-name").focus();
     try {
       await navigator.clipboard.writeText(link);

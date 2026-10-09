@@ -269,9 +269,12 @@
 
   $("share").addEventListener("click", async () => {
     const s = score();
+    // With accounts on, cloud.js supplies a personal link that shows this result.
+    const personal = window.Woometer.shareUrl && window.Woometer.shareUrl();
+    const link = personal || location.origin + location.pathname;
     const text = s.answered
-      ? `I'm ${s.pct}% hoodwinked on the Woometer (${s.woo} of ${s.answered} claims in my Woo Pile). How much woo do you believe? ${location.href.split("#")[0]}`
-      : `How much woo do you believe? ${location.href.split("#")[0]}`;
+      ? `I'm ${s.pct}% hoodwinked on the Woometer (${s.woo} of ${s.answered} claims in my Woo Pile). ${personal ? "See my results and compare with yours:" : "How much woo do you believe?"} ${link}`
+      : `How much woo do you believe? ${link}`;
     try {
       await navigator.clipboard.writeText(text);
       toast("Score copied. Paste it anywhere.");

@@ -91,11 +91,24 @@ button { font: inherit; cursor: pointer; }
 
 .tagline { margin: 2px 0 0; color: var(--muted); font-size: 15px; line-height: 1.35; }
 
-.meter { display: flex; align-items: center; gap: 12px; }
+/* Meter panel: cat, gauge and score, at the top of the side column */
+.meter {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "cat gauge" "cat read";
+  align-items: center;
+  gap: 2px 12px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
 
 .cat {
+  grid-area: cat;
   margin: 0;
-  width: 84px;
+  width: 108px;
   padding: 2px;
   border: 0;
   border-radius: 10px;
@@ -106,22 +119,14 @@ button { font: inherit; cursor: pointer; }
 .cat:hover .cat-art { transform: scale(1.06); }
 .cat:focus-visible, .mini-cat:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .cat-art { display: block; transition: transform 0.15s; }
-.cat-art svg { display: block; width: 62px; height: auto; margin: 0 auto; }
-.cat-label { display: block; font-size: 10px; line-height: 1.15; color: var(--muted); margin-top: 1px; }
-@media (max-width: 480px) {
-  .meter { gap: 8px; width: 100%; justify-content: space-between; }
-  .cat { width: 72px; }
-  .cat-art svg { width: 54px; }
-  .gauge { width: 96px !important; }
-  .meter-read { min-width: 0; }
-  .pct { font-size: 26px !important; }
-}
+.cat-art svg { display: block; width: 100px; height: auto; margin: 0 auto; }
+.cat-label { display: block; font-size: 11px; line-height: 1.2; color: var(--muted); margin-top: 2px; }
 .cat-pop { animation: cat-pop 0.45s cubic-bezier(.34, 1.56, .64, 1); }
 @keyframes cat-pop {
   0% { transform: scale(0.7) rotate(-8deg); opacity: 0.3; }
   100% { transform: none; opacity: 1; }
 }
-.gauge { width: 112px; height: auto; }
+.gauge { grid-area: gauge; justify-self: center; width: 140px; height: auto; }
 .needle-line { stroke: var(--ink); }
 .needle-hub { fill: var(--ink); }
 #needle {
@@ -130,7 +135,7 @@ button { font: inherit; cursor: pointer; }
   transition: transform 0.6s cubic-bezier(.34, 1.56, .64, 1);
 }
 
-.meter-read { display: flex; flex-direction: column; min-width: 150px; }
+.meter-read { grid-area: read; display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
 .pct { font-size: 30px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
 .pct-label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .meter-verdict { font-size: 14px; margin-top: 4px; }
@@ -335,8 +340,12 @@ button { font: inherit; cursor: pointer; }
 
 /* Bins */
 
-.bins { display: flex; flex-direction: column; gap: 16px; align-self: start; position: sticky; top: 126px; }
-@media (max-width: 860px) { .bins { position: static; } }
+.bins { display: flex; flex-direction: column; gap: 16px; align-self: start; position: sticky; top: 112px; }
+@media (max-width: 860px) {
+  /* Single column: the meter goes above the claims, the piles below them. */
+  .bins { display: contents; }
+  .meter { order: -1; }
+}
 
 .bin {
   border-radius: var(--radius);

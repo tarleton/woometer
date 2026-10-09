@@ -21,6 +21,7 @@ const CATEGORIES = {
   christianity: { label: "Christianity", icon: "✝️" },
   worldreligion: { label: "World Religions", icon: "🕉️" },
   newreligion: { label: "New Religions & Cults", icon: "🛐" },
+  magic: { label: "Witchcraft & Superstition", icon: "🧙" },
 };
 
 const CLAIMS = [
@@ -1672,7 +1673,7 @@ const CLAIMS = [
   {
     id: "king-tut-curse",
     name: "King Tut's Curse",
-    category: "paranormal",
+    category: "magic",
     question: "Did a pharaoh's curse kill people who opened King Tutankhamun's tomb?",
     verdict: "A 2002 BMJ study found the 25 Westerners present at the tomb's openings lived to an average of 70, no shorter than others. Howard Carter, who led the excavation, lived until 1939.",
     link: "https://en.wikipedia.org/wiki/Curse_of_the_pharaohs",
@@ -1680,7 +1681,7 @@ const CLAIMS = [
   {
     id: "hope-diamond",
     name: "Cursed Objects",
-    category: "paranormal",
+    category: "magic",
     question: "Can objects like the Hope Diamond carry a curse that brings misfortune to owners?",
     verdict: "Much of the Hope Diamond's curse story was spread by jewelers, including Pierre Cartier, who sold it in 1911. Harry Winston owned it for about a decade and mailed it to the Smithsonian in 1958 without ill effect.",
     link: "https://en.wikipedia.org/wiki/Hope_Diamond",
@@ -3113,8 +3114,8 @@ const CLAIMS = [
   },
   {
     id: "voodoo-curse",
-    name: "Voodoo Curses",
-    category: "worldreligion",
+    name: "Curses & Voodoo Dolls",
+    category: "magic",
     question: "Can someone put a curse on you, or stick pins in a doll, and really cause you harm?",
     verdict: "No curse has been shown to work under controlled conditions. Physiologist Walter Cannon's 1942 paper on 'voodoo death' blamed fear and stress in the victim; pin-stuck dolls are largely a pop-culture image, not Haitian Vodou practice.",
     link: "https://en.wikipedia.org/wiki/Curse",
@@ -3122,7 +3123,7 @@ const CLAIMS = [
   {
     id: "witchcraft-spells",
     name: "Witchcraft Spells",
-    category: "worldreligion",
+    category: "magic",
     question: "Can witches cast spells that change events in the real world?",
     verdict: "No spell has produced results under controlled testing. Modern Wicca was founded by Gerald Gardner in the 1950s; historian Ronald Hutton found its claimed ancient roots unsupported.",
     link: "https://en.wikipedia.org/wiki/Wicca",
@@ -3154,7 +3155,7 @@ const CLAIMS = [
   {
     id: "evil-eye",
     name: "Evil Eye",
-    category: "worldreligion",
+    category: "magic",
     question: "Can an envious glance from someone cause you illness or bad luck?",
     verdict: "There is no evidence a look can cause harm. The belief appears across the Mediterranean and Middle East since ancient times, often used to explain sudden illness in children before germ theory.",
     link: "https://en.wikipedia.org/wiki/Evil_eye",
@@ -3336,5 +3337,71 @@ const CLAIMS = [
     question: "Could Indian guru Sathya Sai Baba make sacred ash, rings and watches appear out of thin air?",
     verdict: "Stage magicians and Indian rationalists such as Basava Premanand reproduced his 'materializations' by sleight of hand, and 1992 TV footage appeared to show him palming a gold chain.",
     link: "https://en.wikipedia.org/wiki/Sathya_Sai_Baba",
+  },
+
+  // Witchcraft & Superstition (added)
+  {
+    id: "love-spells",
+    name: "Love Spells",
+    category: "magic",
+    question: "Can a love spell or potion make a specific person fall in love with you?",
+    verdict: "No spell or potion has ever been shown to change someone's feelings. Paid love-spell services are a common scam, often asking for more money to 'finish' or 'strengthen' the spell when it doesn't work.",
+    link: "https://en.wikipedia.org/wiki/Love_magic",
+  },
+  {
+    id: "curse-removal",
+    name: "Psychic Curse Removal",
+    category: "magic",
+    question: "If a psychic tells you you're cursed, can they lift the curse for a fee?",
+    verdict: "This is one of the best-known psychic frauds: the client is told a curse explains their troubles, then charged ever-larger sums to remove it. Police warn that a real psychic wouldn't need to keep asking for money.",
+    link: "https://en.wikipedia.org/wiki/Fortune_telling_fraud",
+  },
+  {
+    id: "amulets",
+    name: "Lucky Charms & Amulets",
+    category: "magic",
+    question: "Can a lucky charm, amulet or talisman protect you or bring you good luck?",
+    verdict: "A 2010 study reported that holding a lucky charm improved performance, but larger replications found no effect. At most a charm can make you feel more confident; it can't change what happens.",
+    link: "https://en.wikipedia.org/wiki/Amulet",
+  },
+  {
+    id: "black-cats",
+    name: "Black Cats",
+    category: "magic",
+    question: "Is it bad luck if a black cat crosses your path?",
+    verdict: "No study has found black cats affect anyone's luck. The superstition grew from medieval links between cats and witchcraft, and in Britain and Japan a black cat is traditionally a sign of good luck.",
+    link: "https://en.wikipedia.org/wiki/Black_cat",
+  },
+  {
+    id: "broken-mirror",
+    name: "Broken Mirrors",
+    category: "magic",
+    question: "Does breaking a mirror bring seven years of bad luck?",
+    verdict: "There is no evidence for it and no proposed way it could work. It's a folk superstition, and the 'seven years' figure varies between traditions.",
+    link: "https://en.wikipedia.org/wiki/Superstition",
+  },
+  {
+    id: "friday-13th",
+    name: "Friday the 13th",
+    category: "magic",
+    question: "Is Friday the 13th an unlucky day?",
+    verdict: "Studies of accident and insurance data haven't found it more dangerous; a 2008 Dutch insurance study found slightly fewer accidents than on other Fridays, possibly because wary people stay home.",
+    link: "https://en.wikipedia.org/wiki/Friday_the_13th",
+  },
+  {
+    id: "knock-on-wood",
+    name: "Jinxes & Knocking on Wood",
+    category: "magic",
+    question: "If you say something good will happen, do you jinx it unless you knock on wood?",
+    verdict: "Talking about good luck doesn't change outcomes. Psychology experiments find the knocking ritual only makes people feel the bad outcome is less likely.",
+    link: "https://en.wikipedia.org/wiki/Knocking_on_wood",
+  },
+  {
+    id: "witch-harm",
+    name: "Witches Harming People",
+    category: "magic",
+    question: "Do some people secretly use witchcraft to make others sick or die?",
+    verdict: "No one has ever been shown to harm anyone by witchcraft, but the belief has been deadly: tens of thousands were executed in Europe's witch trials, and accused 'witches' are still killed today in parts of Africa, India and Papua New Guinea.",
+    link: "https://en.wikipedia.org/wiki/Witch-hunt",
   },
 ];

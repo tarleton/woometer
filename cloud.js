@@ -160,6 +160,13 @@
     });
     $("sign-out").addEventListener("click", signOut);
     $("copy-friend-link").addEventListener("click", copyFriendLink);
+    $("add-friend-btn").addEventListener("click", addFriendFromInput);
+    $("add-friend-link").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addFriendFromInput();
+      }
+    });
     $("my-name").addEventListener("change", (e) => setName(e.target.value));
     $("invite-name").addEventListener("change", (e) => {
       setName(e.target.value);
@@ -280,17 +287,16 @@
     } catch {}
   }
 
-  // A friend link is woometer.com/?f=CODE (the Share button uses it too). It shows
-  // the sharer's result, and opening one adds each of you to the
-  // other's friend list. Links opened in this browser are remembered, so they
-  // can be re-added when this browser switches to a different (existing) account.
+  // A shared link is woometer.com/?f=CODE (from Share or Copy my friend link).
+  // Opening one only shows the sharer's results; adding them as a friend is a
+  // separate tap. Friends added in this browser are remembered, so they can be
+  // re-added when this browser switches to a different (existing) account.
   async function handleInvite() {
     const url = new URL(location.href);
     const code = url.searchParams.get("f");
     if (code) {
       url.searchParams.delete("f");
       history.replaceState(null, "", url.pathname + url.search + url.hash);
-      rememberFriendCode(code);
     }
 
     let lastUser = null;
@@ -306,28 +312,88 @@
     if (!code) return;
 
     if (code === profile.share_code) {
-      W.toast("That's your own friend link. Send it to someone else!");
-      return;
-    }
-    const { data: friendId, error } = await db.rpc("add_friend", { code });
-    if (error || !friendId) {
-      W.toast("That friend link didn't work. Ask them to send it again.");
+      W.toast("That's your own link. Send it to someone else!");
       return;
     }
     const { data: name } = await db.rpc("name_for_code", { code });
-    const who = name || "Your friend";
-    const theirs = (await answersOf(friendId)) || {};
-    const answered = CLAIMS.filter((c) => theirs[c.id]);
-    const woo = answered.filter((c) => theirs[c.id] === "yes").length;
-    $("invite-title").textContent = answered.length
-      ? `${who} is ${pct(woo, answered.length)}% woo, rejecting ${100 - pct(woo, answered.length)}% of the ${answered.length} claims they've answered.`
-      : `${who} shared their Woometer.`;
-    $("invite-text").textContent =
-      `You're now in each other's friend lists. Answer some claims yourself, then compare to see where you agree and differ.`;
-    $("invite-compare").textContent = `Compare with ${name || "them"}`;
-    $("invite-compare").onclick = () => openCompare({ friend_id: friendId, display_name: name });
+    const theirs = await answersForCode(code);
+    const who = name || "Someone";
+    const s = theirs && scoreOf(theirs);
+    $("invite-title").textContent =
+      s && s.answered
+        ? `${who} is ${s.pct}% woo, rejecting ${100 - s.pct}% of the ${s.answered} claims they've answered.`
+        : `${who} shared their Woometer with you.`;
+    $("invite-text").textContent = "Answer some claims yourself to see where you agree and differ.";
+    $("invite-compare").textContent = `See ${name ? `${name}'s` : "their"} answers`;
+    $("invite-compare").hidden = !theirs;
+    $("invite-compare").onclick = () => openCompare({ code, display_name: name });
+    const add = $("invite-add");
+    add.textContent = `Add ${name || "them"} as a friend`;
+    add.disabled = false;
+    add.onclick = async () => {
+      if (await addFriend(code, name)) {
+        add.textContent = "Added to your friends ✓";
+        add.disabled = true;
+      }
+    };
     $("invite-name-row").hidden = Boolean(profile.display_name);
     $("invite").hidden = false;
+  }
+
+  // Adding is mutual: you appear in their list too, so either of you can compare.
+  async function addFriend(code, name) {
+    if (code === profile.share_code) {
+      W.toast("That's your own link.");
+      return false;
+    }
+    const { data: friendId, error } = await db.rpc("add_friend", { code });
+    if (error || !friendId) {
+      W.toast("That link didn't work. Ask them to send it again.");
+      return false;
+    }
+    rememberFriendCode(code);
+    W.toast(`${name || "Your friend"} is now in your friends.`);
+    refreshFriends();
+    return true;
+  }
+
+  // Accepts a whole link (woometer.com/?f=CODE) or just the code.
+  function codeFromInput(text) {
+    const t = text.trim();
+    try {
+      const fromUrl = new URL(t).searchParams.get("f");
+      if (fromUrl) return fromUrl;
+    } catch {}
+    const m = t.match(/[?&]f=([A-Za-z0-9]+)/);
+    if (m) return m[1];
+    return /^[A-Za-z0-9]{6,40}$/.test(t) ? t : null;
+  }
+
+  async function addFriendFromInput() {
+    const input = $("add-friend-link");
+    const code = codeFromInput(input.value);
+    if (!code) {
+      W.toast("Paste the link your friend sent you.");
+      return;
+    }
+    const { data: name } = await db.rpc("name_for_code", { code });
+    if (await addFriend(code, name)) input.value = "";
+  }
+
+  function scoreOf(answers) {
+    const answered = CLAIMS.filter((c) => answers[c.id]);
+    const woo = answered.filter((c) => answers[c.id] === "yes");
+    return { answered: answered.length, woo, pct: pct(woo.length, answered.length) };
+  }
+
+  // Anyone with a shared link can read that person's answers.
+  async function answersForCode(code) {
+    const { data, error } = await db.rpc("answers_for_code", { code }).range(0, 9999);
+    if (error) {
+      console.warn(error);
+      return null;
+    }
+    return Object.fromEntries(data.map((r) => [r.claim_id, r.answer]));
   }
 
   function friendLink() {
@@ -427,12 +493,45 @@
     $("compare-diffs").replaceChildren();
     dlg.showModal();
 
-    const theirs = await answersOf(friend.friend_id);
+    $("compare-score").textContent = "";
+    $("their-pile").hidden = true;
+    $("compare-remove").hidden = !friend.friend_id;
+    $("compare-add").hidden = Boolean(friend.friend_id);
+
+    const theirs = friend.friend_id ? await answersOf(friend.friend_id) : await answersForCode(friend.code);
     if (!theirs) {
       $("compare-summary").textContent = "Couldn't load their answers. Try again in a moment.";
       return;
     }
     const c = compare(W.getAnswers(), theirs);
+
+    // Their own results, so a shared link shows what they believe, not just the overlap.
+    const s = scoreOf(theirs);
+    const mine = scoreOf(W.getAnswers());
+    $("compare-score").textContent = s.answered
+      ? `${friend.display_name || "They"}: ${s.pct}% woo, rejecting ${100 - s.pct}% of ${s.answered} answered.` +
+        (mine.answered ? ` You: ${mine.pct}% woo.` : "")
+      : `${friend.display_name || "They"} haven't answered anything yet.`;
+    if (s.woo.length) {
+      $("their-pile-title").textContent = `${friend.display_name ? `${friend.display_name}'s` : "Their"} Woo Pile (${s.woo.length})`;
+      $("their-pile-list").replaceChildren(
+        ...s.woo.map((claim) => {
+          const li = document.createElement("li");
+          const b = document.createElement("button");
+          b.type = "button";
+          b.textContent = claim.name;
+          b.addEventListener("click", () => W.openDetail(claim.id));
+          li.append(b);
+          return li;
+        })
+      );
+      $("their-pile").hidden = false;
+    }
+    if (friend.code) {
+      $("compare-add").onclick = async () => {
+        if (await addFriend(friend.code, friend.display_name)) $("compare-add").hidden = true;
+      };
+    }
 
     $("compare-agree").style.flexBasis = `${c.agreePct}%`;
     $("compare-differ").style.flexBasis = `${c.differPct}%`;

@@ -691,7 +691,7 @@ dialog a { color: var(--accent); }
 .invite p { margin: 0 0 8px; }
 .invite .name-row { max-width: 320px; margin-bottom: 8px; }
 #invite-text { color: var(--muted); font-size: 14px; }
-#invite-compare { margin-bottom: 12px; }
+
 .invite-close {
   position: absolute;
   top: 8px;
@@ -752,3 +752,24 @@ dialog a { color: var(--accent); }
 @media (max-width: 360px) {
   .mini-cat { display: none; }
 }
+
+.cat-icon { width: 22px; height: 22px; flex: none; display: block; }
+.friends h3 { display: flex; align-items: center; gap: 8px; }
+.friends h3 .cat-icon { width: 26px; height: 26px; }
+.invite-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.add-friend-row { display: flex; gap: 8px; margin-top: 4px; }
+.add-friend-row input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 10px;
+}
+.add-friend-row input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.compare-score { font-weight: 600; margin: 0 0 4px; }
+.their-pile { margin-top: 12px; }
+.their-pile summary { cursor: pointer; font-weight: 700; margin-bottom: 8px; }

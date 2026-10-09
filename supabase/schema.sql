@@ -21,6 +21,11 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now()
 );
 
+-- Test accounts (like the pretend John Doe) are marked as testers so their
+-- answers stay out of the "N% of people agree" totals. Only the SQL editor
+-- can set it; nobody can mark themselves from the site.
+alter table public.profiles add column if not exists is_tester boolean not null default false;
+
 create table if not exists public.answers (
   user_id uuid not null references auth.users (id) on delete cascade,
   claim_id text not null check (char_length(claim_id) between 1 and 100),
@@ -171,7 +176,8 @@ $$;
 
 -- Yes, No and Don't Know totals per claim across everyone, for "N% of people
 -- agree". Pass a list of claim ids to get just those, or nothing for every claim.
--- Dropped first because the Don't Know column changed what it returns.
+-- Test accounts are left out. Dropped first because the Don't Know column
+-- changed what it returns.
 drop function if exists public.claim_stats(text[]);
 create function public.claim_stats(only_ids text[] default null)
 returns table (claim_id text, yes bigint, no bigint, unsure bigint)
@@ -181,7 +187,8 @@ language sql stable security definer set search_path = public as $$
          count(*) filter (where a.answer = 'no'),
          count(*) filter (where a.answer = 'unsure')
   from answers a
-  where only_ids is null or a.claim_id = any (only_ids)
+  where (only_ids is null or a.claim_id = any (only_ids))
+    and not exists (select 1 from profiles p where p.id = a.user_id and p.is_tester)
   group by a.claim_id;
 $$;
 

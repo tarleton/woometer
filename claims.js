@@ -1423,10 +1423,10 @@ const CLAIMS = [
   },
   {
     id: "sage-smudging",
-    name: "Sage Cleansing",
+    name: "Sage & Palo Santo Cleansing",
     category: "newage",
-    question: "Does burning sage clear a home of negative energy?",
-    verdict: "There is no way to detect 'negative energy', and none has been shown to change after burning sage. The smoke does add fine particles to indoor air, like any burning plant material.",
+    question: "Does waving burning sage or palo santo sticks clear a room of negative energy or spirits?",
+    verdict: "There is no way to detect 'negative energy', and none has been shown to change after the smoke. It can be a meaningful ritual, but the measurable effect is fine particles in the air, like any burning plant. Demand has also led to overharvesting of wild white sage.",
     link: "https://en.wikipedia.org/wiki/Smudging",
   },
   {
@@ -3559,5 +3559,38 @@ const CLAIMS = [
     question: "Could the Large Hadron Collider at CERN create a black hole that swallows Earth or open a portal?",
     verdict: "Cosmic rays have hit Earth, the Moon and other bodies at far higher energies for billions of years without making a planet-eating black hole. The LHC has run since 2008 with no such effect.",
     link: "https://en.wikipedia.org/wiki/Safety_of_high-energy_particle_collision_experiments",
+  },
+  // Andean and Amazonian healing (added)
+  {
+    id: "mapacho-smoke",
+    name: "Shaman Tobacco Smoke Cleansing",
+    category: "medicine",
+    question: "Can a healer blowing mapacho tobacco smoke over you cleanse away illness, bad luck or harmful spirits?",
+    verdict: "There's no evidence smoke removes illness or spirits. Mapacho is a wild tobacco (Nicotiana rustica) with far more nicotine than cigarette tobacco, so the main measurable effect is breathing in strong smoke.",
+    link: "https://en.wikipedia.org/wiki/Nicotiana_rustica",
+  },
+  {
+    id: "cuy-diagnosis",
+    name: "Guinea Pig Diagnosis",
+    category: "medicine",
+    question: "Can a healer find your illness by rubbing a live guinea pig over your body and then examining its insides?",
+    verdict: "This Andean tradition, the 'soba de cuy', is centuries old, but there's no evidence the animal's organs reflect anything about the patient. Normal variation inside a guinea pig gets read as a diagnosis.",
+    link: "https://en.wikipedia.org/wiki/Guinea_pig",
+  },
+  {
+    id: "coca-leaf-reading",
+    name: "Coca Leaf Readings",
+    category: "divination",
+    question: "Can reading how tossed coca leaves fall reveal your future or hidden truths?",
+    verdict: "Like tarot or tea leaves, the pattern is random and the reader's interpretation supplies the meaning. There's no evidence it predicts anything better than a good guess.",
+    link: "https://en.wikipedia.org/wiki/Coca",
+  },
+  {
+    id: "ayahuasca-spirits",
+    name: "Ayahuasca Spirit Healing",
+    category: "newage",
+    question: "Can an ayahuasca ceremony heal trauma or addiction by connecting you with plant spirits who teach and cleanse you?",
+    verdict: "Early studies of ayahuasca and other psychedelics for depression and addiction are promising but small, and researchers credit brain chemistry plus therapy, not spirits. The brew can be dangerous with some antidepressants, and retreat deaths have been reported.",
+    link: "https://en.wikipedia.org/wiki/Ayahuasca",
   },
 ];

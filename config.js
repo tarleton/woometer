@@ -6,5 +6,5 @@ window.WOOMETER_CONFIG = {
   supabaseUrl: "https://jtzwtqzsevsiuyobkvaw.supabase.co",
   supabaseAnonKey: "sb_publishable_39EacCvjF_hic0TeNsP9Kw_jKoHzOQ2",
   // Set to true once Google is enabled under Supabase Authentication > Providers.
-  googleSignIn: false,
+  googleSignIn: true,
 };

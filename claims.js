@@ -1650,8 +1650,8 @@ const CLAIMS = [
     id: "911-inside-job",
     name: "9/11 Inside Job",
     category: "conspiracy",
-    question: "Do you believe 9/11 was an inside job, with the Twin Towers brought down by planted explosives?",
-    verdict: "NIST's 2005 investigation found the jet impacts stripped fireproofing and the fires weakened the towers' steel. Steel doesn't need to melt to fail: it loses about half its strength near 600°C, well below office-fire temperatures.",
+    question: "Do you believe the US government secretly carried out the 9/11 attacks itself?",
+    verdict: "The 9/11 Commission documented real intelligence failures and ignored warnings, but that isn't this claim. NIST's investigations found the jet impacts and fires, not planted explosives, brought down the Twin Towers, and that fire alone brought down Building 7.",
     link: "https://en.wikipedia.org/wiki/9/11_conspiracy_theories",
   },
   {

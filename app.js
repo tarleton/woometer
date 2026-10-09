@@ -216,7 +216,7 @@
     renderCat(Cat.stageFor(s.pct));
   }
 
-  // The cat gets one step scruffier for every 5% of woo.
+  // A different cat for every 5% of woo.
   function renderCat(stage) {
     if (stage === catStage) return;
     const art = $("cat-art");

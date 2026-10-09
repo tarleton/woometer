@@ -12,5 +12,5 @@ window.WOOMETER_CONFIG = {
   // Google's screens name woometer.com instead of the Supabase project's
   // address. Needs https://woometer.com as an authorized redirect URI on the
   // client. Leave empty to sign in through Supabase's redirect instead.
-  googleClientId: "458207142283-nm9ussa779v4th6hpgf8871kphc11s4q.apps.googleusercontent.com",
+  googleClientId: "",
 };

@@ -1,7 +1,8 @@
 // The list of claims shown on the grid.
 //
 // To add one, copy an entry and give it a unique `id` (it's what saved
-// answers are keyed on, so don't rename an id once the site is live).
+// answers are keyed on, so never change or reuse an id once the site is live,
+// even if the claim is renamed; e.g. "Manifesting" keeps id "law-of-attraction").
 //   name:     short label on the card
 //   category: one of the keys in CATEGORIES below
 //   question: what the visitor answers Yes or No to

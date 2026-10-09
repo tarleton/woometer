@@ -356,7 +356,7 @@
   function showProblem(err) {
     const detail = (err && (err.message || err.msg || err.code)) || String(err);
     $("foot-note").textContent =
-      `Couldn't reach the Woometer server, so your answers are only saved in this browser for now. (${detail})`;
+      `Couldn't reach the woometer server, so your answers are only saved in this browser for now. (${detail})`;
   }
 
   // Account
@@ -569,7 +569,7 @@
     $("invite-title").textContent =
       s && s.answered
         ? `${who} is ${s.pct}% woo, rejecting ${100 - s.pct}% of the ${s.answered} claims they've answered.`
-        : `${who} shared their Woometer with you.`;
+        : `${who} shared their woometer with you.`;
     $("invite-text").textContent = "Answer some claims yourself to see where you agree and differ.";
     $("invite-compare").textContent = `See ${name ? `${name}'s` : "their"} answers`;
     $("invite-compare").hidden = !theirs;

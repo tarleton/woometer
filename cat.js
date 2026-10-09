@@ -1,4 +1,4 @@
-// The Woometer cats: 21 different cartoon cats drawn as inline SVG, one per 5% of woo.
+// The woometer cats: 21 different cartoon cats drawn as inline SVG, one per 5% of woo.
 // Every cat is a happy cat. The low end are skeptics with books and magnifying glasses;
 // the props get more mystical as the score climbs, ending in a cat wearing a UFO.
 const Cat = (function () {

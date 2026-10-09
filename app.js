@@ -504,7 +504,7 @@
     const personal = window.Woometer.shareUrl && window.Woometer.shareUrl();
     const link = personal || location.origin + location.pathname;
     const text = s.answered
-      ? `I'm ${s.pct}% woo on the Woometer: I reject ${100 - s.pct}% of the ${s.answered} claims I've answered. ${personal ? "See my results and compare with yours:" : "How much woo do you believe?"} ${link}`
+      ? `I'm ${s.pct}% woo on the woometer: I reject ${100 - s.pct}% of the ${s.answered} claims I've answered. ${personal ? "See my results and compare with yours:" : "How much woo do you believe?"} ${link}`
       : `How much woo do you believe? ${link}`;
     try {
       await navigator.clipboard.writeText(text);

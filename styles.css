@@ -38,6 +38,7 @@ body {
 }
 
 button { font: inherit; cursor: pointer; }
+[hidden] { display: none !important; }
 
 /* Header and meter */
 
@@ -316,8 +317,129 @@ dialog a { color: var(--accent); }
   .mini.bump { transform: scale(1.1); }
   .mini-pct { font-weight: 800; font-size: 20px; font-variant-numeric: tabular-nums; }
   .foot { padding-bottom: 90px; }
+  .toast { bottom: calc(76px + env(safe-area-inset-bottom)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* Friends, account and comparisons (cloud.js) */
+
+@media (min-width: 861px) {
+  .bins { max-height: calc(100vh - 160px); overflow-y: auto; padding-bottom: 8px; }
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.panel h2 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+.panel .bin-hint { margin: 0; }
+
+.name-row { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+.name-row input {
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 10px;
+}
+.name-row input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+
+.btn.google { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.btn.google::before { content: "G"; font-weight: 800; color: #4285f4; margin-right: 8px; }
+
+.friend-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.friend-list button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+.friend-list button:hover { border-color: var(--accent); }
+.friend-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.friend-meta { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+.invite {
+  position: relative;
+  max-width: 1400px;
+  margin: 16px auto 0;
+  margin-inline: clamp(16px, 4vw, 40px);
+  padding: 14px 44px 14px 16px;
+  border-radius: var(--radius);
+  background: var(--woo-soft);
+  border: 1px solid var(--woo);
+}
+.invite p { margin: 0 0 8px; }
+.invite .name-row { max-width: 320px; }
+.invite-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+}
+
+.detail-stats { font-weight: 600; }
+
+.compare-bar {
+  display: flex;
+  height: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--line);
+  margin: 12px 0;
+}
+.seg { flex: 0 0 0; transition: flex-basis 0.5s; }
+.agree { background: var(--trash); }
+.differ { background: var(--woo); }
+.none { background: var(--line); }
+.compare-key { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0; }
+.compare-key div { display: flex; flex-direction: column; }
+.compare-key dt { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.compare-key dd { margin: 0; font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.dot.none { background: var(--muted); }
+.compare-summary { color: var(--muted); font-size: 14px; }
+.compare h4 { margin: 12px 0 6px; }
+.compare-diffs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 40vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.compare-diffs li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 6px;
+}
+.pill { font-size: 12px; font-weight: 700; color: #fff; border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
+.pill.yes { background: var(--woo); }
+.pill.no { background: var(--trash); }

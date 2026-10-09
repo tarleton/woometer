@@ -23,7 +23,7 @@
 
     <div class="top-actions">
       <button type="button" id="share" class="top-btn" aria-label="Share my score" title="Copy a link to your score"><span aria-hidden="true">🔗</span><span class="top-btn-label">Share</span></button>
-      <button type="button" id="friends-open" class="top-btn" aria-label="Compare with friends" title="Compare with friends" hidden><span aria-hidden="true">👯</span><span class="top-btn-label">Friends</span><b class="badge" id="friends-count" hidden></b></button>
+      <button type="button" id="friends-open" class="top-btn" aria-label="Friends" title="Friends" hidden><svg class="cat-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.2 9.5 L5 2.8 L9.6 6.2 Q12 5.5 14.4 6.2 L19 2.8 L19.8 9.5 Q21 12.5 20 15.5 Q18.4 21 12 21 Q5.6 21 4 15.5 Q3 12.5 4.2 9.5 Z" fill="#eda65c" stroke="#5a3a1e" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.1 5 L6.6 8 L8.4 6.8 Z M17.9 5 L17.4 8 L15.6 6.8 Z" fill="#f7c8a0"/><circle cx="9" cy="12.6" r="1.35" fill="#2a1a10"/><circle cx="15" cy="12.6" r="1.35" fill="#2a1a10"/><path d="M10.9 15.1 h2.2 l-1.1 1.2 z" fill="#d9707a"/><path d="M12 16.3 q-1 1.5 -2.5 0.8 M12 16.3 q1 1.5 2.5 0.8 M3 14 l4 .6 M3.4 16.6 l3.8 -.6 M21 14 l-4 .6 M20.6 16.6 l-3.8 -.6" fill="none" stroke="#5a3a1e" stroke-width="0.9" stroke-linecap="round"/></svg><span class="top-btn-label">Friends</span><b class="badge" id="friends-count" hidden></b></button>
       <button type="button" id="google-login" class="gsi" aria-label="Sign in with Google" hidden><svg class="g-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span class="gsi-label">Sign in</span></button>
       <div class="account" id="account" hidden>
         <button type="button" id="avatar" class="avatar" aria-haspopup="true" aria-expanded="false" aria-label="Your account"></button>
@@ -40,7 +40,10 @@
   <div class="invite" id="invite" role="status" hidden>
     <p><strong id="invite-title"></strong></p>
     <p id="invite-text"></p>
-    <button type="button" class="btn" id="invite-compare">Compare</button>
+    <div class="invite-actions">
+      <button type="button" class="btn" id="invite-compare">See their answers</button>
+      <button type="button" class="btn ghost" id="invite-add">Add as a friend</button>
+    </div>
     <label class="name-row" id="invite-name-row">Your name, so they know who you are
       <input type="text" id="invite-name" maxlength="40" autocomplete="given-name" placeholder="Your name">
     </label>
@@ -143,13 +146,20 @@
 
   <dialog id="friends" class="friends">
     <form method="dialog">
-      <h3><span aria-hidden="true">👯</span> Compare with friends</h3>
-      <p class="bin-hint">Send your friend link. Whoever opens it joins your friend list, and you join theirs. Tap a friend to see where you agree and differ.</p>
+      <h3><svg class="cat-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.2 9.5 L5 2.8 L9.6 6.2 Q12 5.5 14.4 6.2 L19 2.8 L19.8 9.5 Q21 12.5 20 15.5 Q18.4 21 12 21 Q5.6 21 4 15.5 Q3 12.5 4.2 9.5 Z" fill="#eda65c" stroke="#5a3a1e" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.1 5 L6.6 8 L8.4 6.8 Z M17.9 5 L17.4 8 L15.6 6.8 Z" fill="#f7c8a0"/><circle cx="9" cy="12.6" r="1.35" fill="#2a1a10"/><circle cx="15" cy="12.6" r="1.35" fill="#2a1a10"/><path d="M10.9 15.1 h2.2 l-1.1 1.2 z" fill="#d9707a"/><path d="M12 16.3 q-1 1.5 -2.5 0.8 M12 16.3 q1 1.5 2.5 0.8 M3 14 l4 .6 M3.4 16.6 l3.8 -.6 M21 14 l-4 .6 M20.6 16.6 l-3.8 -.6" fill="none" stroke="#5a3a1e" stroke-width="0.9" stroke-linecap="round"/></svg> Friends</h3>
+      <p class="bin-hint">Send your link so friends can see your results. Tap a friend to see where you agree and differ.</p>
       <label class="name-row">Your name
         <input type="text" id="my-name" maxlength="40" autocomplete="given-name" placeholder="So friends know it's you">
       </label>
       <button type="button" id="copy-friend-link" class="btn">Copy my friend link</button>
-      <p class="bin-hint" id="friend-empty">No friends yet. Send your link to someone!</p>
+      <div class="add-friend">
+        <label class="name-row" for="add-friend-link">Add a friend</label>
+        <div class="add-friend-row">
+          <input type="text" id="add-friend-link" placeholder="Paste their Woometer link" autocomplete="off">
+          <button type="button" class="btn" id="add-friend-btn">Add</button>
+        </div>
+      </div>
+      <p class="bin-hint" id="friend-empty">No friends yet. Paste a friend's link above, or open it and tap Add as a friend.</p>
       <ul class="friend-list" id="friend-list"></ul>
       <div class="detail-actions">
         <button class="btn ghost" value="close">Close</button>
@@ -161,6 +171,7 @@
     <form method="dialog">
       <p class="detail-cat">You vs.</p>
       <h3 id="compare-name"></h3>
+      <p class="compare-score" id="compare-score"></p>
       <div class="compare-bar" aria-hidden="true">
         <span class="seg agree" id="compare-agree"></span>
         <span class="seg differ" id="compare-differ"></span>
@@ -174,8 +185,13 @@
       <p class="compare-summary" id="compare-summary"></p>
       <h4 id="compare-diffs-title" hidden>Where you differ</h4>
       <ul class="compare-diffs" id="compare-diffs"></ul>
+      <details class="their-pile" id="their-pile" hidden>
+        <summary id="their-pile-title"></summary>
+        <ul class="pile" id="their-pile-list"></ul>
+      </details>
       <div class="detail-actions">
         <button type="button" class="btn ghost" id="compare-remove">Remove friend</button>
+        <button type="button" class="btn ghost" id="compare-add" hidden>Add as a friend</button>
         <button class="btn" value="close">Close</button>
       </div>
     </form>

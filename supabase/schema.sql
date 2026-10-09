@@ -115,7 +115,7 @@ language sql stable security definer set search_path = public as $$
   select display_name from profiles where share_code = code;
 $$;
 
--- Opening someone's friend link adds each of you to the other's list.
+-- Tapping "Add as a friend" on someone's link adds each of you to the other's list.
 -- Returns the friend's user id, or null for an unknown code or your own link.
 create or replace function public.add_friend(code text)
 returns uuid
@@ -153,6 +153,17 @@ language sql stable security definer set search_path = public as $$
     and exists (select 1 from friends f where f.user_id = auth.uid() and f.friend_id = friend);
 $$;
 
+-- The answers behind a shared link (woometer.com/?f=CODE), so whoever opens
+-- it can see that person's results without adding them as a friend.
+create or replace function public.answers_for_code(code text)
+returns table (claim_id text, answer text)
+language sql stable security definer set search_path = public as $$
+  select a.claim_id, a.answer
+  from answers a
+  join profiles p on p.id = a.user_id
+  where p.share_code = code;
+$$;
+
 -- Yes and No totals per claim across everyone, for "N% of people agree".
 -- Pass a list of claim ids to get just those, or nothing for every claim.
 create or replace function public.claim_stats(only_ids text[] default null)
@@ -167,6 +178,6 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 revoke execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
-  public.add_friend(text), public.my_friends(), public.friend_answers(uuid), public.claim_stats(text[]) from public, anon;
+  public.add_friend(text), public.my_friends(), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]) from public, anon;
 grant execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
-  public.add_friend(text), public.my_friends(), public.friend_answers(uuid), public.claim_stats(text[]) to authenticated;
+  public.add_friend(text), public.my_friends(), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]) to authenticated;

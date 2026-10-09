@@ -46,6 +46,7 @@
           <p class="account-name" id="account-name"></p>
           <p class="account-email" id="account-email"></p>
           <button type="button" id="sign-out" class="btn ghost">Sign out</button>
+          <button type="button" id="delete-account" class="link-btn danger-link">Delete my account</button>
         </div>
       </div>
       <button type="button" id="mute" class="mute" aria-pressed="false" title="Turn sound off">🔊</button>
@@ -213,6 +214,17 @@
         <button type="button" class="btn ghost" id="compare-remove">Remove friend</button>
         <button type="button" class="btn ghost" id="compare-add" hidden>Add as a Friend</button>
         <button class="btn" value="close">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="delete-dialog" class="delete-dialog">
+    <form method="dialog">
+      <h3>Delete your account?</h3>
+      <p>This permanently deletes your answers, your friend list and your name from Woometer. Friends won't see you in their list anymore, and your shared link stops working. It can't be undone.</p>
+      <div class="detail-actions">
+        <button class="btn ghost" value="cancel">Cancel</button>
+        <button type="button" class="btn danger" id="delete-confirm">Delete my account</button>
       </div>
     </form>
   </dialog>

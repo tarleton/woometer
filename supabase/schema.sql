@@ -185,7 +185,20 @@ language sql stable security definer set search_path = public as $$
   group by a.claim_id;
 $$;
 
+-- "Delete my account" in the account menu. Deleting the caller's sign-in also
+-- deletes their profile, answers and friend rows in both directions, through
+-- the "on delete cascade" on every table above.
+create or replace function public.delete_my_account()
+returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'not signed in'; end if;
+  delete from auth.users where id = auth.uid();
+end $$;
+
 revoke execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
-  public.add_friend(text), public.my_friends(), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]) from public, anon;
+  public.add_friend(text), public.my_friends(), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
+  public.delete_my_account() from public, anon;
 grant execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
-  public.add_friend(text), public.my_friends(), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]) to authenticated;
+  public.add_friend(text), public.my_friends(), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
+  public.delete_my_account() to authenticated;

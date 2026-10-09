@@ -14,6 +14,8 @@
   const LAST_USER_KEY = "woometer.lastUser.v1";
   // The friend someone was adding when they left to sign in with Google.
   const PENDING_FRIEND_KEY = "woometer.pendingFriend.v1";
+  // Set just before the reload that follows "Delete my account", to say it worked.
+  const DELETED_KEY = "woometer.accountDeleted";
   const TURNSTILE_JS = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
   const GOOGLE_AUTH = "https://accounts.google.com/o/oauth2/v2/auth";
   // Per-tab check values for a trip to Google's sign-in page and back.
@@ -93,6 +95,12 @@
       const detail = googleProblem.message || googleProblem.code || String(googleProblem);
       $("foot-note").textContent = `Google sign-in didn't work, so you're not signed in. (${detail})`;
     }
+    try {
+      if (sessionStorage.getItem(DELETED_KEY)) {
+        sessionStorage.removeItem(DELETED_KEY);
+        W.toast("Your account and everything in it are deleted.");
+      }
+    } catch {}
 
     await handleInvite();
     await refreshFriends();
@@ -252,6 +260,11 @@
       if (e.key === "Escape") setMenu(false);
     });
     $("sign-out").addEventListener("click", signOut);
+    $("delete-account").addEventListener("click", () => {
+      setMenu(false);
+      $("delete-dialog").showModal();
+    });
+    $("delete-confirm").addEventListener("click", deleteAccount);
     $("copy-friend-link").addEventListener("click", copyFriendLink);
     $("add-friend-btn").addEventListener("click", addFriendFromInput);
     $("add-friend-link").addEventListener("keydown", (e) => {
@@ -411,7 +424,12 @@
 
   async function signOut() {
     await db.auth.signOut();
-    // The answers live in the account now; start this browser fresh.
+    startFresh();
+  }
+
+  // The answers live in the account; after signing out or deleting it, this
+  // browser starts over as a new anonymous visitor.
+  function startFresh() {
     W.setAnswers({});
     try {
       localStorage.removeItem(FRIEND_CODES_KEY);
@@ -419,6 +437,30 @@
       localStorage.removeItem(PENDING_FRIEND_KEY);
     } catch {}
     location.replace(homeUrl());
+  }
+
+  // Deletes the sign-in itself; the database removes the profile, answers and
+  // friend rows (both directions) along with it. See delete_my_account in
+  // supabase/schema.sql.
+  async function deleteAccount() {
+    const button = $("delete-confirm");
+    button.disabled = true;
+    button.textContent = "Deleting…";
+    const { error } = await db.rpc("delete_my_account");
+    if (error) {
+      console.warn(error);
+      button.disabled = false;
+      button.textContent = "Delete my account";
+      $("delete-dialog").close();
+      W.toast("Couldn't delete your account just now. Nothing was deleted; try again in a moment.");
+      return;
+    }
+    // The session is already gone on the server, so only clear it here.
+    await db.auth.signOut({ scope: "local" });
+    try {
+      sessionStorage.setItem(DELETED_KEY, "1");
+    } catch {}
+    startFresh();
   }
 
   async function setName(name) {

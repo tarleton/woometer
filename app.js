@@ -302,6 +302,7 @@
     $("mini-trash-count").textContent = s.trash;
     $("mini-woo-count").textContent = s.woo;
     $("mini-unsure-count").textContent = s.unsure;
+    $("reset-row").hidden = !Object.keys(answers).length;
     showMiniUnsure(s.unsure > 0);
     $("mini-pct").textContent = `${s.pct}%`;
     // -90deg is all the way left (0%), +90deg all the way right (100%).

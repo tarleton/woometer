@@ -384,6 +384,8 @@ button { font: inherit; cursor: pointer; }
 .bin.trash { background: var(--trash-soft); border-color: var(--trash); }
 .bin.woo { background: var(--woo-soft); border-color: var(--woo); }
 .bin.unsure { background: var(--unsure-soft); border-color: var(--unsure); padding: 10px 14px; }
+/* "Start over" sits quietly under the piles, once there's something to clear. */
+.reset-row { margin: 0; text-align: center; }
 .bin.unsure h2 { font-size: 16px; }
 .bin.unsure .bin-hint { margin-bottom: 6px; }
 .bin.bump { transform: scale(1.04); }

@@ -12,6 +12,8 @@
   const SUPABASE_JS = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js";
   const FRIEND_CODES_KEY = "woometer.friendCodes.v1";
   const LAST_USER_KEY = "woometer.lastUser.v1";
+  // The answers this browser last knew the account to hold, and whose account.
+  const SYNCED_KEY = "woometer.synced.v1";
   // The friend someone was adding when they left to sign in with Google.
   const PENDING_FRIEND_KEY = "woometer.pendingFriend.v1";
   // Set just before the reload that follows "Delete my account", to say it worked.
@@ -28,6 +30,8 @@
   let db = null;
   let user = null;
   let profile = { display_name: null, share_code: null };
+  // What the account holds, as far as this browser knows: { [claimId]: answer }.
+  let synced = {};
 
   loadScript(SUPABASE_JS)
     .then(start)
@@ -154,39 +158,79 @@
 
   // Answers
 
-  // Merge this browser's answers with the account's. This browser wins where
-  // both have an answer, since it holds whatever was clicked most recently here.
+  // Merge this browser's answers with the account's. Answers given, changed or
+  // put back on the board here since the last visit are sent up; everything
+  // else comes from the account, so a change made on another device wins over
+  // this browser's old copy. The first time an account is seen in this
+  // browser (say, just after signing in), this browser wins wherever both
+  // have an answer.
   async function syncAnswers() {
     const { data, error } = await db.from("answers").select("claim_id, answer").eq("user_id", user.id).range(0, 9999);
     if (error) throw error;
     const server = Object.fromEntries(data.map((r) => [r.claim_id, r.answer]));
     const local = W.getAnswers();
-    const toSend = Object.entries(local)
-      .filter(([id, value]) => server[id] !== value)
-      .map(([id, value]) => row(id, value));
-    if (toSend.length) await saveRows(toSend);
-    W.setAnswers({ ...server, ...local });
-  }
-
-  // Don't Know answers are saved in their own batch. Until supabase/schema.sql
-  // has been re-run, the database refuses them; then the claim's old Yes or No
-  // is removed instead, so the server doesn't keep an answer that was changed.
-  // Returns the error from saving Yes and No answers, if any.
-  async function saveRows(rows) {
-    const sure = rows.filter((r) => r.answer !== "unsure");
-    const unsure = rows.filter((r) => r.answer === "unsure");
-    if (sure.length) {
-      const { error } = await db.from("answers").upsert(sure);
-      if (error) return error;
-    }
-    if (unsure.length) {
-      const { error } = await db.from("answers").upsert(unsure);
-      if (error) {
-        console.warn("Woometer: the database doesn't take Don't Know answers yet.", error);
-        await db.from("answers").delete().eq("user_id", user.id).in("claim_id", unsure.map((r) => r.claim_id));
+    const last = lastSynced();
+    synced = { ...server };
+    const merged = {};
+    const toSend = [];
+    const toRemove = [];
+    for (const [id, value] of Object.entries(local)) {
+      if (last && last[id] === value) {
+        // Not changed here: keep whatever the account has now, if anything.
+        if (id in server) merged[id] = server[id];
+      } else {
+        merged[id] = value;
+        if (server[id] !== value) toSend.push(row(id, value));
       }
     }
+    for (const [id, value] of Object.entries(server)) {
+      if (id in merged) continue;
+      if (last && id in last && !(id in local) && last[id] === value) toRemove.push(id);
+      else merged[id] = value;
+    }
+    if (toSend.length) logError({ error: await saveRows(toSend) });
+    if (toRemove.length) await removeRows(toRemove);
+    keepSynced();
+    W.setAnswers(merged);
+  }
+
+  // Saves go to the database one at a time, in the order they were made, so a
+  // quick change of mind can't be overtaken by the answer it replaced.
+  let writes = Promise.resolve();
+  function inOrder(write) {
+    const done = writes.then(write);
+    writes = done.catch(() => {});
+    return done;
+  }
+
+  function lastSynced() {
+    try {
+      const s = JSON.parse(localStorage.getItem(SYNCED_KEY));
+      return s && s.user === user.id ? s.answers : null;
+    } catch {
+      return null;
+    }
+  }
+  function keepSynced() {
+    try {
+      localStorage.setItem(SYNCED_KEY, JSON.stringify({ user: user.id, answers: synced }));
+    } catch {}
+  }
+
+  // Returns the error, if any.
+  async function saveRows(rows) {
+    const { error } = await db.from("answers").upsert(rows);
+    if (error) return error;
+    for (const r of rows) synced[r.claim_id] = r.answer;
+    keepSynced();
     return null;
+  }
+
+  async function removeRows(ids) {
+    const res = await db.from("answers").delete().eq("user_id", user.id).in("claim_id", ids);
+    if (res.error) return logError(res);
+    for (const id of ids) delete synced[id];
+    keepSynced();
   }
 
   function row(id, value) {
@@ -196,11 +240,12 @@
   function wireEvents() {
     document.addEventListener("woometer:answer", async (e) => {
       const { id, value } = e.detail;
-      const error = await saveRows([row(id, value)]);
+      const error = await inOrder(() => saveRows([row(id, value)]));
       if (error) return logError({ error });
       const s = await statsFor(id);
-      // No Don't Know count means the database isn't counting them yet.
-      if (!s || (value === "unsure" && !s.unsure)) return;
+      // Only the latest tap on a claim gets a message. No Don't Know count
+      // means the database isn't counting them yet.
+      if (!s || W.getAnswers()[id] !== value || (value === "unsure" && !s.unsure)) return;
       const total = s.yes + s.no + s.unsure;
       const people = `${total.toLocaleString()} people`;
       if (total <= 1) W.toast("You're the first to answer this one.");
@@ -209,11 +254,16 @@
     });
 
     document.addEventListener("woometer:remove", (e) => {
-      db.from("answers").delete().eq("user_id", user.id).eq("claim_id", e.detail.id).then(logError);
+      inOrder(() => removeRows([e.detail.id]));
     });
 
     document.addEventListener("woometer:reset", () => {
-      db.from("answers").delete().eq("user_id", user.id).then(logError);
+      inOrder(async () => {
+        const res = await db.from("answers").delete().eq("user_id", user.id);
+        if (res.error) return logError(res);
+        synced = {};
+        keepSynced();
+      });
     });
 
     document.addEventListener("woometer:detail", async (e) => {
@@ -435,6 +485,7 @@
       localStorage.removeItem(FRIEND_CODES_KEY);
       localStorage.removeItem(LAST_USER_KEY);
       localStorage.removeItem(PENDING_FRIEND_KEY);
+      localStorage.removeItem(SYNCED_KEY);
     } catch {}
     location.replace(homeUrl());
   }

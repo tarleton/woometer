@@ -122,7 +122,7 @@ const CLAIMS = [
     name: "Reiki",
     category: "medicine",
     question: "Can a practitioner heal you by channeling 'universal life energy' through their hands?",
-    verdict: "Systematic reviews find no effect beyond placebo, and no 'life energy' field has ever been detected.",
+    verdict: "Mikao Usui developed Reiki in Japan in the 1920s. Systematic reviews find no effect beyond placebo, sham Reiki works as well as the real thing in trials, and no 'life energy' field has ever been detected.",
     link: "https://en.wikipedia.org/wiki/Reiki",
   },
   {

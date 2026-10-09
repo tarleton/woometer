@@ -23,7 +23,10 @@
 
   loadScript(SUPABASE_JS)
     .then(start)
-    .catch((err) => console.warn("Woometer: accounts are off.", err));
+    .catch((err) => {
+      console.warn("Woometer: accounts are off.", err);
+      showProblem(err);
+    });
 
   function loadScript(src) {
     return new Promise((resolve, reject) => {
@@ -106,7 +109,7 @@
     document.addEventListener("woometer:answer", async (e) => {
       const { id, value } = e.detail;
       const { error } = await db.from("answers").upsert(row(id, value));
-      if (error) return console.warn(error);
+      if (error) return logError({ error });
       const s = await statsFor(id);
       if (!s) return;
       const total = s.yes + s.no;
@@ -168,8 +171,19 @@
   }
 
   function logError(res) {
-    if (res && res.error) console.warn(res.error);
+    if (res && res.error) {
+      console.warn(res.error);
+      showProblem(res.error);
+    }
     return null;
+  }
+
+  // Say so on the page when the server can't be reached, so problems are
+  // visible without opening the browser console.
+  function showProblem(err) {
+    const detail = (err && (err.message || err.msg || err.code)) || String(err);
+    $("foot-note").textContent =
+      `Couldn't reach the Woometer server, so your answers are only saved in this browser for now. (${detail})`;
   }
 
   // Account

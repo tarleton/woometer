@@ -501,10 +501,6 @@ dialog a { color: var(--accent); }
 
 .foot { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 16px 40px; }
 .foot-link { color: inherit; }
-.quote { max-width: 520px; margin: 0 auto 20px; }
-.quote p { margin: 0; font-size: 15px; font-style: italic; color: var(--ink); }
-.quote cite { display: block; margin-top: 4px; font-style: normal; }
-.quote cite::before { content: "— "; }
 
 .toast {
   position: fixed;

@@ -13,6 +13,7 @@
   // answers: { [claimId]: "yes" | "no" }, in the order they were given
   let answers = load();
   let activeCategory = "all";
+  let query = "";
   let detailId = null;
   let catStage = null;
 
@@ -80,7 +81,7 @@
     card.dataset.id = claim.id;
 
     const cat = document.createElement("span");
-    cat.className = "cat";
+    cat.className = "card-cat";
     cat.textContent = `${CATEGORIES[claim.category].icon} ${CATEGORIES[claim.category].label}`;
 
     const h = document.createElement("h3");
@@ -108,7 +109,10 @@
 
   function renderGrid() {
     const open = CLAIMS.filter(
-      (c) => !answers[c.id] && (activeCategory === "all" || c.category === activeCategory)
+      (c) =>
+        !answers[c.id] &&
+        (activeCategory === "all" || c.category === activeCategory) &&
+        (!query || `${c.name} ${c.question}`.toLowerCase().includes(query))
     );
     grid.replaceChildren(...open.map(makeCard));
 
@@ -117,7 +121,7 @@
     $("progress").textContent = `${done} of ${total} answered`;
     $("done").hidden = open.length > 0;
     $("done").querySelector("p").textContent =
-      done === total ? "That's every claim on the list." : "Nothing left in this category.";
+      done === total ? "That's every claim on the list." : query ? "No unanswered claims match your search." : "Nothing left in this category.";
   }
 
   function renderBins() {
@@ -314,6 +318,11 @@
     document.body.append(t);
     setTimeout(() => t.remove(), 2200);
   }
+
+  $("search").addEventListener("input", (e) => {
+    query = e.target.value.trim().toLowerCase();
+    renderGrid();
+  });
 
   // Hooks for cloud.js (accounts, stats and friends). Events fire on document
   // as "woometer:answer", "woometer:remove", "woometer:reset" and "woometer:detail".

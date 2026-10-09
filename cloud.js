@@ -71,7 +71,7 @@
     await syncAnswers();
     wireEvents();
     renderAccount();
-    $("friends").hidden = false;
+    $("friends-open").hidden = false;
     $("my-name").value = profile.display_name || "";
     $("foot-note").textContent = user.is_anonymous
       ? "Your answers are saved anonymously so you can see what others think and compare with friends."
@@ -145,6 +145,20 @@
     });
 
     $("google-login").addEventListener("click", signInWithGoogle);
+    $("friends-open").addEventListener("click", () => {
+      $("friends").showModal();
+      refreshFriends();
+    });
+    $("avatar").addEventListener("click", (e) => {
+      e.stopPropagation();
+      setMenu($("account-menu").hidden);
+    });
+    document.addEventListener("click", (e) => {
+      if (!$("account").contains(e.target)) setMenu(false);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setMenu(false);
+    });
     $("sign-out").addEventListener("click", signOut);
     $("copy-friend-link").addEventListener("click", copyFriendLink);
     $("my-name").addEventListener("change", (e) => setName(e.target.value));
@@ -190,13 +204,38 @@
 
   function renderAccount() {
     const anon = user.is_anonymous;
-    // Hidden until the Google provider is set up in Supabase (googleSignIn in config.js).
-    $("account").hidden = !cfg.googleSignIn && anon;
-    $("account-status").textContent = anon
-      ? "Sign in to keep your answers and friends on any device. It's optional."
-      : `Signed in as ${user.email || profile.display_name || "you"}.`;
-    $("google-login").hidden = !anon;
-    $("sign-out").hidden = anon;
+    // The sign-in button stays hidden until the Google provider is set up in
+    // Supabase (googleSignIn in config.js).
+    $("google-login").hidden = !anon || !cfg.googleSignIn;
+    $("google-login").title = "Sign in with Google to keep your answers and friends on any device";
+    $("account").hidden = anon;
+    if (anon) return;
+
+    const meta = user.user_metadata || {};
+    const name = meta.full_name || meta.name || profile.display_name || "";
+    const picture = meta.avatar_url || meta.picture;
+    const avatar = $("avatar");
+    if (picture) {
+      const img = document.createElement("img");
+      img.src = picture;
+      img.alt = "";
+      img.referrerPolicy = "no-referrer";
+      img.onerror = () => (avatar.textContent = initial(name || user.email));
+      avatar.replaceChildren(img);
+    } else {
+      avatar.textContent = initial(name || user.email);
+    }
+    $("account-name").textContent = name;
+    $("account-email").textContent = user.email || "";
+  }
+
+  function initial(text) {
+    return (text || "?").trim().charAt(0).toUpperCase();
+  }
+
+  function setMenu(open) {
+    $("account-menu").hidden = !open;
+    $("avatar").setAttribute("aria-expanded", String(open));
   }
 
   async function signInWithGoogle() {
@@ -313,6 +352,8 @@
     if (error) return logError({ error });
     const list = $("friend-list");
     $("friend-empty").hidden = data.length > 0;
+    $("friends-count").hidden = data.length === 0;
+    $("friends-count").textContent = data.length;
     const mine = W.getAnswers();
     const items = await Promise.all(
       data.map(async (f) => {
@@ -326,7 +367,11 @@
         name.textContent = f.display_name || "Unnamed friend";
         const meta = document.createElement("span");
         meta.className = "friend-meta";
-        meta.textContent = c.both ? `${c.agreePct}% agree · ${c.differPct}% differ` : "Nothing to compare yet";
+        // Out of the claims you've both answered; with hundreds of claims the
+        // share of the whole list would read 0% for a long time.
+        meta.textContent = c.both
+          ? `Agree on ${pct(c.agree, c.both)}% of ${c.both} shared`
+          : "Nothing to compare yet";
         b.append(name, meta);
         b.addEventListener("click", () => openCompare(f));
         li.append(b);

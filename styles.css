@@ -100,10 +100,17 @@ button { font: inherit; cursor: pointer; }
 .pct-label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .meter-verdict { font-size: 14px; margin-top: 4px; }
 
-.mute {
+.top-actions {
   position: absolute;
   top: 12px;
   right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mute {
+  flex: none;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -357,21 +364,111 @@ dialog a { color: var(--accent); }
 
 /* Friends, account and comparisons (cloud.js) */
 
+.top-btn {
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+.top-btn:hover { border-color: var(--accent); }
+.badge {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  line-height: 20px;
+  text-align: center;
+}
+
+/* Google's standard sign-in button: white, grey outline, colour G, Roboto-ish label */
+.gsi {
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px 0 12px;
+  border-radius: 999px;
+  border: 1px solid #747775;
+  background: #fff;
+  color: #1f1f1f;
+  font: 500 14px/1 Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: 0.25px;
+}
+.gsi:hover { background: #f8f9fa; box-shadow: 0 1px 2px rgb(60 64 67 / 30%); }
+.g-logo { width: 18px; height: 18px; flex: none; }
+@media (prefers-color-scheme: dark) {
+  .gsi { background: #131314; color: #e3e3e3; border-color: #8e918f; }
+  .gsi:hover { background: #1f1f20; }
+}
+
+.account { position: relative; }
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 17px;
+  padding: 0;
+  overflow: hidden;
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar:hover { box-shadow: 0 0 0 3px var(--woo-soft); }
+.account-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 220px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 20%);
+  padding: 14px;
+  z-index: 30;
+}
+.account-menu p { margin: 0; }
+.account-name { font-weight: 700; }
+.account-email { font-size: 13px; color: var(--muted); margin-bottom: 12px !important; word-break: break-all; }
+.account-menu .btn { width: 100%; }
+.top-btn:focus-visible, .gsi:focus-visible, .avatar:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* The buttons float in the header's top-right corner. On wide screens the
+   header keeps clear of them so they never cover the meter. */
+@media (min-width: 861px) {
+  .top { padding-right: calc(clamp(16px, 4vw, 40px) + 160px); }
+  .brand { flex: 1 1 260px; }
+}
+@media (min-width: 1100px) {
+  .top { padding-right: calc(clamp(16px, 4vw, 40px) + 290px); }
+}
+
+@media (max-width: 1099px) {
+  .top-btn-label, .gsi-label { display: none; }
+  .top-btn, .gsi { width: 40px; padding: 0; justify-content: center; gap: 0; }
+  .top-btn { position: relative; }
+  .top-btn .badge { position: absolute; top: -4px; right: -4px; }
+}
+
+.friends form { display: flex; flex-direction: column; gap: 10px; min-width: min(420px, calc(100vw - 76px)); }
+.friends h3 { margin: 0; }
+.friends .bin-hint { margin: 0; }
+.friends .friend-list { max-height: 45vh; overflow-y: auto; }
+
 @media (min-width: 861px) {
   .bins { max-height: calc(100vh - 160px); overflow-y: auto; padding-bottom: 8px; }
 }
 
-.panel {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.panel h2 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
-.panel .bin-hint { margin: 0; }
 
 .name-row { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
 .name-row input {
@@ -385,8 +482,6 @@ dialog a { color: var(--accent); }
 }
 .name-row input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
 
-.btn.google { background: var(--surface); color: var(--ink); border-color: var(--line); }
-.btn.google::before { content: "G"; font-weight: 800; color: #4285f4; margin-right: 8px; }
 
 .friend-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .friend-list button {

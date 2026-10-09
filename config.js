@@ -13,4 +13,8 @@ window.WOOMETER_CONFIG = {
   // address. Needs https://woometer.com as an authorized redirect URI on the
   // client. Leave empty to sign in through Supabase's redirect instead.
   googleClientId: "458207142283-nm9ussa779v4th6hpgf8871kphc11s4q.apps.googleusercontent.com",
+  // Cloudflare Turnstile site key (public), for the spam check on new sign-ins.
+  // Set this first, then turn on CAPTCHA protection in Supabase (Authentication
+  // > Attack Protection) with the matching secret. Empty means no spam check.
+  turnstileSiteKey: "",
 };

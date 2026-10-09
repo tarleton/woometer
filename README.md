@@ -50,6 +50,18 @@ Answers are stored by claim `id`, so adding claims needs no database change.
 4. Set up Google: create an OAuth client (type *Web application*) in Google Cloud Console with `https://woometer.com` as a JavaScript origin and the callback URL from Supabase's Google provider page as the redirect URI, then paste the client ID and secret into that Supabase page and enable it. Also add `https://woometer.com` as a redirect URI and put the client ID (public) in `googleClientId` in [`config.js`](config.js): sign-in then goes straight from woometer.com to Google and back with an ID token (`signInWithIdToken`), so Google's screens say "woometer.com" instead of the Supabase project's address. Without it, sign-in goes through Supabase's own redirect.
 5. Put the **Project URL** and the **anon public** key (Supabase → Project Settings → API) into [`config.js`](config.js). Both are meant to be public. Never put the `service_role` key, database password or Google client secret in this repo.
 
+### Spam check (Cloudflare Turnstile)
+
+New sign-ins can require a Cloudflare Turnstile token, so bots can't create piles of anonymous users and skew the stats. Put the Turnstile **site key** (public) in `turnstileSiteKey` in [`config.js`](config.js) first, then in Supabase under **Authentication → Attack Protection** turn on CAPTCHA protection, choose Turnstile and paste the **secret key** there (never in this repo). In that order nothing breaks: with the key set but CAPTCHA off, Supabase ignores the token.
+
+### Keeping the free plan awake
+
+Supabase's free plan pauses a project after about a week with no activity. [`.github/workflows/keep-supabase-awake.yml`](.github/workflows/keep-supabase-awake.yml) makes one tiny read three times a week. GitHub turns scheduled workflows off after 60 days with no commits; if that happens, re-enable it under the repo's **Actions** tab.
+
+## Link previews
+
+`index.html` has Open Graph and Twitter tags pointing at [`icons/og-image.png`](icons/og-image.png). Its source is [`tools/og-image.html`](tools/og-image.html); re-render it with `node tools/render-og-image.js` (needs Playwright).
+
 ## Hosting on GitHub Pages
 
 1. In the repo, go to **Settings → Pages** and set the source to **Deploy from a branch**, branch `main`, folder `/ (root)`.

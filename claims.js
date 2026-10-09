@@ -3404,4 +3404,28 @@ const CLAIMS = [
     verdict: "No one has ever been shown to harm anyone by witchcraft, but the belief has been deadly: tens of thousands were executed in Europe's witch trials, and accused 'witches' are still killed today in parts of Africa, India and Papua New Guinea.",
     link: "https://en.wikipedia.org/wiki/Witch-hunt",
   },
+  {
+    id: "mirror-portals",
+    name: "Mirror Portals",
+    category: "magic",
+    question: "Can mirrors act as windows or portals into other realms or the spirit world?",
+    verdict: "No mirror has shown anything but reflected light. What people see is a known illusion: in a 2010 study by Giovanni Caputo, most people who stared at their reflection in dim light for 10 minutes saw their face distort into strange or unfamiliar faces.",
+    link: "https://en.wikipedia.org/wiki/Mirror",
+  },
+  {
+    id: "bloody-mary",
+    name: "Bloody Mary",
+    category: "magic",
+    question: "Can chanting 'Bloody Mary' into a mirror in the dark summon a ghost?",
+    verdict: "No one has ever produced evidence of a summoned spirit. The same dim-light mirror illusion, plus a scary story and an expectant mood, explains what people report seeing.",
+    link: "https://en.wikipedia.org/wiki/Bloody_Mary_(folklore)",
+  },
+  {
+    id: "covering-mirrors",
+    name: "Covering Mirrors After a Death",
+    category: "magic",
+    question: "Should mirrors be covered after someone dies so their soul doesn't get trapped in the glass?",
+    verdict: "There's no evidence a soul could be caught in a mirror. Covering mirrors is a mourning custom in several cultures, and many who keep it explain it as setting aside vanity while grieving rather than as protection.",
+    link: "https://en.wikipedia.org/wiki/Superstition",
+  },
 ];

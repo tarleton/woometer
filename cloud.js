@@ -176,7 +176,8 @@
 
   function renderAccount() {
     const anon = user.is_anonymous;
-    $("account").hidden = false;
+    // Hidden until the Google provider is set up in Supabase (googleSignIn in config.js).
+    $("account").hidden = !cfg.googleSignIn && anon;
     $("account-status").textContent = anon
       ? "Sign in to keep your answers and friends on any device. It's optional."
       : `Signed in as ${user.email || profile.display_name || "you"}.`;

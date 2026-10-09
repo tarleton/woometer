@@ -1,34 +1,19 @@
 :root {
-  --bg: #f6f3fb;
-  --surface: #ffffff;
-  --ink: #221a2e;
-  --muted: #6b6178;
-  --line: #e2dbeb;
+  --bg: #15111c;
+  --surface: #211b2b;
+  --ink: #f1ecf7;
+  --muted: #a99fb8;
+  --line: #362d44;
   --trash: #3fb68b;
-  --trash-soft: #e3f5ee;
+  --trash-soft: #173229;
   --woo: #c04ad6;
-  --woo-soft: #f6e6fa;
+  --woo-soft: #351b3d;
   --unsure: #6b7280;
-  --unsure-soft: #eef0f3;
-  --accent: #6b3fd6;
-  --shadow: 0 1px 2px rgb(34 26 46 / 6%), 0 4px 14px rgb(34 26 46 / 6%);
+  --unsure-soft: #262a31;
+  --accent: #a78bfa;
+  --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 4px 14px rgb(0 0 0 / 25%);
   --radius: 14px;
-  color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #15111c;
-    --surface: #211b2b;
-    --ink: #f1ecf7;
-    --muted: #a99fb8;
-    --line: #362d44;
-    --trash-soft: #173229;
-    --woo-soft: #351b3d;
-    --unsure-soft: #262a31;
-    --accent: #a78bfa;
-    --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 4px 14px rgb(0 0 0 / 25%);
-  }
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -66,8 +51,8 @@ button { font: inherit; cursor: pointer; }
   font-size: clamp(30px, 5vw, 42px);
   font-weight: 800;
   letter-spacing: -0.03em;
-  --alien: #16a34a;
-  --alien-glow: rgb(74 222 128 / 45%);
+  --alien: #4ade80;
+  --alien-glow: rgb(74 222 128 / 60%);
 }
 .logo-woo {
   color: var(--alien);
@@ -87,10 +72,6 @@ button { font: inherit; cursor: pointer; }
 .logo .eye .glint { fill: #fff; opacity: 0.85; }
 /* Mirror the right eye so both slant up and outward, like the alien favicon. */
 .logo .eye-l { transform: scaleX(-1); }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .brand h1 { --alien: #4ade80; --alien-glow: rgb(74 222 128 / 60%); }
-}
-:root[data-theme="dark"] .brand h1 { --alien: #4ade80; --alien-glow: rgb(74 222 128 / 60%); }
 
 /* Tagline sits beside the logo, lined up with its baseline, and drops under
    it only when there isn't room. */
@@ -600,18 +581,14 @@ dialog a { color: var(--accent); }
   gap: 10px;
   padding: 0 14px 0 12px;
   border-radius: 999px;
-  border: 1px solid #747775;
-  background: #fff;
-  color: #1f1f1f;
+  border: 1px solid #8e918f;
+  background: #131314;
+  color: #e3e3e3;
   font: 500 14px/1 Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
   letter-spacing: 0.25px;
 }
-.gsi:hover { background: #f8f9fa; box-shadow: 0 1px 2px rgb(60 64 67 / 30%); }
+.gsi:hover { background: #1f1f20; }
 .g-logo { width: 18px; height: 18px; flex: none; }
-@media (prefers-color-scheme: dark) {
-  .gsi { background: #131314; color: #e3e3e3; border-color: #8e918f; }
-  .gsi:hover { background: #1f1f20; }
-}
 
 .account { position: relative; }
 .avatar {

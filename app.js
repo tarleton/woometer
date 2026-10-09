@@ -124,23 +124,58 @@
       done === total ? "That's every claim on the list." : query ? "No unanswered claims match your search." : "Nothing left in this category.";
   }
 
+  // Each bin shows its newest few claims so the side panel never needs its own
+  // scrollbar; the rest open in a popup.
+  const PILE_PREVIEW = 6;
+
+  function pileIds(kind) {
+    return Object.keys(answers).filter((id) => answers[id] === kind).reverse();
+  }
+
+  function pileItem(id, onClick) {
+    const li = document.createElement("li");
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = byId[id].name;
+    b.addEventListener("click", onClick);
+    li.append(b);
+    return li;
+  }
+
   function renderBins() {
     const fill = (list, kind) => {
-      const ids = Object.keys(answers).filter((id) => answers[id] === kind);
-      list.replaceChildren(
-        ...ids.map((id) => {
-          const li = document.createElement("li");
-          const b = document.createElement("button");
-          b.type = "button";
-          b.textContent = byId[id].name;
-          b.addEventListener("click", () => openDetail(id));
-          li.append(b);
-          return li;
-        })
-      );
+      const ids = pileIds(kind);
+      const items = ids.slice(0, PILE_PREVIEW).map((id) => pileItem(id, () => openDetail(id)));
+      if (ids.length > PILE_PREVIEW) {
+        const li = document.createElement("li");
+        const more = document.createElement("button");
+        more.type = "button";
+        more.className = "more";
+        more.textContent = `See all ${ids.length}`;
+        more.addEventListener("click", () => openPile(kind));
+        li.append(more);
+        items.push(li);
+      }
+      list.replaceChildren(...items);
     };
     fill(trashPile, "no");
     fill(wooPile, "yes");
+  }
+
+  function openPile(kind) {
+    const dlg = $("pile-dialog");
+    const ids = pileIds(kind);
+    $("pile-title").textContent = `${kind === "yes" ? "🔮 Woo Pile" : "🗑️ Trash Bin"} (${ids.length})`;
+    dlg.classList.toggle("trash", kind === "no");
+    $("pile-all").replaceChildren(
+      ...ids.map((id) =>
+        pileItem(id, () => {
+          dlg.close();
+          openDetail(id);
+        })
+      )
+    );
+    dlg.showModal();
   }
 
   function renderMeter() {

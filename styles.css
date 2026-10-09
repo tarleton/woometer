@@ -230,7 +230,7 @@ button { font: inherit; cursor: pointer; }
 
 /* Bins */
 
-.bins { display: flex; flex-direction: column; gap: 16px; align-self: start; position: sticky; top: 140px; }
+.bins { display: flex; flex-direction: column; gap: 16px; align-self: start; position: sticky; top: 126px; }
 @media (max-width: 860px) { .bins { position: static; } }
 
 .bin {
@@ -261,8 +261,6 @@ button { font: inherit; cursor: pointer; }
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  max-height: 260px;
-  overflow-y: auto;
 }
 
 .pile button {
@@ -275,8 +273,13 @@ button { font: inherit; cursor: pointer; }
 }
 .pile button:hover { border-color: var(--accent); }
 .trash .pile button { text-decoration: line-through; text-decoration-color: var(--trash); }
+.pile button.more { text-decoration: none; font-weight: 700; color: var(--accent); border-style: dashed; }
+.pile-dialog h3 { margin: 0; }
+.pile-dialog .bin-hint { margin: 4px 0 12px; }
 
-.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.link-btn { border: 0; background: none; padding: 0; color: var(--muted); text-decoration: underline; font-size: 13px; }
+.link-btn:hover { color: var(--accent); }
+
 
 .btn {
   border: 1px solid var(--accent);
@@ -447,11 +450,11 @@ dialog a { color: var(--accent); }
 /* The buttons float in the header's top-right corner. On wide screens the
    header keeps clear of them so they never cover the meter. */
 @media (min-width: 861px) {
-  .top { padding-right: calc(clamp(16px, 4vw, 40px) + 160px); }
+  .top { padding-right: calc(clamp(16px, 4vw, 40px) + 200px); }
   .brand { flex: 1 1 200px; }
 }
-@media (min-width: 1100px) {
-  .top { padding-right: calc(clamp(16px, 4vw, 40px) + 290px); }
+@media (min-width: 1200px) {
+  .top { padding-right: calc(clamp(16px, 4vw, 40px) + 380px); }
 }
 
 @media (max-width: 860px) {
@@ -459,7 +462,7 @@ dialog a { color: var(--accent); }
   .tagline { margin-top: 8px; }
 }
 
-@media (max-width: 1099px) {
+@media (max-width: 1199px) {
   .top-btn-label, .gsi-label { display: none; }
   .top-btn, .gsi { width: 40px; padding: 0; justify-content: center; gap: 0; }
   .top-btn { position: relative; }
@@ -471,9 +474,6 @@ dialog a { color: var(--accent); }
 .friends .bin-hint { margin: 0; }
 .friends .friend-list { max-height: 45vh; overflow-y: auto; }
 
-@media (min-width: 861px) {
-  .bins { max-height: calc(100vh - 160px); overflow-y: auto; padding-bottom: 8px; }
-}
 
 
 .name-row { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Woometer: how hoodwinked are you?</title>
+  <meta name="description" content="Answer Yes or No to the best-known pseudoscience, paranormal and religious claims, and see how much woo you've been sold.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔮</text></svg>">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <h1>Woometer</h1>
+      <p class="tagline">Click Yes if you believe it, No if you don't. Watch your woo pile up.</p>
+    </div>
+
+    <div class="meter" aria-live="polite">
+      <svg viewBox="0 0 200 116" class="gauge" aria-hidden="true">
+        <defs>
+          <linearGradient id="arc" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stop-color="#3fb68b"/>
+            <stop offset="0.5" stop-color="#e5c04a"/>
+            <stop offset="1" stop-color="#c04ad6"/>
+          </linearGradient>
+        </defs>
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#arc)" stroke-width="16" stroke-linecap="round"/>
+        <g id="needle" style="transform: rotate(-90deg)">
+          <line x1="100" y1="100" x2="100" y2="34" class="needle-line" stroke-width="4" stroke-linecap="round"/>
+        </g>
+        <circle cx="100" cy="100" r="8" class="needle-hub"/>
+      </svg>
+      <div class="meter-read">
+        <span id="pct" class="pct">0%</span>
+        <span class="pct-label">hoodwinked</span>
+        <span id="verdict" class="meter-verdict">Answer a few to get a reading</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="board" aria-label="Claims">
+      <nav class="filters" id="filters" aria-label="Filter by category"></nav>
+      <p class="progress" id="progress"></p>
+      <div class="grid" id="grid"></div>
+      <div class="done" id="done" hidden>
+        <p>That's every claim on the list.</p>
+      </div>
+    </section>
+
+    <aside class="bins">
+      <section class="bin trash" id="trash-bin">
+        <h2><span aria-hidden="true">🗑️</span> Trash Bin <span class="count" id="trash-count">0</span></h2>
+        <p class="bin-hint">Claims you don't buy.</p>
+        <ul class="pile" id="trash-pile"></ul>
+      </section>
+      <section class="bin woo" id="woo-bin">
+        <h2><span aria-hidden="true">🔮</span> Woo Pile <span class="count" id="woo-count">0</span></h2>
+        <p class="bin-hint">Claims you believe. Tap one to see the evidence.</p>
+        <ul class="pile" id="woo-pile"></ul>
+      </section>
+      <div class="actions">
+        <button type="button" id="share" class="btn">Copy my score</button>
+        <button type="button" id="reset" class="btn ghost">Start over</button>
+      </div>
+    </aside>
+  </main>
+
+  <dialog id="detail">
+    <form method="dialog">
+      <p class="detail-cat" id="detail-cat"></p>
+      <h3 id="detail-name"></h3>
+      <p class="detail-q" id="detail-q"></p>
+      <p class="detail-verdict"><strong>The evidence:</strong> <span id="detail-verdict"></span></p>
+      <p><a id="detail-link" target="_blank" rel="noopener">Read more</a></p>
+      <div class="detail-actions">
+        <button type="button" class="btn ghost" id="detail-undo">Put it back on the board</button>
+        <button class="btn" value="close">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <nav class="minibar" aria-label="Your piles">
+    <a href="#trash-bin" id="mini-trash" class="mini trash">🗑️ Trash <b id="mini-trash-count">0</b></a>
+    <span class="mini-pct" id="mini-pct">0%</span>
+    <a href="#woo-bin" id="mini-woo" class="mini woo">🔮 Woo <b id="mini-woo-count">0</b></a>
+  </nav>
+
+  <footer class="foot">
+    <p>Your answers stay in this browser. Nothing is sent anywhere.</p>
+  </footer>
+
+  <script src="claims.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

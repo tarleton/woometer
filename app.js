@@ -81,7 +81,7 @@
     card.dataset.id = claim.id;
 
     const cat = document.createElement("span");
-    cat.className = "cat";
+    cat.className = "card-cat";
     cat.textContent = `${CATEGORIES[claim.category].icon} ${CATEGORIES[claim.category].label}`;
 
     const h = document.createElement("h3");

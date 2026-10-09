@@ -180,7 +180,7 @@ button { font: inherit; cursor: pointer; }
   transition: opacity 0.25s, transform 0.25s;
 }
 
-.card .cat { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.card .card-cat { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
 .card h3 { margin: 0; font-size: 18px; }
 .card .q { margin: 0; font-size: 14px; color: var(--muted); flex: 1; }
 

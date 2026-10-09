@@ -266,7 +266,8 @@
   }
 
   async function signInWithGoogle() {
-    if (cfg.googleClientId) return goToGoogle();
+    // crypto.subtle (for the nonce) only exists on https pages.
+    if (cfg.googleClientId && window.crypto && crypto.subtle) return goToGoogle();
     const options = { redirectTo: homeUrl() };
     // Keep the same user so answers and friends carry over. linkIdentity needs
     // "manual linking" on in Supabase; without it, fall back to a plain sign-in.

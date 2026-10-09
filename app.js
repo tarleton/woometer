@@ -133,11 +133,12 @@
     const row = document.createElement("div");
     row.className = "answer";
     const given = answers[claim.id];
-    for (const [value, label, cls] of [["yes", "Yes", "yes"], ["no", "No", "no"], ["unsure", "Don't Know", "unsure"]]) {
+    // Don't Know sits between Yes and No, on two lines so all three stay the same size.
+    for (const [value, label, cls, text] of [["yes", "Yes", "yes"], ["unsure", "Don't Know", "unsure", "Don't\nKnow"], ["no", "No", "no"]]) {
       const b = document.createElement("button");
       b.type = "button";
       b.className = cls;
-      b.textContent = label;
+      b.textContent = text || label;
       b.setAttribute("aria-label", `${label}: ${claim.name}`);
       if (given) b.setAttribute("aria-pressed", String(given === value));
       b.addEventListener("click", () => answer(claim.id, value, card));

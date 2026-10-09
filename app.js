@@ -372,6 +372,15 @@
     dlg.querySelector(".current")?.scrollIntoView({ block: "nearest" });
   }
 
+  // Bottom-bar pile buttons scroll to their pile without putting a #hash in the address bar.
+  for (const id of ["mini-trash", "mini-woo", "mini-unsure"]) {
+    const link = $(id);
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      document.getElementById(link.getAttribute("href").slice(1))?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
   $("cat").addEventListener("click", openCats);
   $("mini-cat").addEventListener("click", openCats);
   $("mini-cat").addEventListener("keydown", (e) => {

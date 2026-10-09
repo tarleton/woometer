@@ -16,6 +16,10 @@
     </div>
 
     <div class="meter" aria-live="polite">
+      <figure class="cat" id="cat">
+        <div class="cat-art" id="cat-art"></div>
+        <figcaption id="cat-name"></figcaption>
+      </figure>
       <svg viewBox="0 0 200 116" class="gauge" aria-hidden="true">
         <defs>
           <linearGradient id="arc" x1="0" x2="1" y1="0" y2="0">
@@ -39,6 +43,14 @@
 
     <button type="button" id="mute" class="mute" aria-pressed="false" title="Turn sound off">🔊</button>
   </header>
+
+  <div class="invite" id="invite" role="status" hidden>
+    <p><strong id="invite-title"></strong> Answer some claims, then open them under Compare with friends to see where you agree.</p>
+    <label class="name-row" id="invite-name-row">Your name, so they know who you are
+      <input type="text" id="invite-name" maxlength="40" autocomplete="given-name" placeholder="Your name">
+    </label>
+    <button type="button" class="invite-close" id="invite-close" aria-label="Dismiss">✕</button>
+  </div>
 
   <main class="layout">
     <section class="board" aria-label="Claims">
@@ -66,6 +78,23 @@
         <button type="button" id="share" class="btn">Copy my score</button>
         <button type="button" id="reset" class="btn ghost">Start over</button>
       </div>
+
+      <section class="panel friends" id="friends" hidden>
+        <h2><span aria-hidden="true">👯</span> Compare with friends</h2>
+        <p class="bin-hint">Send your friend link. Whoever opens it joins your friend list, and you join theirs.</p>
+        <label class="name-row">Your name
+          <input type="text" id="my-name" maxlength="40" autocomplete="given-name" placeholder="So friends know it's you">
+        </label>
+        <button type="button" id="copy-friend-link" class="btn">Copy my friend link</button>
+        <p class="bin-hint" id="friend-empty">No friends yet.</p>
+        <ul class="friend-list" id="friend-list"></ul>
+      </section>
+
+      <section class="panel account" id="account" hidden>
+        <p class="bin-hint" id="account-status"></p>
+        <button type="button" id="google-login" class="btn google">Sign in with Google</button>
+        <button type="button" id="sign-out" class="btn ghost" hidden>Sign out</button>
+      </section>
     </aside>
   </main>
 
@@ -75,6 +104,7 @@
       <h3 id="detail-name"></h3>
       <p class="detail-q" id="detail-q"></p>
       <p class="detail-verdict"><strong>The evidence:</strong> <span id="detail-verdict"></span></p>
+      <p class="detail-stats" id="detail-stats" hidden></p>
       <p><a id="detail-link" target="_blank" rel="noopener">Read more</a></p>
       <div class="detail-actions">
         <button type="button" class="btn ghost" id="detail-undo">Put it back on the board</button>
@@ -83,18 +113,45 @@
     </form>
   </dialog>
 
+  <dialog id="compare" class="compare">
+    <form method="dialog">
+      <p class="detail-cat">You vs.</p>
+      <h3 id="compare-name"></h3>
+      <div class="compare-bar" aria-hidden="true">
+        <span class="seg agree" id="compare-agree"></span>
+        <span class="seg differ" id="compare-differ"></span>
+        <span class="seg none" id="compare-none"></span>
+      </div>
+      <dl class="compare-key">
+        <div><dt><span class="dot agree"></span>Agree</dt><dd id="compare-agree-pct">0%</dd></div>
+        <div><dt><span class="dot differ"></span>Differ</dt><dd id="compare-differ-pct">0%</dd></div>
+        <div><dt><span class="dot none"></span>Not both answered</dt><dd id="compare-none-pct">0%</dd></div>
+      </dl>
+      <p class="compare-summary" id="compare-summary"></p>
+      <h4 id="compare-diffs-title" hidden>Where you differ</h4>
+      <ul class="compare-diffs" id="compare-diffs"></ul>
+      <div class="detail-actions">
+        <button type="button" class="btn ghost" id="compare-remove">Remove friend</button>
+        <button class="btn" value="close">Close</button>
+      </div>
+    </form>
+  </dialog>
+
   <nav class="minibar" aria-label="Your piles">
     <a href="#trash-bin" id="mini-trash" class="mini trash">🗑️ Trash <b id="mini-trash-count">0</b></a>
-    <span class="mini-pct" id="mini-pct">0%</span>
+    <span class="mini-pct"><span class="mini-cat" id="mini-cat"></span><span id="mini-pct">0%</span></span>
     <a href="#woo-bin" id="mini-woo" class="mini woo">🔮 Woo <b id="mini-woo-count">0</b></a>
   </nav>
 
   <footer class="foot">
-    <p>Your answers stay in this browser. Nothing is sent anywhere.</p>
+    <p id="foot-note">Your answers stay in this browser. Nothing is sent anywhere.</p>
   </footer>
 
   <script src="claims.js"></script>
   <script src="sounds.js"></script>
+  <script src="cat.js"></script>
   <script src="app.js"></script>
+  <script src="config.js"></script>
+  <script src="cloud.js"></script>
 </body>
 </html>

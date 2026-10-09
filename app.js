@@ -15,6 +15,7 @@
   let activeCategory = "all";
   let query = "";
   let detailId = null;
+  let catStage = null;
 
   function load() {
     try {
@@ -153,6 +154,24 @@
     $("mini-pct").textContent = `${s.pct}%`;
     // -90deg is all the way left (0%), +90deg all the way right (100%).
     $("needle").style.transform = `rotate(${-90 + s.pct * 1.8}deg)`;
+    renderCat(Cat.stageFor(s.pct));
+  }
+
+  // The cat gets one step scruffier for every 5% hoodwinked.
+  function renderCat(stage) {
+    if (stage === catStage) return;
+    const art = $("cat-art");
+    const first = catStage === null;
+    catStage = stage;
+    art.innerHTML = Cat.svg(stage);
+    $("mini-cat").innerHTML = Cat.svg(stage);
+    $("cat-name").textContent = Cat.name(stage);
+    $("cat").title = `${stage * 5}%: ${Cat.name(stage)}`;
+    if (!first) {
+      art.classList.remove("cat-pop");
+      void art.offsetWidth; // restart the animation
+      art.classList.add("cat-pop");
+    }
   }
 
   function renderAll() {
@@ -166,6 +185,7 @@
   function answer(id, value, card) {
     answers[id] = value;
     save();
+    emit("answer", { id, value });
     if (value === "yes") Sounds.woo();
     else Sounds.trash();
 
@@ -236,6 +256,7 @@
     $("detail-verdict").textContent = c.verdict;
     $("detail-link").href = c.link;
     detail.showModal();
+    emit("detail", { id });
   }
 
   $("detail-undo").addEventListener("click", () => {
@@ -243,6 +264,7 @@
       delete answers[detailId];
       save();
       renderAll();
+      emit("remove", { id: detailId });
     }
     detail.close();
   });
@@ -268,6 +290,7 @@
     answers = {};
     save();
     renderAll();
+    emit("reset", {});
   });
 
   const muteBtn = $("mute");
@@ -297,6 +320,24 @@
     query = e.target.value.trim().toLowerCase();
     renderGrid();
   });
+
+  // Hooks for cloud.js (accounts, stats and friends). Events fire on document
+  // as "woometer:answer", "woometer:remove", "woometer:reset" and "woometer:detail".
+  function emit(name, detail) {
+    document.dispatchEvent(new CustomEvent(`woometer:${name}`, { detail }));
+  }
+
+  window.Woometer = {
+    getAnswers: () => ({ ...answers }),
+    // Replace every answer at once, e.g. after loading them from an account.
+    setAnswers(next) {
+      answers = Object.fromEntries(Object.entries(next).filter(([id]) => byId[id]));
+      save();
+      renderAll();
+    },
+    toast,
+    openDetail,
+  };
 
   renderFilters();
   renderAll();

@@ -2,9 +2,9 @@
 
 A place to measure your woo. Live at [woometer.com](https://woometer.com).
 
-The page is a grid of well-known pseudoscience, paranormal, conspiracy and religious claims. Click **Yes** if you believe it or **No** if you don't, and the card flies into your **Woo Pile** or your **Trash Bin**. The meter at the top shows what percentage of your answers were Yes: how hoodwinked you are. Tap anything in a pile to read what the evidence says, or to put it back on the board.
+The page is a grid of well-known pseudoscience, paranormal, conspiracy and religious claims. Click **Yes** if you believe it or **No** if you don't, and the card flies into your **Woo Pile** or your **Trash Bin**. The meter at the top shows what percentage of your answers were Yes: how hoodwinked you are. Next to the meter is a cartoon cat that gets one step scruffier for every 5% (21 stages, drawn as inline SVG in [`cat.js`](cat.js)): a professor in glasses and a tie at 0%, a tinfoil-hatted furball at 100%. Tap anything in a pile to read what the evidence says, or to put it back on the board.
 
-Answers are saved in the visitor's own browser (`localStorage`). There is no backend, no account and no tracking.
+Answers are saved in the visitor's own browser (`localStorage`). When Supabase is configured (see below), they are also saved to the visitor's Supabase user, which powers the "N% of people agree" numbers, friend comparisons and optional Google sign-in. With no Supabase settings the site runs entirely in the browser.
 
 ## Running it locally
 
@@ -31,6 +31,24 @@ Everything on the grid comes from [`claims.js`](claims.js). Each claim looks lik
 ```
 
 New categories go in `CATEGORIES` at the top of the same file.
+
+## Accounts, stats and friends (Supabase)
+
+[`cloud.js`](cloud.js) adds three things on top of the static site:
+
+- **Everyone is saved, nobody has to sign up.** Each visitor quietly gets an anonymous Supabase user. **Sign in with Google** links that same user to a Google account, so answers and friends carry over and follow you to other devices.
+- **"N% of people agree with you"** after each answer, and Yes/No totals in each claim's detail view.
+- **Compare with friends.** Everyone has a friend link (`woometer.com/?f=CODE`). Opening someone's link puts each of you in the other's friend list. Clicking a friend shows the percentage of claims you agree on, differ on, and haven't both answered (out of every claim currently on the list, so the three add up to 100 as new claims are added), plus the list of differences.
+
+Answers are stored by claim `id`, so adding claims needs no database change.
+
+### Setting it up
+
+1. Create a Supabase project. Under **Authentication → Sign In / Providers**, turn on **Anonymous sign-ins** and **Allow manual linking** (that's what lets Google sign-in keep the anonymous user's answers).
+2. Under **Authentication → URL Configuration**, set the Site URL to `https://woometer.com`.
+3. Open the **SQL editor**, paste in all of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. It creates the tables, row-level security rules and functions, and is safe to run again after changes.
+4. Set up Google: create an OAuth client (type *Web application*) in Google Cloud Console with `https://woometer.com` as a JavaScript origin and the callback URL from Supabase's Google provider page as the redirect URI, then paste the client ID and secret into that Supabase page and enable it.
+5. Put the **Project URL** and the **anon public** key (Supabase → Project Settings → API) into [`config.js`](config.js). Both are meant to be public. Never put the `service_role` key, database password or Google client secret in this repo.
 
 ## Hosting on GitHub Pages
 

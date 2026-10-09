@@ -1,0 +1,8 @@
+// Supabase settings for accounts, stats and friend comparisons.
+// Both values are public by design (they ship to every browser); the data is
+// protected by the row-level security rules in supabase/schema.sql.
+// Leave them empty and the site runs entirely in the browser with no backend.
+window.WOOMETER_CONFIG = {
+  supabaseUrl: "",
+  supabaseAnonKey: "",
+};

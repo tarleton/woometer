@@ -181,6 +181,7 @@
   function answer(id, value, card) {
     answers[id] = value;
     save();
+    emit("answer", { id, value });
     if (value === "yes") Sounds.woo();
     else Sounds.trash();
 
@@ -251,6 +252,7 @@
     $("detail-verdict").textContent = c.verdict;
     $("detail-link").href = c.link;
     detail.showModal();
+    emit("detail", { id });
   }
 
   $("detail-undo").addEventListener("click", () => {
@@ -258,6 +260,7 @@
       delete answers[detailId];
       save();
       renderAll();
+      emit("remove", { id: detailId });
     }
     detail.close();
   });
@@ -283,6 +286,7 @@
     answers = {};
     save();
     renderAll();
+    emit("reset", {});
   });
 
   const muteBtn = $("mute");
@@ -307,6 +311,24 @@
     document.body.append(t);
     setTimeout(() => t.remove(), 2200);
   }
+
+  // Hooks for cloud.js (accounts, stats and friends). Events fire on document
+  // as "woometer:answer", "woometer:remove", "woometer:reset" and "woometer:detail".
+  function emit(name, detail) {
+    document.dispatchEvent(new CustomEvent(`woometer:${name}`, { detail }));
+  }
+
+  window.Woometer = {
+    getAnswers: () => ({ ...answers }),
+    // Replace every answer at once, e.g. after loading them from an account.
+    setAnswers(next) {
+      answers = Object.fromEntries(Object.entries(next).filter(([id]) => byId[id]));
+      save();
+      renderAll();
+    },
+    toast,
+    openDetail,
+  };
 
   renderFilters();
   renderAll();

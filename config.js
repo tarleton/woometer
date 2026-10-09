@@ -7,4 +7,10 @@ window.WOOMETER_CONFIG = {
   supabaseAnonKey: "sb_publishable_39EacCvjF_hic0TeNsP9Kw_jKoHzOQ2",
   // Set to true once Google is enabled under Supabase Authentication > Providers.
   googleSignIn: true,
+  // The Google OAuth client ID (public; ends in .apps.googleusercontent.com).
+  // With it, sign-in goes straight from woometer.com to Google and back, so
+  // Google's screens name woometer.com instead of the Supabase project's
+  // address. Needs https://woometer.com as an authorized redirect URI on the
+  // client. Leave empty to sign in through Supabase's redirect instead.
+  googleClientId: "",
 };

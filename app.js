@@ -193,7 +193,12 @@
     const li = document.createElement("li");
     const b = document.createElement("button");
     b.type = "button";
-    b.textContent = byId[id].name;
+    // Trash Bin names are crossed out wherever they're listed. The line goes on
+    // the name itself; some browsers don't draw it when it's set on the button.
+    const name = document.createElement("span");
+    name.textContent = byId[id].name;
+    if (answers[id] === "no") name.className = "struck";
+    b.append(name);
     b.addEventListener("click", onClick);
     li.append(b);
     return li;
@@ -243,7 +248,6 @@
     const dlg = $("pile-dialog");
     const ids = pileIds(kind);
     $("pile-title").textContent = `${PILES[kind].title} (${ids.length})`;
-    dlg.classList.toggle("trash", kind === "no");
     $("pile-all").replaceChildren(
       ...ids.map((id) =>
         pileItem(id, () => {

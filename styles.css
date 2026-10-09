@@ -400,8 +400,8 @@ button { font: inherit; cursor: pointer; }
 .pile button:hover { border-color: var(--accent); }
 /* One line per chip, so the side panel's height stays predictable. */
 .bins .pile button { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.trash .pile button { text-decoration: line-through; text-decoration-color: var(--trash); }
-.pile button.more { text-decoration: none; font-weight: 700; color: var(--accent); border-style: dashed; }
+.pile .struck { text-decoration: line-through; text-decoration-color: var(--trash); }
+.pile button.more { font-weight: 700; color: var(--accent); border-style: dashed; }
 .pile-dialog h3 { margin: 0; }
 .pile-dialog .bin-hint { margin: 4px 0 12px; }
 

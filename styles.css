@@ -47,8 +47,8 @@ button { font: inherit; cursor: pointer; }
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px 32px;
-  padding: 20px clamp(16px, 4vw, 40px);
+  gap: 10px 24px;
+  padding: 12px clamp(16px, 4vw, 40px);
   border-bottom: 1px solid var(--line);
   background: var(--surface);
   position: sticky;
@@ -58,6 +58,7 @@ button { font: inherit; cursor: pointer; }
 
 .brand h1 {
   margin: 0;
+  line-height: 1.1;
   font-size: clamp(28px, 5vw, 40px);
   letter-spacing: -0.02em;
   background: linear-gradient(90deg, var(--accent), var(--woo));
@@ -66,27 +67,27 @@ button { font: inherit; cursor: pointer; }
   color: transparent;
 }
 
-.tagline { margin: 2px 0 0; color: var(--muted); }
+.tagline { margin: 2px 0 0; color: var(--muted); font-size: 15px; line-height: 1.35; }
 
 .meter { display: flex; align-items: center; gap: 12px; }
 
-.cat { margin: 0; width: 104px; text-align: center; }
-.cat-art svg { display: block; width: 92px; height: auto; margin: 0 auto; }
-.cat figcaption { font-size: 11px; line-height: 1.2; color: var(--muted); margin-top: 2px; }
+.cat { margin: 0; width: 84px; text-align: center; }
+.cat-art svg { display: block; width: 62px; height: auto; margin: 0 auto; }
+.cat figcaption { font-size: 10px; line-height: 1.15; color: var(--muted); margin-top: 1px; }
 @media (max-width: 480px) {
   .meter { gap: 8px; width: 100%; justify-content: space-between; }
-  .cat { width: 84px; }
-  .cat-art svg { width: 76px; }
-  .gauge { width: 104px; }
+  .cat { width: 72px; }
+  .cat-art svg { width: 54px; }
+  .gauge { width: 96px !important; }
   .meter-read { min-width: 0; }
-  .pct { font-size: 30px; }
+  .pct { font-size: 26px !important; }
 }
 .cat-pop { animation: cat-pop 0.45s cubic-bezier(.34, 1.56, .64, 1); }
 @keyframes cat-pop {
   0% { transform: scale(0.7) rotate(-8deg); opacity: 0.3; }
   100% { transform: none; opacity: 1; }
 }
-.gauge { width: 140px; height: auto; }
+.gauge { width: 112px; height: auto; }
 .needle-line { stroke: var(--ink); }
 .needle-hub { fill: var(--ink); }
 #needle {
@@ -96,7 +97,7 @@ button { font: inherit; cursor: pointer; }
 }
 
 .meter-read { display: flex; flex-direction: column; min-width: 150px; }
-.pct { font-size: 34px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.pct { font-size: 30px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
 .pct-label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .meter-verdict { font-size: 14px; margin-top: 4px; }
 
@@ -447,10 +448,15 @@ dialog a { color: var(--accent); }
    header keeps clear of them so they never cover the meter. */
 @media (min-width: 861px) {
   .top { padding-right: calc(clamp(16px, 4vw, 40px) + 160px); }
-  .brand { flex: 1 1 260px; }
+  .brand { flex: 1 1 200px; }
 }
 @media (min-width: 1100px) {
   .top { padding-right: calc(clamp(16px, 4vw, 40px) + 290px); }
+}
+
+@media (max-width: 860px) {
+  /* Clear the corner buttons, which sit level with the title. */
+  .tagline { margin-top: 8px; }
 }
 
 @media (max-width: 1099px) {

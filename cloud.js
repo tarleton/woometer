@@ -92,12 +92,9 @@
     renderAccount();
     $("friends-open").hidden = false;
     $("my-name").value = profile.display_name || "";
-    $("foot-note").textContent = user.is_anonymous
-      ? "Your answers are saved anonymously so you can see what others think and compare with friends."
-      : "Your answers are saved to your account.";
     if (googleProblem) {
       const detail = googleProblem.message || googleProblem.code || String(googleProblem);
-      $("foot-note").textContent = `Google sign-in didn't work, so you're not signed in. (${detail})`;
+      footNote(`Google sign-in didn't work, so you're not signed in. (${detail})`);
     }
     try {
       if (sessionStorage.getItem(DELETED_KEY)) {
@@ -355,8 +352,14 @@
   // visible without opening the browser console.
   function showProblem(err) {
     const detail = (err && (err.message || err.msg || err.code)) || String(err);
-    $("foot-note").textContent =
-      `Couldn't reach the woometer server, so your answers are only saved in this browser for now. (${detail})`;
+    footNote(`Couldn't reach the woometer server, so your answers are only saved in this browser for now. (${detail})`);
+  }
+
+  // The footer is just About · Privacy · Terms; a line above them appears
+  // only when something has gone wrong.
+  function footNote(text) {
+    $("foot-note").textContent = text;
+    $("foot-note").hidden = false;
   }
 
   // Account

@@ -439,8 +439,7 @@ button { font: inherit; cursor: pointer; }
 /* Every-cat popup */
 
 .cats-dialog { width: min(640px, calc(100vw - 32px)); max-width: none; }
-.cats-dialog h3 { margin: 0; }
-.cats-dialog .bin-hint { margin: 4px 0 12px; }
+.cats-dialog h3 { margin: 0 0 12px; }
 .cat-grid {
   list-style: none;
   margin: 0;

@@ -14,6 +14,9 @@
   const LAST_USER_KEY = "woometer.lastUser.v1";
   // The friend someone was adding when they left to sign in with Google.
   const PENDING_FRIEND_KEY = "woometer.pendingFriend.v1";
+  const GOOGLE_AUTH = "https://accounts.google.com/o/oauth2/v2/auth";
+  // Per-tab check values for a trip to Google's sign-in page and back.
+  const GOOGLE_TRIP_KEY = "woometer.googleTrip.v1";
 
   const $ = (id) => document.getElementById(id);
   const byId = Object.fromEntries(CLAIMS.map((c) => [c.id, c]));
@@ -41,6 +44,8 @@
   }
 
   async function start() {
+    // Read Google's reply before supabase-js looks at the address bar.
+    const google = takeGoogleReply();
     db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
 
     // Linking Google to this browser's anonymous user fails when that Google
@@ -54,6 +59,11 @@
     }
 
     let { data } = await db.auth.getSession();
+    let googleProblem = null;
+    if (google) {
+      googleProblem = await useGoogleToken(google, data.session);
+      ({ data } = await db.auth.getSession());
+    }
     if (!data.session) {
       const res = await db.auth.signInAnonymously();
       if (res.error) throw res.error;
@@ -78,6 +88,10 @@
     $("foot-note").textContent = user.is_anonymous
       ? "Your answers are saved anonymously so you can see what others think and compare with friends."
       : "Your answers are saved to your account.";
+    if (googleProblem) {
+      const detail = googleProblem.message || googleProblem.code || String(googleProblem);
+      $("foot-note").textContent = `Google sign-in didn't work, so you're not signed in. (${detail})`;
+    }
 
     await handleInvite();
     await refreshFriends();
@@ -252,11 +266,74 @@
   }
 
   async function signInWithGoogle() {
+    // crypto.subtle (for the nonce) only exists on https pages.
+    if (cfg.googleClientId && window.crypto && crypto.subtle) return goToGoogle();
     const options = { redirectTo: homeUrl() };
     // Keep the same user so answers and friends carry over. linkIdentity needs
     // "manual linking" on in Supabase; without it, fall back to a plain sign-in.
     const { error } = await db.auth.linkIdentity({ provider: "google", options });
     if (error) await db.auth.signInWithOAuth({ provider: "google", options });
+  }
+
+  // Sign in on Google's own page and come straight back with an ID token, so
+  // Google shows woometer.com as the site asking (not the Supabase address).
+  async function goToGoogle() {
+    const nonce = randomHex();
+    const state = randomHex();
+    try {
+      sessionStorage.setItem(GOOGLE_TRIP_KEY, JSON.stringify({ nonce, state }));
+    } catch {}
+    const query = new URLSearchParams({
+      client_id: cfg.googleClientId,
+      redirect_uri: location.origin,
+      response_type: "id_token",
+      scope: "openid email profile",
+      // Google puts this hash in the token; Supabase checks it against the nonce.
+      nonce: await sha256Hex(nonce),
+      state,
+      prompt: "select_account",
+    });
+    location.assign(`${GOOGLE_AUTH}?${query}`);
+  }
+
+  // Back from Google: woometer.com/#id_token=…&state=… (or #error=… if they
+  // backed out). Take it out of the address either way.
+  function takeGoogleReply() {
+    const reply = new URLSearchParams(location.hash.slice(1));
+    if (!reply.has("state")) return null;
+    let trip = null;
+    try {
+      trip = JSON.parse(sessionStorage.getItem(GOOGLE_TRIP_KEY));
+      sessionStorage.removeItem(GOOGLE_TRIP_KEY);
+    } catch {}
+    if (!trip || reply.get("state") !== trip.state) return null;
+    history.replaceState(null, "", location.pathname + location.search);
+    const token = reply.get("id_token");
+    return token ? { token, nonce: trip.nonce } : null;
+  }
+
+  // Link Google to this browser's anonymous user, so its answers stay put. If
+  // that Google account already has a Woometer user (say, from another device),
+  // sign in to that one instead; this browser's answers get merged in.
+  async function useGoogleToken({ token, nonce }, session) {
+    const creds = { provider: "google", token, nonce };
+    if (session && session.user.is_anonymous) {
+      const { error } = await db.auth.linkIdentity(creds);
+      if (!error) return null;
+      console.warn("Woometer: linking Google failed, signing in instead.", error);
+    }
+    const { error } = await db.auth.signInWithIdToken(creds);
+    if (error) console.warn(error);
+    return error || null;
+  }
+
+  function randomHex() {
+    return Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
+  }
+
+  async function sha256Hex(text) {
+    const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(hash), (b) => b.toString(16).padStart(2, "0")).join("");
   }
 
   async function signOut() {

@@ -450,7 +450,7 @@
     if (error) {
       console.warn(error);
       button.disabled = false;
-      button.textContent = "Delete my account";
+      button.textContent = "Delete";
       $("delete-dialog").close();
       W.toast("Couldn't delete your account just now. Nothing was deleted; try again in a moment.");
       return;

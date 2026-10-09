@@ -12,6 +12,8 @@
   const SUPABASE_JS = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js";
   const FRIEND_CODES_KEY = "woometer.friendCodes.v1";
   const LAST_USER_KEY = "woometer.lastUser.v1";
+  // The friend someone was adding when they left to sign in with Google.
+  const PENDING_FRIEND_KEY = "woometer.pendingFriend.v1";
 
   const $ = (id) => document.getElementById(id);
   const byId = Object.fromEntries(CLAIMS.map((c) => [c.id, c]));
@@ -79,6 +81,7 @@
 
     await handleInvite();
     await refreshFriends();
+    await finishPendingFriend();
   }
 
   function homeUrl() {
@@ -144,6 +147,10 @@
     });
 
     $("google-login").addEventListener("click", signInWithGoogle);
+    $("signin-google").addEventListener("click", () => {
+      savePendingFriend($("signin-prompt").dataset.code, $("signin-prompt").dataset.name);
+      signInWithGoogle();
+    });
     $("friends-open").addEventListener("click", () => {
       $("friends").showModal();
       refreshFriends();
@@ -259,6 +266,7 @@
     try {
       localStorage.removeItem(FRIEND_CODES_KEY);
       localStorage.removeItem(LAST_USER_KEY);
+      localStorage.removeItem(PENDING_FRIEND_KEY);
     } catch {}
     location.replace(homeUrl());
   }
@@ -328,7 +336,7 @@
     $("invite-compare").hidden = !theirs;
     $("invite-compare").onclick = () => openCompare({ code, display_name: name });
     const add = $("invite-add");
-    add.textContent = `Add ${name || "them"} as a friend`;
+    add.textContent = `Add ${name || "them"} as a Friend`;
     add.disabled = false;
     add.onclick = async () => {
       if (await addFriend(code, name)) {
@@ -341,9 +349,15 @@
   }
 
   // Adding is mutual: you appear in their list too, so either of you can compare.
+  // Friends belong to a Google account, so anyone not signed in is asked to
+  // sign in first, and the add finishes when they come back.
   async function addFriend(code, name) {
     if (code === profile.share_code) {
       W.toast("That's your own link.");
+      return false;
+    }
+    if (user.is_anonymous && cfg.googleSignIn) {
+      askToSignIn(code, name);
       return false;
     }
     const { data: friendId, error } = await db.rpc("add_friend", { code });
@@ -355,6 +369,32 @@
     W.toast(`${name || "Your friend"} is now in your friends.`);
     refreshFriends();
     return true;
+  }
+
+  function askToSignIn(code, name) {
+    const dlg = $("signin-prompt");
+    dlg.dataset.code = code;
+    dlg.dataset.name = name || "";
+    $("signin-title").textContent = `Sign in to add ${name || "your friend"}`;
+    dlg.showModal();
+  }
+
+  function savePendingFriend(code, name) {
+    try {
+      localStorage.setItem(PENDING_FRIEND_KEY, JSON.stringify({ code, name: name || null }));
+    } catch {}
+  }
+
+  // Back from Google: finish adding the friend they picked before signing in.
+  // Still anonymous means they backed out of signing in, so drop it.
+  async function finishPendingFriend() {
+    let pending = null;
+    try {
+      pending = JSON.parse(localStorage.getItem(PENDING_FRIEND_KEY));
+      localStorage.removeItem(PENDING_FRIEND_KEY);
+    } catch {}
+    if (!pending || !pending.code || user.is_anonymous) return;
+    if (await addFriend(pending.code, pending.name)) $("friends").showModal();
   }
 
   // Accepts a whole link (woometer.com/?f=CODE) or just the code.

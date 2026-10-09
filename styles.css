@@ -643,8 +643,8 @@ dialog a { color: var(--accent); }
 }
 
 @media (max-width: 1199px) {
-  .top-btn-label, .gsi-label { display: none; }
-  .top-btn, .gsi { width: 40px; padding: 0; justify-content: center; gap: 0; }
+  .top-btn-label, #google-login .gsi-label { display: none; }
+  .top-btn, #google-login { width: 40px; padding: 0; justify-content: center; gap: 0; }
   .top-btn { position: relative; }
   .top-btn .badge { position: absolute; top: -4px; right: -4px; }
 }
@@ -782,3 +782,8 @@ dialog a { color: var(--accent); }
 .compare-score { font-weight: 600; margin: 0 0 4px; }
 .their-pile { margin-top: 12px; }
 .their-pile summary { cursor: pointer; font-weight: 700; margin-bottom: 8px; }
+
+.signin-prompt { width: min(420px, calc(100vw - 32px)); }
+.signin-prompt h3 { margin: 0 0 8px; }
+.signin-prompt p { margin: 0; color: var(--muted); }
+.signin-prompt .detail-actions { align-items: center; }

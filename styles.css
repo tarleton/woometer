@@ -722,7 +722,6 @@ dialog a { color: var(--accent); }
   border: 1px solid var(--woo);
 }
 .invite p { margin: 0 0 8px; }
-.invite .name-row { max-width: 320px; margin-bottom: 8px; }
 #invite-text { color: var(--muted); font-size: 14px; }
 
 .invite-close {
@@ -792,7 +791,7 @@ dialog a { color: var(--accent); }
 .cat-icon { width: 22px; height: 22px; flex: none; display: block; }
 .friends h3 { display: flex; align-items: center; gap: 8px; }
 .friends h3 .cat-icon { width: 26px; height: 26px; }
-.invite-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.invite-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .add-friend-row { display: flex; gap: 8px; margin-top: 4px; }
 .add-friend-row input {
   flex: 1;

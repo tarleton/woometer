@@ -66,8 +66,8 @@ Supabase's free plan pauses a project after about a week with no activity. [`.gi
 ## Hosting on GitHub Pages
 
 1. In the repo, go to **Settings → Pages** and set the source to **Deploy from a branch**, branch `main`, folder `/ (root)`.
-2. The `CNAME` file already points Pages at `woometer.com`. At your domain registrar, add the DNS records GitHub lists in [Managing a custom domain](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site) (four `A` records for the apex, and a `CNAME` for `www` pointing at `tarleton.github.io`).
-   - **DreamHost:** in the panel, set woometer.com to **DNS only** hosting (so DreamHost stops serving its own page), then under **Websites → Manage Websites → DNS** add `A` records for `woometer.com` pointing to `185.199.108.153`, `185.199.109.153`, `185.199.110.153` and `185.199.111.153`, and a `CNAME` record for `www` pointing to `tarleton.github.io.`. Remove any old `A` records DreamHost created for the domain.
+2. The `CNAME` file already points Pages at `woometer.com`. At your domain registrar, add the DNS records GitHub lists in [Managing a custom domain](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site) (four `A` records for the apex, and a `CNAME` for `www` pointing at `<your-github-username>.github.io`).
+   - **DreamHost:** in the panel, set woometer.com to **DNS only** hosting (so DreamHost stops serving its own page), then under **Websites → Manage Websites → DNS** add `A` records for `woometer.com` pointing to `185.199.108.153`, `185.199.109.153`, `185.199.110.153` and `185.199.111.153`, and a `CNAME` record for `www` pointing to `<your-github-username>.github.io.`. Remove any old `A` records DreamHost created for the domain.
 3. Once DNS resolves, tick **Enforce HTTPS** on the Pages settings page.
 
 Any other static host (Netlify, Cloudflare Pages, S3) works too: upload the folder as is.

@@ -1261,10 +1261,10 @@ const CLAIMS = [
   },
   {
     id: "miracle-diet-pills",
-    name: "Miracle Diet Pills",
+    name: "Miracle Diet Supplements",
     category: "health",
-    question: "Do you believe supplements like raspberry ketones or green coffee bean extract can melt away fat?",
-    verdict: "No human trial shows raspberry ketones cause weight loss. The main green coffee study was retracted in 2014 after the FTC charged its marketer, and Dr. Oz was questioned by the US Senate that year over such claims.",
+    question: "Do you believe over-the-counter diet supplements, like raspberry ketones or green coffee extract, melt away fat without diet or exercise?",
+    verdict: "No human trial shows raspberry ketones cause weight loss, and the main green coffee study was retracted in 2014 after the FTC charged its marketer. Prescription GLP-1 drugs like Ozempic and Wegovy are different: they're real medicines with strong trial evidence.",
     link: "https://en.wikipedia.org/wiki/Raspberry_ketone",
   },
   {

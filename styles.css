@@ -270,7 +270,14 @@ button { font: inherit; cursor: pointer; }
 }
 .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-.progress { color: var(--muted); font-size: 14px; margin: 8px 0 16px; }
+.progress-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; margin: 8px 0 16px; }
+.progress { color: var(--muted); font-size: 14px; margin: 0; }
+/* Puts answered claims back on the board (after the unanswered ones), so
+   answers can be looked over and changed once the board is empty. */
+.show-answered { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); cursor: pointer; white-space: nowrap; }
+.show-answered[hidden] { display: none; }
+.show-answered input { margin: 0; width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+.show-answered:hover, .show-answered:has(input:checked) { color: var(--ink); }
 
 /* Grid of claim cards */
 

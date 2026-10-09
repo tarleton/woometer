@@ -1,5 +1,6 @@
 (function () {
   const STORAGE_KEY = "woometer.answers.v1";
+  const SHOW_ANSWERED_KEY = "woometer.showAnswered.v1";
 
   const $ = (id) => document.getElementById(id);
   const grid = $("grid");
@@ -16,6 +17,11 @@
   let answers = load();
   let activeCategory = "all";
   let query = "";
+  // "Show answered" puts answered claims back on the board, after the rest.
+  let showAnswered = false;
+  try {
+    showAnswered = localStorage.getItem(SHOW_ANSWERED_KEY) === "1";
+  } catch {}
   let detailId = null;
   let catStage = null;
 
@@ -185,11 +191,11 @@
   }
 
   function renderGrid() {
-    // Normally only unanswered claims are on the board; a search also finds
-    // answered ones, listed after the unanswered matches.
+    // Normally only unanswered claims are on the board; a search, or "Show
+    // answered", also brings back answered ones, listed after the rest.
     const open = CLAIMS.filter(
       (c) =>
-        (query || !answers[c.id]) &&
+        (query || showAnswered || !answers[c.id]) &&
         (activeCategory === "all" || c.category === activeCategory) &&
         (!query || `${c.name} ${c.question}`.toLowerCase().includes(query))
     ).sort((a, b) => !!answers[a.id] - !!answers[b.id]);
@@ -198,9 +204,12 @@
     const total = CLAIMS.length;
     const done = Object.keys(answers).length;
     $("progress").textContent = `${done} of ${total} answered`;
+    $("show-answered-label").hidden = done === 0;
+    $("show-answered").checked = showAnswered;
     $("done").hidden = open.length > 0;
-    $("done").querySelector("p").textContent =
-      done === total ? "That's every claim on the list." : query ? "No claims match your search." : "Nothing left in this category.";
+    $("done").querySelector("p").textContent = query
+      ? "No claims match your search."
+      : `${done === total ? "That's every claim on the list." : "Nothing left in this category."} Tick “Show answered” to look over your answers or change them.`;
   }
 
   // Each bin shows its newest few claims so the side panel never needs its own
@@ -526,6 +535,14 @@
     document.body.append(t);
     setTimeout(() => t.remove(), 2200);
   }
+
+  $("show-answered").addEventListener("change", (e) => {
+    showAnswered = e.target.checked;
+    try {
+      localStorage.setItem(SHOW_ANSWERED_KEY, showAnswered ? "1" : "0");
+    } catch {}
+    renderGrid();
+  });
 
   $("search").addEventListener("input", (e) => {
     query = e.target.value.trim().toLowerCase();

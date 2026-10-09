@@ -324,10 +324,6 @@
       }
     });
     $("my-name").addEventListener("change", (e) => setName(e.target.value));
-    $("invite-name").addEventListener("change", (e) => {
-      setName(e.target.value);
-      $("my-name").value = e.target.value;
-    });
     $("invite-close").addEventListener("click", () => ($("invite").hidden = true));
     W.shareUrl = friendLink;
     document.addEventListener("visibilitychange", () => {
@@ -587,7 +583,6 @@
         add.disabled = true;
       }
     };
-    $("invite-name-row").hidden = Boolean(profile.display_name);
     $("invite").hidden = false;
   }
 

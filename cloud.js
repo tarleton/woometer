@@ -320,7 +320,7 @@
     const answered = CLAIMS.filter((c) => theirs[c.id]);
     const woo = answered.filter((c) => theirs[c.id] === "yes").length;
     $("invite-title").textContent = answered.length
-      ? `${who} is ${pct(woo, answered.length)}% hoodwinked, with ${woo} of ${answered.length} claims in their Woo Pile.`
+      ? `${who} is ${pct(woo, answered.length)}% woo, rejecting ${100 - pct(woo, answered.length)}% of the ${answered.length} claims they've answered.`
       : `${who} shared their Woometer.`;
     $("invite-text").textContent =
       `You're now in each other's friend lists. Answer some claims yourself, then compare to see where you agree and differ.`;

@@ -41,15 +41,12 @@
     return { answered: ids.length, woo, trash: ids.length - woo, pct: ids.length ? Math.round((woo / ids.length) * 100) : 0 };
   }
 
+  // Lead with what people reject: most visitors turn down most of the list.
   function verdictFor(pct, answered) {
     if (answered === 0) return "Answer a few to get a reading";
-    if (pct === 0) return "Skeptic of the year";
-    if (pct <= 10) return "Hard to fool";
-    if (pct <= 25) return "A little woo-curious";
-    if (pct <= 50) return "Partly hoodwinked";
-    if (pct <= 75) return "Deep in the woo";
-    if (pct < 100) return "Thoroughly hoodwinked";
-    return "Maximum woo";
+    if (pct === 0) return "You reject all of it";
+    if (pct === 100) return "You believe all of it";
+    return `You reject ${100 - pct}% of it`;
   }
 
   // Rendering
@@ -206,7 +203,7 @@
     renderCat(Cat.stageFor(s.pct));
   }
 
-  // The cat gets one step scruffier for every 5% hoodwinked.
+  // The cat gets one step scruffier for every 5% of woo.
   function renderCat(stage) {
     if (stage === catStage) return;
     const art = $("cat-art");
@@ -327,7 +324,7 @@
     const personal = window.Woometer.shareUrl && window.Woometer.shareUrl();
     const link = personal || location.origin + location.pathname;
     const text = s.answered
-      ? `I'm ${s.pct}% hoodwinked on the Woometer (${s.woo} of ${s.answered} claims in my Woo Pile). ${personal ? "See my results and compare with yours:" : "How much woo do you believe?"} ${link}`
+      ? `I'm ${s.pct}% woo on the Woometer: I reject ${100 - s.pct}% of the ${s.answered} claims I've answered. ${personal ? "See my results and compare with yours:" : "How much woo do you believe?"} ${link}`
       : `How much woo do you believe? ${link}`;
     try {
       await navigator.clipboard.writeText(text);

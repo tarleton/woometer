@@ -232,18 +232,22 @@ button { font: inherit; cursor: pointer; }
 }
 .search-close:hover { color: var(--ink); background: var(--bg); }
 
-/* One row of category chips that scrolls sideways instead of wrapping. */
+/* Category chips wrap onto at most two rows; app.js switches to one row that
+   scrolls sideways when two rows aren't enough. */
 .filters {
   display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px;
   margin: 0 0 8px;
+}
+.filters.one-row {
+  flex-wrap: nowrap;
   padding-bottom: 6px;
   overflow-x: auto;
   scrollbar-width: thin;
   -webkit-overflow-scrolling: touch;
 }
-.filters .chip { flex: none; white-space: nowrap; }
+.filters .chip { flex: none; white-space: nowrap; padding: 5px 11px; font-size: 13.5px; }
 
 .chip {
   border: 1px solid var(--line);

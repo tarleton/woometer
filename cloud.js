@@ -281,7 +281,7 @@
     } catch {}
   }
 
-  // A friend link is woometer.com/?f=CODE ("Copy my score" uses it too). It shows
+  // A friend link is woometer.com/?f=CODE (the Share button uses it too). It shows
   // the sharer's result, and opening one adds each of you to the
   // other's friend list. Links opened in this browser are remembered, so they
   // can be re-added when this browser switches to a different (existing) account.

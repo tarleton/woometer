@@ -84,8 +84,22 @@
     cat.className = "card-cat";
     cat.textContent = `${CATEGORIES[claim.category].icon} ${CATEGORIES[claim.category].label}`;
 
+    // The title opens the evidence and everyone's answers, without answering.
     const h = document.createElement("h3");
-    h.textContent = claim.name;
+    const info = document.createElement("button");
+    info.type = "button";
+    info.className = "card-info";
+    info.setAttribute("aria-label", `${claim.name}: what's the evidence?`);
+    const title = document.createElement("span");
+    title.textContent = claim.name;
+    const why = document.createElement("span");
+    why.className = "card-why";
+    why.setAttribute("aria-hidden", "true");
+    why.textContent = "ⓘ";
+    info.append(title, why);
+    info.addEventListener("click", () => openDetail(claim.id));
+    cat.addEventListener("click", () => openDetail(claim.id));
+    h.append(info);
 
     const q = document.createElement("p");
     q.className = "q";
@@ -255,6 +269,7 @@
     $("detail-q").textContent = c.question;
     $("detail-verdict").textContent = c.verdict;
     $("detail-link").href = c.link;
+    $("detail-undo").hidden = !answers[id];
     detail.showModal();
     emit("detail", { id });
   }

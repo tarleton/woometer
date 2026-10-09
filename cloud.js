@@ -132,16 +132,15 @@
       el.textContent = "Counting everyone's answers…";
       const s = await statsFor(id);
       const mine = W.getAnswers()[id];
-      if (!s || !mine) {
+      if (!s) {
         el.hidden = true;
         return;
       }
       const total = s.yes + s.no;
-      const same = mine === "yes" ? s.yes : s.no;
-      el.textContent =
-        total <= 1
-          ? "You're the only one who has answered this so far."
-          : `${pct(s.yes, total)}% of ${total.toLocaleString()} people said Yes and ${pct(s.no, total)}% said No. ${pct(same, total)}% agree with you.`;
+      const split = `${pct(s.yes, total)}% of ${total.toLocaleString()} ${total === 1 ? "person" : "people"} said Yes and ${pct(s.no, total)}% said No.`;
+      if (!mine) el.textContent = total ? split : "Nobody has answered this one yet.";
+      else if (total <= 1) el.textContent = "You're the only one who has answered this so far.";
+      else el.textContent = `${split} ${pct(mine === "yes" ? s.yes : s.no, total)}% agree with you.`;
     });
 
     $("google-login").addEventListener("click", signInWithGoogle);

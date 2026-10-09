@@ -1994,6 +1994,56 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/Murder_of_Tupac_Shakur",
   },
 
+  // Satanic Panic
+  {
+    id: "dnd-satanic",
+    name: "D&D Is Satanic",
+    category: "conspiracy",
+    question: "Does playing Dungeons & Dragons lead players into Satanism, the occult or suicide?",
+    verdict: "Patricia Pulling founded the group BADD in 1982, blaming the game for her son's suicide. Studies found no link between role-playing games and suicide or the occult, and D&D is now a mainstream family hobby.",
+    link: "https://en.wikipedia.org/wiki/Dungeons_%26_Dragons_controversies",
+  },
+  {
+    id: "harry-potter-witchcraft",
+    name: "Harry Potter Teaches Witchcraft",
+    category: "conspiracy",
+    question: "Do the Harry Potter books draw children into real witchcraft or the occult?",
+    verdict: "The series topped the American Library Association's most-challenged books list for 2000 to 2009. A viral 2000 story that the books were causing a rise in Satanism among children came from The Onion, a satire site.",
+    link: "https://en.wikipedia.org/wiki/Religious_debates_over_the_Harry_Potter_series",
+  },
+  {
+    id: "heavy-metal-satanism",
+    name: "Heavy Metal Devil Worship",
+    category: "conspiracy",
+    question: "Does listening to heavy metal turn people into devil worshippers or drive them to violence?",
+    verdict: "Lawsuits blaming Ozzy Osbourne's 'Suicide Solution' for a teen's death were dismissed in the 1980s. Research finds no evidence the music causes Satanism or violence, and some studies suggest it helps fans work through anger.",
+    link: "https://en.wikipedia.org/wiki/Parents_Music_Resource_Center",
+  },
+  {
+    id: "pokemon-demonic",
+    name: "Pokémon Is Demonic",
+    category: "conspiracy",
+    question: "Is Pokémon secretly demonic or a gateway to the occult?",
+    verdict: "Some churches denounced the cards as occult around 1999. Pokémon grew out of creator Satoshi Tajiri's childhood hobby of collecting insects, and there is no evidence it has led anyone into the occult.",
+    link: "https://en.wikipedia.org/wiki/Pok%C3%A9mon",
+  },
+  {
+    id: "procter-gamble-satanic",
+    name: "Procter & Gamble's Satanic Logo",
+    category: "conspiracy",
+    question: "Is Procter & Gamble's old moon-and-stars logo a satanic symbol showing the company supports Satanism?",
+    verdict: "The rumor spread for decades, much of it through Amway distributors. In 2007 a US jury awarded P&G $19.25 million against distributors who spread it. The logo dates to the 1800s as a simple trademark.",
+    link: "https://en.wikipedia.org/wiki/Procter_%26_Gamble",
+  },
+  {
+    id: "violent-video-games",
+    name: "Video Games Cause Violence",
+    category: "popsych",
+    question: "Do violent video games make players violent in real life?",
+    verdict: "Youth violence in the US fell sharply as gaming boomed. In 2011 the US Supreme Court struck down a California sales ban, finding the research did not show games cause harm, and the APA says evidence doesn't link them to violent crime.",
+    link: "https://en.wikipedia.org/wiki/Video_games_and_violence",
+  },
+
   // Fringe Science (added)
   {
     id: "free-energy",

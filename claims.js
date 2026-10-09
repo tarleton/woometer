@@ -1958,8 +1958,8 @@ const CLAIMS = [
     id: "water-car",
     name: "Water-Powered Car",
     category: "fringe",
-    question: "Do you believe a car can run on water as its fuel, as Stanley Meyer claimed?",
-    verdict: "Splitting water into hydrogen takes more energy than burning that hydrogen gives back. In 1996 an Ohio court found Meyer had committed 'gross and egregious fraud' and ordered him to repay investors.",
+    question: "Do you believe a car can run on plain water as its only energy source, as Stanley Meyer claimed?",
+    verdict: "Water is already 'burned' hydrogen: splitting it takes more energy than burning the hydrogen gives back. Real hydrogen cars get that energy from elsewhere. In 1996 an Ohio court found Meyer had committed 'gross and egregious fraud'.",
     link: "https://en.wikipedia.org/wiki/Water_fuel_cell",
   },
   {

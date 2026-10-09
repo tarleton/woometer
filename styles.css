@@ -56,16 +56,38 @@ button { font: inherit; cursor: pointer; }
   z-index: 10;
 }
 
+/* Logo: lowercase "woometer", with "woo" in alien green and the o's as alien eyes */
 .brand h1 {
   margin: 0;
   line-height: 1.1;
-  font-size: clamp(28px, 5vw, 40px);
-  letter-spacing: -0.02em;
-  background: linear-gradient(90deg, var(--accent), var(--woo));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  font-size: clamp(30px, 5vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  --alien: #16a34a;
+  --alien-glow: rgb(74 222 128 / 45%);
 }
+.logo-woo {
+  color: var(--alien);
+  text-shadow: 0 0 14px var(--alien-glow);
+}
+.logo-meter { color: var(--ink); }
+.logo .eye {
+  display: inline-block;
+  width: 0.6em;
+  height: 0.6em;
+  margin: 0 0.02em;
+  vertical-align: -0.04em;
+  overflow: visible;
+  filter: drop-shadow(0 0 4px var(--alien-glow));
+}
+.logo .eye path { fill: #0b0b12; stroke: var(--alien); stroke-width: 2.4; stroke-linejoin: round; }
+.logo .eye .glint { fill: #fff; opacity: 0.85; }
+/* Mirror the right eye so both slant up and outward, like the alien favicon. */
+.logo .eye-l { transform: scaleX(-1); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .brand h1 { --alien: #4ade80; --alien-glow: rgb(74 222 128 / 60%); }
+}
+:root[data-theme="dark"] .brand h1 { --alien: #4ade80; --alien-glow: rgb(74 222 128 / 60%); }
 
 .tagline { margin: 2px 0 0; color: var(--muted); font-size: 15px; line-height: 1.35; }
 

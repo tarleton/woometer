@@ -14,6 +14,7 @@
   let answers = load();
   let activeCategory = "all";
   let detailId = null;
+  let catStage = null;
 
   function load() {
     try {
@@ -149,6 +150,24 @@
     $("mini-pct").textContent = `${s.pct}%`;
     // -90deg is all the way left (0%), +90deg all the way right (100%).
     $("needle").style.transform = `rotate(${-90 + s.pct * 1.8}deg)`;
+    renderCat(Cat.stageFor(s.pct));
+  }
+
+  // The cat gets one step scruffier for every 5% hoodwinked.
+  function renderCat(stage) {
+    if (stage === catStage) return;
+    const art = $("cat-art");
+    const first = catStage === null;
+    catStage = stage;
+    art.innerHTML = Cat.svg(stage);
+    $("mini-cat").innerHTML = Cat.svg(stage);
+    $("cat-name").textContent = Cat.name(stage);
+    $("cat").title = `${stage * 5}%: ${Cat.name(stage)}`;
+    if (!first) {
+      art.classList.remove("cat-pop");
+      void art.offsetWidth; // restart the animation
+      art.classList.add("cat-pop");
+    }
   }
 
   function renderAll() {

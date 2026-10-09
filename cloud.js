@@ -14,6 +14,7 @@
   const LAST_USER_KEY = "woometer.lastUser.v1";
   // The friend someone was adding when they left to sign in with Google.
   const PENDING_FRIEND_KEY = "woometer.pendingFriend.v1";
+  const TURNSTILE_JS = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
   const GOOGLE_AUTH = "https://accounts.google.com/o/oauth2/v2/auth";
   // Per-tab check values for a trip to Google's sign-in page and back.
   const GOOGLE_TRIP_KEY = "woometer.googleTrip.v1";
@@ -65,7 +66,7 @@
       ({ data } = await db.auth.getSession());
     }
     if (!data.session) {
-      const res = await db.auth.signInAnonymously();
+      const res = await db.auth.signInAnonymously({ options: await captcha() });
       if (res.error) throw res.error;
       data = res.data;
     }
@@ -96,6 +97,47 @@
     await handleInvite();
     await refreshFriends();
     await finishPendingFriend();
+  }
+
+  // Spam check (Cloudflare Turnstile). Supabase asks for a fresh token on
+  // every new sign-in once CAPTCHA protection is on in its Auth settings.
+  // With no turnstileSiteKey in config.js this returns {} and nothing changes.
+  // Most visitors never see it; Cloudflare only shows a checkbox when unsure.
+  let turnstileLoad = null;
+  async function captcha() {
+    if (!cfg.turnstileSiteKey) return {};
+    try {
+      turnstileLoad = turnstileLoad || loadScript(TURNSTILE_JS);
+      await turnstileLoad;
+      return { captchaToken: await turnstileToken() };
+    } catch (err) {
+      // Sign in without a token: works while CAPTCHA is off in Supabase.
+      console.warn("Woometer: spam check didn't load.", err);
+      return {};
+    }
+  }
+
+  function turnstileToken() {
+    return new Promise((resolve, reject) => {
+      let box = $("captcha");
+      if (box) box.remove();
+      box = document.createElement("div");
+      box.id = "captcha";
+      box.className = "captcha";
+      document.body.append(box);
+      const done = (fn, value) => {
+        clearTimeout(timer);
+        box.remove();
+        fn(value);
+      };
+      const timer = setTimeout(() => done(reject, new Error("Spam check timed out")), 120000);
+      window.turnstile.render(box, {
+        sitekey: cfg.turnstileSiteKey,
+        appearance: "interaction-only",
+        callback: (token) => done(resolve, token),
+        "error-callback": (code) => done(reject, new Error(`Spam check failed (${code})`)),
+      });
+    });
   }
 
   function homeUrl() {
@@ -318,11 +360,11 @@
   async function useGoogleToken({ token, nonce }, session) {
     const creds = { provider: "google", token, nonce };
     if (session && session.user.is_anonymous) {
-      const { error } = await db.auth.linkIdentity(creds);
+      const { error } = await db.auth.linkIdentity({ ...creds, options: await captcha() });
       if (!error) return null;
       console.warn("Woometer: linking Google failed, signing in instead.", error);
     }
-    const { error } = await db.auth.signInWithIdToken(creds);
+    const { error } = await db.auth.signInWithIdToken({ ...creds, options: await captcha() });
     if (error) console.warn(error);
     return error || null;
   }

@@ -485,7 +485,12 @@ dialog h3 { margin: 4px 0 8px; font-size: 22px; }
 dialog a { color: var(--accent); }
 .detail-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
 
+/* Cloudflare's spam check; empty unless it needs a click. */
+.captcha { position: fixed; right: 16px; bottom: 16px; z-index: 30; }
+@media (max-width: 860px) { .captcha { bottom: calc(76px + env(safe-area-inset-bottom)); } }
+
 .foot { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 16px 40px; }
+.foot-link { color: inherit; }
 .quote { max-width: 520px; margin: 0 auto 20px; }
 .quote p { margin: 0; font-size: 15px; font-style: italic; color: var(--ink); }
 .quote cite { display: block; margin-top: 4px; font-style: normal; }

@@ -53,14 +53,15 @@
 
   function renderFilters() {
     const options = [["all", "All"]].concat(
-      Object.entries(CATEGORIES).map(([key, c]) => [key, `${c.icon} ${c.label}`])
+      Object.entries(CATEGORIES).map(([key, c]) => [key, `${c.icon} ${c.short || c.label}`, c.label])
     );
     filters.replaceChildren(
-      ...options.map(([key, label]) => {
+      ...options.map(([key, label, full]) => {
         const b = document.createElement("button");
         b.type = "button";
         b.className = "chip";
         b.textContent = label;
+        if (full) b.title = full;
         b.setAttribute("aria-pressed", String(key === activeCategory));
         b.addEventListener("click", () => {
           activeCategory = key;
@@ -70,7 +71,19 @@
         return b;
       })
     );
+    fitFilters();
   }
+
+  // Let the chips wrap onto at most two rows; if they'd need more (narrow
+  // screens), keep them on one row that scrolls sideways instead.
+  function fitFilters() {
+    filters.classList.remove("one-row");
+    const chips = filters.children;
+    if (!chips.length) return;
+    const rows = new Set([...chips].map((c) => c.offsetTop)).size;
+    if (rows > 2) filters.classList.add("one-row");
+  }
+  window.addEventListener("resize", fitFilters);
 
   function makeCard(claim) {
     const card = document.createElement("article");

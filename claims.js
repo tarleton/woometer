@@ -9,19 +9,20 @@
 //   verdict:  one or two sentences on what the evidence says
 //   link:     where to read more
 
+// `short` is the label on the filter buttons, when the full one is long.
 const CATEGORIES = {
-  divination: { label: "Divination & Psychics", icon: "🔮" },
-  medicine: { label: "Alternative Medicine", icon: "💊" },
+  divination: { label: "Divination & Psychics", short: "Psychics", icon: "🔮" },
+  medicine: { label: "Alternative Medicine", short: "Alt Medicine", icon: "💊" },
   health: { label: "Health Myths", icon: "🩺" },
-  newage: { label: "New Age & Energy", icon: "✨" },
-  paranormal: { label: "Paranormal & Aliens", icon: "👽" },
+  newage: { label: "New Age & Energy", short: "New Age", icon: "✨" },
+  paranormal: { label: "Paranormal & Aliens", short: "Paranormal", icon: "👽" },
   conspiracy: { label: "Conspiracies", icon: "🛸" },
   fringe: { label: "Fringe Science", icon: "🧪" },
-  popsych: { label: "Pop Psychology", icon: "🧠" },
+  popsych: { label: "Pop Psychology", short: "Pop Psych", icon: "🧠" },
   christianity: { label: "Christianity", icon: "✝️" },
   worldreligion: { label: "World Religions", icon: "🕉️" },
-  newreligion: { label: "New Religions & Cults", icon: "🛐" },
-  magic: { label: "Witchcraft & Superstition", icon: "🧙" },
+  newreligion: { label: "New Religions & Cults", short: "Cults", icon: "🛐" },
+  magic: { label: "Witchcraft & Superstition", short: "Superstition", icon: "🧙" },
 };
 
 const CLAIMS = [

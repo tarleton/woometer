@@ -157,26 +157,81 @@ button { font: inherit; cursor: pointer; }
 }
 
 @media (max-width: 860px) {
-  .layout { grid-template-columns: 1fr; }
+  .layout { grid-template-columns: minmax(0, 1fr); }
   .top { position: relative; }
 }
 
-/* Search and filters */
+/* Search (behind the 🔍 next to the logo) and filters */
 
-.search {
-  width: 100%;
-  max-width: 420px;
-  margin-bottom: 12px;
-  padding: 9px 14px;
-  font: inherit;
+.brand { position: relative; }
+.brand-row { display: flex; align-items: center; gap: 10px; }
+.search-toggle {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
   color: var(--ink);
+}
+@media (max-width: 860px) { .search-toggle { width: 32px; height: 32px; } }
+.search-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+.search-toggle:hover, .search-toggle[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+.search-toggle:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Opens over the tagline, so the header never gets taller. */
+.search-pop {
+  position: absolute;
+  left: 0;
+  top: calc(100% - 22px);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: min(380px, calc(100vw - 32px));
+  padding: 6px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 999px;
+  box-shadow: var(--shadow);
 }
-.search:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.search {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 12px;
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+}
+.search:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
+.search::-webkit-search-cancel-button { display: none; }
+.search-close {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+}
+.search-close:hover { color: var(--ink); background: var(--bg); }
 
-.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+/* One row of category chips that scrolls sideways instead of wrapping. */
+.filters {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding-bottom: 6px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+.filters .chip { flex: none; white-space: nowrap; }
 
 .chip {
   border: 1px solid var(--line);

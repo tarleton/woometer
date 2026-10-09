@@ -371,6 +371,43 @@
     renderGrid();
   });
 
+  // Search lives behind the 🔍 next to the logo so it doesn't take up a row.
+  const searchPop = $("search-pop");
+  const searchToggle = $("search-toggle");
+  function openSearch() {
+    searchPop.hidden = false;
+    searchToggle.setAttribute("aria-expanded", "true");
+    $("search").focus();
+  }
+  function closeSearch() {
+    searchPop.hidden = true;
+    searchToggle.setAttribute("aria-expanded", "false");
+    if (query) {
+      $("search").value = "";
+      query = "";
+      renderGrid();
+    }
+  }
+  searchToggle.addEventListener("click", () => (searchPop.hidden ? openSearch() : closeSearch()));
+  $("search-close").addEventListener("click", () => {
+    closeSearch();
+    searchToggle.focus();
+  });
+  $("search").addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeSearch();
+      searchToggle.focus();
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    const typing = e.target.closest && e.target.closest("input, textarea, [contenteditable]");
+    if (e.key === "/" && !typing && !document.querySelector("dialog[open]")) {
+      e.preventDefault();
+      openSearch();
+    }
+  });
+
   // Hooks for cloud.js (accounts, stats and friends). Events fire on document
   // as "woometer:answer", "woometer:remove", "woometer:reset" and "woometer:detail".
   function emit(name, detail) {

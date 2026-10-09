@@ -74,9 +74,17 @@ drop policy if exists "remove own friends" on public.friends;
 create policy "remove own friends" on public.friends
   for delete to authenticated using (user_id = auth.uid());
 
+-- Table access for signed-in users (anonymous visitors count as signed in).
+-- Granted explicitly so this works whether or not Supabase auto-exposes new
+-- tables; the policies above still limit every user to their own rows.
 -- Profiles are created and renamed only through the functions below.
-revoke insert, update, delete on public.profiles from anon, authenticated;
-revoke insert, update on public.friends from anon, authenticated;
+grant usage on schema public to anon, authenticated;
+revoke all on public.profiles, public.answers, public.friends from anon;
+revoke insert, update, delete on public.profiles from authenticated;
+revoke insert, update on public.friends from authenticated;
+grant select on public.profiles to authenticated;
+grant select, insert, update, delete on public.answers to authenticated;
+grant select, delete on public.friends to authenticated;
 
 -- Functions
 

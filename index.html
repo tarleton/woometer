@@ -16,6 +16,10 @@
     </div>
 
     <div class="meter" aria-live="polite">
+      <figure class="cat" id="cat">
+        <div class="cat-art" id="cat-art"></div>
+        <figcaption id="cat-name"></figcaption>
+      </figure>
       <svg viewBox="0 0 200 116" class="gauge" aria-hidden="true">
         <defs>
           <linearGradient id="arc" x1="0" x2="1" y1="0" y2="0">
@@ -84,7 +88,7 @@
 
   <nav class="minibar" aria-label="Your piles">
     <a href="#trash-bin" id="mini-trash" class="mini trash">🗑️ Trash <b id="mini-trash-count">0</b></a>
-    <span class="mini-pct" id="mini-pct">0%</span>
+    <span class="mini-pct"><span class="mini-cat" id="mini-cat"></span><span id="mini-pct">0%</span></span>
     <a href="#woo-bin" id="mini-woo" class="mini woo">🔮 Woo <b id="mini-woo-count">0</b></a>
   </nav>
 
@@ -94,6 +98,7 @@
 
   <script src="claims.js"></script>
   <script src="sounds.js"></script>
+  <script src="cat.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

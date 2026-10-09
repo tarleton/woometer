@@ -2,7 +2,7 @@
 
 A place to measure your woo. Live at [woometer.com](https://woometer.com).
 
-The page is a grid of well-known pseudoscience, paranormal, conspiracy and religious claims. Click **Yes** if you believe it or **No** if you don't, and the card flies into your **Woo Pile** or your **Trash Bin**. The meter at the top shows what percentage of your answers were Yes: how hoodwinked you are. Tap anything in a pile to read what the evidence says, or to put it back on the board.
+The page is a grid of well-known pseudoscience, paranormal, conspiracy and religious claims. Click **Yes** if you believe it or **No** if you don't, and the card flies into your **Woo Pile** or your **Trash Bin**. The meter at the top shows what percentage of your answers were Yes: how hoodwinked you are. Next to the meter is a cartoon cat that gets one step scruffier for every 5% (21 stages, drawn as inline SVG in [`cat.js`](cat.js)): a professor in glasses and a tie at 0%, a tinfoil-hatted furball at 100%. Tap anything in a pile to read what the evidence says, or to put it back on the board.
 
 Answers are saved in the visitor's own browser (`localStorage`). There is no backend, no account and no tracking.
 

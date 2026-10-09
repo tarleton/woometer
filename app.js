@@ -431,17 +431,19 @@
     renderGrid();
   });
 
-  // Search lives behind the 🔍 next to the logo so it doesn't take up a row.
+  // Search lives behind the 🔍 at the start of the filter row and opens inline.
   const searchPop = $("search-pop");
   const searchToggle = $("search-toggle");
   function openSearch() {
     searchPop.hidden = false;
     searchToggle.setAttribute("aria-expanded", "true");
+    fitFilters();
     $("search").focus();
   }
   function closeSearch() {
     searchPop.hidden = true;
     searchToggle.setAttribute("aria-expanded", "false");
+    fitFilters();
     if (query) {
       $("search").value = "";
       query = "";

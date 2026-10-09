@@ -89,7 +89,10 @@ button { font: inherit; cursor: pointer; }
 }
 :root[data-theme="dark"] .brand h1 { --alien: #4ade80; --alien-glow: rgb(74 222 128 / 60%); }
 
-.tagline { margin: 2px 0 0; color: var(--muted); font-size: 15px; line-height: 1.35; }
+/* Tagline sits beside the logo, lined up with its baseline, and drops under
+   it only when there isn't room. */
+.brand-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 16px; }
+.tagline { flex: 1 1 260px; min-width: 0; margin: 0; color: var(--muted); font-size: 15px; line-height: 1.35; }
 
 /* Meter panel: cat, gauge and score, at the top of the side column */
 .meter {
@@ -178,14 +181,20 @@ button { font: inherit; cursor: pointer; }
   .top { position: relative; }
 }
 
-/* Search (behind the 🔍 next to the logo) and filters */
+/* Search (behind the 🔍 at the start of the filter row) and filters */
 
-.brand { position: relative; }
-.brand-row { display: flex; align-items: center; gap: 10px; }
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+.filter-bar .filters { flex: 1 1 0; min-width: 0; margin: 0; }
 .search-toggle {
   flex: none;
-  width: 36px;
-  height: 36px;
+  width: 31px;
+  height: 31px;
   display: inline-grid;
   place-items: center;
   border-radius: 50%;
@@ -193,47 +202,49 @@ button { font: inherit; cursor: pointer; }
   background: var(--surface);
   color: var(--ink);
 }
-@media (max-width: 860px) { .search-toggle { width: 32px; height: 32px; } }
-.search-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+.search-toggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
 .search-toggle:hover, .search-toggle[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
 .search-toggle:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
-/* Opens over the tagline, so the header never gets taller. */
+/* Opens inline between the 🔍 and the chips. */
 .search-pop {
-  position: absolute;
-  left: 0;
-  top: calc(100% - 22px);
-  z-index: 30;
+  flex: 0 1 280px;
+  min-width: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
-  width: min(380px, calc(100vw - 32px));
-  padding: 6px;
+  gap: 2px;
+  height: 31px;
+  padding: 0 2px 0 4px;
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 1px solid var(--accent);
   border-radius: 999px;
-  box-shadow: var(--shadow);
+}
+/* On phones the search box gets its own line under the 🔍 and chips. */
+@media (max-width: 600px) {
+  .search-pop { order: 3; flex-basis: 100%; }
 }
 .search {
   flex: 1;
   min-width: 0;
-  padding: 7px 12px;
+  padding: 4px 8px;
   font: inherit;
+  font-size: 14px;
   color: var(--ink);
   background: transparent;
   border: 0;
   border-radius: 999px;
 }
-.search:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
+.search:focus-visible { outline: none; }
 .search::-webkit-search-cancel-button { display: none; }
 .search-close {
   flex: none;
-  width: 32px;
-  height: 32px;
+  width: 25px;
+  height: 25px;
   border: 0;
   border-radius: 50%;
   background: transparent;
   color: var(--muted);
+  font-size: 13px;
 }
 .search-close:hover { color: var(--ink); background: var(--bg); }
 
@@ -619,7 +630,7 @@ dialog a { color: var(--accent); }
 
 @media (max-width: 860px) {
   /* Clear the corner buttons, which sit level with the title. */
-  .tagline { margin-top: 8px; }
+  .tagline { flex-basis: 100%; margin-top: 4px; font-size: 14px; }
 }
 
 @media (max-width: 1199px) {

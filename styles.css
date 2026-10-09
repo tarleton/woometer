@@ -428,9 +428,9 @@ dialog a { color: var(--accent); }
   margin: 12px 0;
 }
 .seg { flex: 0 0 0; transition: flex-basis 0.5s; }
-.agree { background: var(--trash); }
-.differ { background: var(--woo); }
-.none { background: var(--line); }
+.seg.agree, .dot.agree { background: var(--trash); }
+.seg.differ, .dot.differ { background: var(--woo); }
+.seg.none { background: var(--line); }
 .compare-key { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0; }
 .compare-key div { display: flex; flex-direction: column; }
 .compare-key dt { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }

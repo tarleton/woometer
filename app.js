@@ -117,27 +117,42 @@
 
     const row = document.createElement("div");
     row.className = "answer";
+    const given = answers[claim.id];
     for (const [value, label, cls] of [["yes", "Yes", "yes"], ["no", "No", "no"]]) {
       const b = document.createElement("button");
       b.type = "button";
       b.className = cls;
       b.textContent = label;
       b.setAttribute("aria-label", `${label}: ${claim.name}`);
+      if (given) b.setAttribute("aria-pressed", String(given === value));
       b.addEventListener("click", () => answer(claim.id, value, card));
       row.append(b);
     }
 
-    card.append(cat, h, q, row);
+    // Search also shows claims you've already answered, labelled with their pile.
+    // Tapping the other button moves the claim to the other pile.
+    const parts = [cat, h, q, row];
+    if (given) {
+      card.classList.add("answered", given === "yes" ? "in-woo" : "in-trash");
+      const pile = document.createElement("p");
+      pile.className = "card-pile";
+      pile.textContent = given === "yes" ? "🔮 In your Woo Pile" : "🗑️ In your Trash Bin";
+      parts.splice(3, 0, pile);
+    }
+
+    card.append(...parts);
     return card;
   }
 
   function renderGrid() {
+    // Normally only unanswered claims are on the board; a search also finds
+    // answered ones, listed after the unanswered matches.
     const open = CLAIMS.filter(
       (c) =>
-        !answers[c.id] &&
+        (query || !answers[c.id]) &&
         (activeCategory === "all" || c.category === activeCategory) &&
         (!query || `${c.name} ${c.question}`.toLowerCase().includes(query))
-    );
+    ).sort((a, b) => !!answers[a.id] - !!answers[b.id]);
     grid.replaceChildren(...open.map(makeCard));
 
     const total = CLAIMS.length;
@@ -145,7 +160,7 @@
     $("progress").textContent = `${done} of ${total} answered`;
     $("done").hidden = open.length > 0;
     $("done").querySelector("p").textContent =
-      done === total ? "That's every claim on the list." : query ? "No unanswered claims match your search." : "Nothing left in this category.";
+      done === total ? "That's every claim on the list." : query ? "No claims match your search." : "Nothing left in this category.";
   }
 
   // Each bin shows its newest few claims so the side panel never needs its own
@@ -289,6 +304,9 @@
   // Answering
 
   function answer(id, value, card) {
+    if (answers[id] === value) return;
+    // A changed answer counts as the newest one in its new pile.
+    delete answers[id];
     answers[id] = value;
     save();
     emit("answer", { id, value });

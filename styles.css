@@ -113,7 +113,20 @@ button { font: inherit; cursor: pointer; }
   .top { position: relative; }
 }
 
-/* Filters */
+/* Search and filters */
+
+.search {
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: 12px;
+  padding: 9px 14px;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.search:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
 
 .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
 

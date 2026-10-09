@@ -11,10 +11,15 @@
 const CATEGORIES = {
   divination: { label: "Divination & Psychics", icon: "🔮" },
   medicine: { label: "Alternative Medicine", icon: "💊" },
+  health: { label: "Health Myths", icon: "🩺" },
   newage: { label: "New Age & Energy", icon: "✨" },
   paranormal: { label: "Paranormal & Aliens", icon: "👽" },
   conspiracy: { label: "Conspiracies", icon: "🛸" },
-  religion: { label: "Religion", icon: "⛪" },
+  fringe: { label: "Fringe Science", icon: "🧪" },
+  popsych: { label: "Pop Psychology", icon: "🧠" },
+  christianity: { label: "Christianity", icon: "✝️" },
+  worldreligion: { label: "World Religions", icon: "🕉️" },
+  newreligion: { label: "New Religions & Cults", icon: "🛐" },
 };
 
 const CLAIMS = [
@@ -217,9 +222,9 @@ const CLAIMS = [
   },
   {
     id: "law-of-attraction",
-    name: "Law of Attraction",
+    name: "Manifesting",
     category: "newage",
-    question: "Can you get what you want just by thinking positively about it?",
+    question: "Can you manifest money, love or success just by visualizing it and believing it's on its way (the 'Law of Attraction')?",
     verdict: "Thoughts don't emit attracting 'vibrations'. Research suggests fantasizing about success can actually make people less likely to achieve it.",
     link: "https://en.wikipedia.org/wiki/Law_of_attraction_(New_Thought)",
   },
@@ -233,10 +238,10 @@ const CLAIMS = [
   },
   {
     id: "orgone",
-    name: "Orgone & Energy Devices",
+    name: "Energy Healing Gadgets",
     category: "newage",
-    question: "Can pyramids, orgonite or 'energy' gadgets block bad energy or recharge you?",
-    verdict: "These 'energies' have never been detected by any instrument. The devices are resin, metal shavings and marketing.",
+    question: "Can EMF-blocking stickers, 'quantum' pendants or orgonite pyramids protect you from radiation or recharge your energy?",
+    verdict: "Tests of 'quantum' pendants found some were radioactive themselves, and phone stickers block nothing. Orgone 'energy', the idea behind orgonite, has never been detected by any instrument.",
     link: "https://en.wikipedia.org/wiki/Orgone",
   },
 
@@ -340,11 +345,11 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/Reptilian_conspiracy_theory",
   },
 
-  // Religion
+  // Christianity and new religions
   {
     id: "mormonism",
     name: "Mormonism",
-    category: "religion",
+    category: "christianity",
     question: "Did Joseph Smith translate golden plates, left by ancient American civilizations, through a seer stone in a hat?",
     verdict: "No plates were ever produced for inspection. Archaeology and DNA studies find no trace of the Book of Mormon's Israelite civilizations in the Americas.",
     link: "https://en.wikipedia.org/wiki/Archaeology_and_the_Book_of_Mormon",
@@ -352,7 +357,7 @@ const CLAIMS = [
   {
     id: "scientology",
     name: "Scientology",
-    category: "religion",
+    category: "newreligion",
     question: "Are we haunted by the spirits of aliens killed by the galactic overlord Xenu 75 million years ago?",
     verdict: "L. Ron Hubbard was a science fiction writer. The 'E-meter' used in auditing is a simple skin-resistance meter.",
     link: "https://en.wikipedia.org/wiki/Xenu",
@@ -360,7 +365,7 @@ const CLAIMS = [
   {
     id: "catholicism",
     name: "Catholicism",
-    category: "religion",
+    category: "christianity",
     question: "Do bread and wine literally become the body and blood of Christ during Mass?",
     verdict: "After consecration, the bread and wine remain chemically bread and wine; the doctrine says only their unobservable 'substance' changes.",
     link: "https://en.wikipedia.org/wiki/Transubstantiation",
@@ -368,7 +373,7 @@ const CLAIMS = [
   {
     id: "lutheranism",
     name: "Lutheranism",
-    category: "religion",
+    category: "christianity",
     question: "Is Christ's body truly present 'in, with and under' the bread and wine of communion?",
     verdict: "Like transubstantiation, the claim is defined so that it can't be observed or tested.",
     link: "https://en.wikipedia.org/wiki/Sacramental_union",
@@ -376,7 +381,7 @@ const CLAIMS = [
   {
     id: "methodism",
     name: "Methodism",
-    category: "religion",
+    category: "christianity",
     question: "Can the Holy Spirit make you perfect in love during this life, as John Wesley taught?",
     verdict: "A supernatural claim with no testable evidence behind it.",
     link: "https://en.wikipedia.org/wiki/Christian_perfection",
@@ -384,7 +389,7 @@ const CLAIMS = [
   {
     id: "young-earth",
     name: "Young Earth Creationism",
-    category: "religion",
+    category: "christianity",
     question: "Was the Earth created less than 10,000 years ago?",
     verdict: "Radiometric dating, ice cores, tree rings and starlight from billions of light-years away all show a universe billions of years old.",
     link: "https://en.wikipedia.org/wiki/Young_Earth_creationism",
@@ -392,7 +397,7 @@ const CLAIMS = [
   {
     id: "noahs-flood",
     name: "Noah's Flood",
-    category: "religion",
+    category: "christianity",
     question: "Did a worldwide flood cover every mountain, with all land animals saved on one boat?",
     verdict: "There is no global flood layer in the geological record, and an ark couldn't hold, feed or ventilate millions of species.",
     link: "https://en.wikipedia.org/wiki/Flood_geology",
@@ -400,7 +405,7 @@ const CLAIMS = [
   {
     id: "jehovahs-witnesses",
     name: "Jehovah's Witnesses",
-    category: "religion",
+    category: "christianity",
     question: "Is the end of the world coming soon, as the Watch Tower Society predicts?",
     verdict: "The movement has predicted or strongly implied the end for 1914, 1925 and 1975. It didn't come.",
     link: "https://en.wikipedia.org/wiki/Eschatology_of_Jehovah%27s_Witnesses",
@@ -408,7 +413,7 @@ const CLAIMS = [
   {
     id: "christian-science",
     name: "Christian Science",
-    category: "religion",
+    category: "christianity",
     question: "Is illness an illusion that prayer can heal instead of medicine?",
     verdict: "Studies of Christian Scientist graduates found higher death rates than comparable groups, and children have died from untreated, treatable illnesses.",
     link: "https://en.wikipedia.org/wiki/Christian_Science",
@@ -416,7 +421,7 @@ const CLAIMS = [
   {
     id: "prosperity-gospel",
     name: "Prosperity Gospel",
-    category: "religion",
+    category: "christianity",
     question: "Will God make you rich if you give money to a preacher?",
     verdict: "The reliable result is that the preachers get rich. Several have bought private jets with donations.",
     link: "https://en.wikipedia.org/wiki/Prosperity_theology",
@@ -424,7 +429,7 @@ const CLAIMS = [
   {
     id: "rapture",
     name: "The Rapture",
-    category: "religion",
+    category: "christianity",
     question: "Will believers soon be lifted bodily into the sky while everyone else is left behind?",
     verdict: "The idea dates from John Nelson Darby in the 1830s, and every date predicted for it so far has passed.",
     link: "https://en.wikipedia.org/wiki/Rapture",
@@ -432,7 +437,7 @@ const CLAIMS = [
   {
     id: "exorcism",
     name: "Demonic Possession",
-    category: "religion",
+    category: "christianity",
     question: "Can demons possess people and be driven out by exorcism?",
     verdict: "Reported possessions match known conditions like epilepsy, schizophrenia and dissociative disorders. Exorcisms have killed people.",
     link: "https://en.wikipedia.org/wiki/Spirit_possession",

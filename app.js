@@ -212,13 +212,60 @@
     art.innerHTML = Cat.svg(stage);
     $("mini-cat").innerHTML = Cat.svg(stage);
     $("cat-name").textContent = Cat.name(stage);
-    $("cat").title = `${stage * 5}%: ${Cat.name(stage)}`;
+    $("cat").title = `${Cat.name(stage)}. Tap to see every cat.`;
     if (!first) {
       art.classList.remove("cat-pop");
       void art.offsetWidth; // restart the animation
       art.classList.add("cat-pop");
     }
   }
+
+  // Percent range that rounds to each stage: 0-2%, 3-7%, ... 98-100%.
+  function stageRange(stage) {
+    const lo = stage === 0 ? 0 : stage * 5 - 2;
+    const hi = stage === 20 ? 100 : stage * 5 + 2;
+    return `${lo}–${hi}%`;
+  }
+
+  function openCats() {
+    const dlg = $("cats");
+    const items = [];
+    for (let stage = 0; stage <= 20; stage++) {
+      const li = document.createElement("li");
+      li.className = "cat-tile";
+      const art = document.createElement("span");
+      art.className = "cat-tile-art";
+      art.innerHTML = Cat.svg(stage);
+      const range = document.createElement("span");
+      range.className = "cat-tile-range";
+      range.textContent = stageRange(stage);
+      const name = document.createElement("span");
+      name.className = "cat-tile-name";
+      name.textContent = Cat.name(stage);
+      li.append(art, range, name);
+      if (stage === catStage) {
+        li.classList.add("current");
+        li.setAttribute("aria-current", "true");
+        const you = document.createElement("span");
+        you.className = "cat-tile-you";
+        you.textContent = "You";
+        li.append(you);
+      }
+      items.push(li);
+    }
+    $("cat-grid").replaceChildren(...items);
+    dlg.showModal();
+    dlg.querySelector(".current")?.scrollIntoView({ block: "nearest" });
+  }
+
+  $("cat").addEventListener("click", openCats);
+  $("mini-cat").addEventListener("click", openCats);
+  $("mini-cat").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openCats();
+    }
+  });
 
   function renderAll() {
     renderGrid();

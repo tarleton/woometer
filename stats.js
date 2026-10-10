@@ -165,21 +165,24 @@
         name.className = "name";
         name.textContent = `${CATEGORIES[c.claim.category].icon} ${c.claim.name}`;
 
-        const all = c.yes + c.no + c.unsure;
+        // Each color shows its own count, so even a sliver is wide enough for its number.
         const bar = document.createElement("span");
         bar.className = "split";
-        for (const [cls, n] of [["y", c.yes], ["x", c.no], ["u", c.unsure]]) {
+        for (const [cls, n, label] of [["y", c.yes, "believe"], ["x", c.no, "don't"], ["u", c.unsure, "don't know"]]) {
+          if (!n) continue;
           const part = document.createElement("span");
           part.className = cls;
-          part.style.width = `${(n / all) * 100}%`;
+          part.style.flexGrow = n;
+          part.textContent = n;
+          part.title = `${n} ${label}`;
           bar.append(part);
         }
 
         const meta = document.createElement("span");
         meta.className = "meta";
-        // e.g. "20% believe (1) · 80% don't (4) · 2 don't know"
+        // e.g. "20% believe · 80% don't · 2 don't know"
         const unsure = c.unsure ? ` · ${c.unsure} don't know` : "";
-        meta.textContent = `${pct(c.share)} believe (${c.yes}) · ${pct(1 - c.share)} don't (${c.no})${unsure}`;
+        meta.textContent = `${pct(c.share)} believe · ${pct(1 - c.share)} don't${unsure}`;
 
         li.append(name, bar, meta);
         return li;

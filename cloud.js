@@ -1216,8 +1216,11 @@
     const stage = Cat.stageFor(s.pct);
     $("friend-cat-art").innerHTML = Cat.svg(stage);
     $("friend-cat-name").textContent = Cat.name(stage);
-    $("friend-pct").textContent = `${s.pct}%`;
-    $("friend-pct-label").textContent = `${friend.display_name ? `${friend.display_name}'s` : "Their"} woo`;
+    const word = document.createElement("span");
+    word.className = "pct-word";
+    word.textContent = "woo";
+    $("friend-pct").replaceChildren(`${s.pct}% `, word);
+    $("friend-pct-label").textContent = friend.display_name || "Your friend";
   }
 
   async function openCompare(friend) {

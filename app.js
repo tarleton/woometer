@@ -558,7 +558,14 @@
 
   // Share and reset
 
-  $("share").addEventListener("click", async () => {
+  // With accounts on, cloud.js first makes sure you have a name, since the
+  // personal link shows it to whoever opens it.
+  $("share").addEventListener("click", () => {
+    if (window.Woometer.withName) window.Woometer.withName(shareScore);
+    else shareScore();
+  });
+
+  async function shareScore() {
     const s = score();
     // With accounts on, cloud.js supplies a personal link that shows this result.
     const personal = window.Woometer.shareUrl && window.Woometer.shareUrl();
@@ -572,7 +579,7 @@
     } catch {
       window.prompt("Copy your score:", text);
     }
-  });
+  }
 
   $("reset").addEventListener("click", () => {
     if (!Object.keys(answers).length) return;

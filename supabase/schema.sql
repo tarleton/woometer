@@ -50,6 +50,10 @@ create table if not exists public.friends (
   check (user_id <> friend_id)
 );
 
+-- A private nickname for a friend (say "Dad"). It sits on your own row of the
+-- pair, so only you ever see it.
+alter table public.friends add column if not exists nickname text check (char_length(nickname) <= 40);
+
 -- Row-level security
 
 alter table public.profiles enable row level security;
@@ -113,9 +117,10 @@ returns void
 language plpgsql security definer set search_path = public as $$
 begin
   if auth.uid() is null then raise exception 'not signed in'; end if;
+  -- Friends see this name in their list, so a blank one keeps the old name.
   insert into profiles (id, display_name)
   values (auth.uid(), nullif(left(btrim(new_name), 40), ''))
-  on conflict (id) do update set display_name = excluded.display_name;
+  on conflict (id) do update set display_name = coalesce(excluded.display_name, profiles.display_name);
 end $$;
 
 -- The name behind a friend link, for the "X wants to compare" banner.
@@ -126,7 +131,9 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 -- Tapping "Add as a friend" on someone's link adds each of you to the other's list.
--- Returns the friend's user id, or null for an unknown code or your own link.
+-- Returns the friend's user id, or null for an unknown code, your own link, or
+-- someone who hasn't given a name yet. Both of you need a name, so nobody shows
+-- up in a friend list as "Unnamed friend".
 create or replace function public.add_friend(code text)
 returns uuid
 language plpgsql security definer set search_path = public as $$
@@ -134,23 +141,36 @@ declare
   other uuid;
 begin
   if auth.uid() is null then raise exception 'not signed in'; end if;
-  select id into other from profiles where share_code = code;
+  if not exists (select 1 from profiles where id = auth.uid() and btrim(display_name) <> '') then
+    raise exception 'add your name first';
+  end if;
+  select id into other from profiles where share_code = code and btrim(display_name) <> '';
   if other is null or other = auth.uid() then return null; end if;
-  insert into profiles (id) values (auth.uid()) on conflict (id) do nothing;
   insert into friends (user_id, friend_id) values (auth.uid(), other), (other, auth.uid())
   on conflict do nothing;
   return other;
 end $$;
 
-create or replace function public.my_friends()
-returns table (friend_id uuid, display_name text, added_at timestamptz, answered bigint)
+-- Your friends, with the nickname you gave each one (if any). Dropped first
+-- because the nickname column changed what it returns.
+drop function if exists public.my_friends();
+create function public.my_friends()
+returns table (friend_id uuid, display_name text, nickname text, added_at timestamptz, answered bigint)
 language sql stable security definer set search_path = public as $$
-  select f.friend_id, p.display_name, f.created_at,
+  select f.friend_id, p.display_name, f.nickname, f.created_at,
          (select count(*) from answers a where a.user_id = f.friend_id)
   from friends f
   left join profiles p on p.id = f.friend_id
   where f.user_id = auth.uid()
   order by f.created_at desc;
+$$;
+
+-- Rename a friend in your own list; a blank nickname goes back to their name.
+create or replace function public.set_friend_nickname(friend uuid, new_nickname text)
+returns void
+language sql security definer set search_path = public as $$
+  update friends set nickname = nullif(left(btrim(new_nickname), 40), '')
+  where user_id = auth.uid() and friend_id = friend;
 $$;
 
 -- A friend's answers, only if they are in the caller's friend list.
@@ -254,8 +274,8 @@ revoke execute on function public.site_stats() from public;
 grant execute on function public.site_stats() to anon, authenticated;
 
 revoke execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
-  public.add_friend(text), public.my_friends(), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
+  public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
   public.delete_my_account() from public, anon;
 grant execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
-  public.add_friend(text), public.my_friends(), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
+  public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
   public.delete_my_account() to authenticated;

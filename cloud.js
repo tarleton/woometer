@@ -32,6 +32,10 @@
   let db = null;
   let user = null;
   let profile = { display_name: null, share_code: null };
+  // The name being saved from the "What's your name?" box, and what to do once
+  // there is one (see withName).
+  let nameSaving = Promise.resolve();
+  let afterName = null;
   // What the account holds, as far as this browser knows: { [claimId]: answer }.
   let synced = {};
 
@@ -323,9 +327,23 @@
         addFriendFromInput();
       }
     });
-    $("my-name").addEventListener("change", (e) => setName(e.target.value));
+    $("my-name").addEventListener("change", (e) => {
+      if (e.target.value.trim()) return setName(e.target.value);
+      e.target.value = profile.display_name || "";
+      if (profile.display_name) W.toast("Your name can't be blank: friends see it in their list.");
+    });
+    $("name-save").addEventListener("click", saveNameFromDialog);
+    $("name-dialog").addEventListener("close", () => {
+      if (afterName) afterName.resolve(false);
+      afterName = null;
+    });
+    $("nickname-save").addEventListener("click", saveNickname);
+    // Enter saves (the form's first button is Cancel, which Enter would pick).
+    $("name-input").addEventListener("keydown", (e) => e.key === "Enter" && saveNameFromDialog(e));
+    $("nickname-input").addEventListener("keydown", (e) => e.key === "Enter" && saveNickname(e));
     $("invite-close").addEventListener("click", () => ($("invite").hidden = true));
     W.shareUrl = friendLink;
+    W.withName = withName;
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") refreshFriends();
     });
@@ -524,6 +542,37 @@
     profile.display_name = clean || null;
   }
 
+  // Your name goes with your link and into your friends' lists, so sharing a
+  // link or adding a friend needs one. With a name, runs then() right away;
+  // without, asks for it first (filled in from Google when Google has it) and
+  // runs then() from the Save tap itself, so copying a link still works.
+  // Resolves to what then() returns, or false if they cancel.
+  function withName(then) {
+    if (profile.display_name) return Promise.resolve(then());
+    const meta = user.user_metadata || {};
+    $("name-input").value = (meta.full_name || meta.name || "").trim().slice(0, 40);
+    return new Promise((resolve) => {
+      afterName = { then, resolve };
+      $("name-dialog").showModal();
+    });
+  }
+
+  function saveNameFromDialog(e) {
+    e.preventDefault();
+    const name = $("name-input").value.trim().slice(0, 40);
+    if (!name) {
+      $("name-input").focus();
+      return;
+    }
+    const pending = afterName;
+    afterName = null;
+    profile.display_name = name;
+    $("my-name").value = name;
+    nameSaving = setName(name);
+    $("name-dialog").close();
+    if (pending) pending.resolve(pending.then());
+  }
+
   // Friends
 
   function friendCodes() {
@@ -584,6 +633,9 @@
     const add = $("invite-add");
     add.textContent = `Add ${name || "them"} as a Friend`;
     add.disabled = false;
+    // Friends need a name to show in each other's lists.
+    add.hidden = !name;
+    if (!name) $("invite-text").textContent = "They haven't added their name yet. Once they do, you can add them as a friend.";
     add.onclick = async () => {
       if (await addFriend(code, name)) {
         add.textContent = "Added to your friends ✓";
@@ -605,6 +657,15 @@
       askToSignIn(code, name);
       return false;
     }
+    if (!name) {
+      W.toast("They haven't added their name on woometer yet. Once they do, ask them to send their link again.");
+      return false;
+    }
+    return withName(() => addNamedFriend(code, name));
+  }
+
+  async function addNamedFriend(code, name) {
+    await nameSaving;
     const { data: friendId, error } = await db.rpc("add_friend", { code });
     if (error || !friendId) {
       W.toast("That link didn't work. Ask them to send it again.");
@@ -689,15 +750,16 @@
     return `${homeUrl()}?f=${profile.share_code}`;
   }
 
-  async function copyFriendLink() {
-    const link = friendLink();
-    if (!profile.display_name) $("my-name").focus();
-    try {
-      await navigator.clipboard.writeText(link);
-      W.toast(profile.display_name ? "Friend link copied." : "Link copied. Add your name so friends know it's you.");
-    } catch {
-      window.prompt("Copy your friend link:", link);
-    }
+  function copyFriendLink() {
+    withName(async () => {
+      const link = friendLink();
+      try {
+        await navigator.clipboard.writeText(link);
+        W.toast("Friend link copied.");
+      } catch {
+        window.prompt("Copy your friend link:", link);
+      }
+    });
   }
 
   // opening: true when the person just opened Friends, so everyone listed has
@@ -719,7 +781,8 @@
         b.type = "button";
         const name = document.createElement("span");
         name.className = "friend-name";
-        name.textContent = f.display_name || "Unnamed friend";
+        name.textContent = friendName(f) || "Unnamed friend";
+        if (f.nickname && f.display_name && f.nickname !== f.display_name) name.title = f.display_name;
         const meta = document.createElement("span");
         meta.className = "friend-meta";
         // Out of the claims you've both answered; with hundreds of claims the
@@ -728,12 +791,57 @@
           ? `Agree on ${pct(c.agree, c.both)}% of ${c.both} shared`
           : "Nothing to compare yet";
         b.append(name, meta);
-        b.addEventListener("click", () => openCompare(f));
+        b.addEventListener("click", () => openCompare({ ...f, display_name: friendName(f) }));
         li.append(b);
+        // Nicknames need the current schema.sql; before that the list has no
+        // nickname column, so there's nothing to rename with.
+        if ("nickname" in f) {
+          const rename = document.createElement("button");
+          rename.type = "button";
+          rename.className = "rename";
+          rename.textContent = "✎";
+          rename.title = "Rename (only you see it)";
+          rename.setAttribute("aria-label", `Rename ${friendName(f) || "this friend"}`);
+          rename.addEventListener("click", () => openNickname(f));
+          li.append(rename);
+        }
         return li;
       })
     );
     list.replaceChildren(...items);
+  }
+
+  // The nickname you gave them, else the name they chose.
+  function friendName(f) {
+    return f.nickname || f.display_name || "";
+  }
+
+  let renaming = null;
+  function openNickname(f) {
+    renaming = f;
+    $("nickname-title").textContent = `Rename ${friendName(f) || "your friend"}`;
+    $("nickname-hint").textContent = f.display_name
+      ? `Only you see this name. Leave it blank to go back to the name they chose, ${f.display_name}.`
+      : "Only you see this name.";
+    $("nickname-input").value = f.nickname || "";
+    $("nickname-input").placeholder = f.display_name || "Their name";
+    $("nickname-dialog").showModal();
+  }
+
+  async function saveNickname(e) {
+    e.preventDefault();
+    const f = renaming;
+    if (!f) return;
+    const nickname = $("nickname-input").value.trim().slice(0, 40);
+    const { error } = await db.rpc("set_friend_nickname", { friend: f.friend_id, new_nickname: nickname });
+    if (error) {
+      logError({ error });
+      W.toast("Couldn't save that name just now. Try again in a moment.");
+      return;
+    }
+    $("nickname-dialog").close();
+    renaming = null;
+    refreshFriends();
   }
 
   // The badge on the Friends button counts people who have added you since you

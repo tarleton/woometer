@@ -32,6 +32,7 @@ button { font: inherit; cursor: pointer; }
 /* Header and meter */
 
 .top {
+  --logo-size: clamp(30px, 5vw, 42px);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -49,7 +50,7 @@ button { font: inherit; cursor: pointer; }
 .brand h1 {
   margin: 0;
   line-height: 1.1;
-  font-size: clamp(30px, 5vw, 42px);
+  font-size: var(--logo-size);
   font-weight: 800;
   letter-spacing: -0.03em;
   --alien: #4ade80;
@@ -130,9 +131,11 @@ button { font: inherit; cursor: pointer; }
 .why-link { font-size: 12px; margin-top: 6px; color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
 .why-link:hover { color: var(--accent); }
 
+/* The corner buttons line up with the middle of the logo's letters, which
+   sits a little over half the logo's size below the header's 12px padding. */
 .top-actions {
   position: absolute;
-  top: 12px;
+  top: calc(12px + 0.56 * var(--logo-size) - 20px);
   right: 12px;
   display: flex;
   align-items: center;
@@ -664,15 +667,16 @@ dialog a { color: var(--accent); }
 /* Phones and narrow windows: each button is its icon with a small word under
    it, like an app's tab bar, so everything still fits on the one header row. */
 @media (max-width: 860px) {
-  .top-actions { top: 8px; right: 8px; gap: 0; }
+  /* Here it's the icons, 16px down each button, that line up with the logo. */
+  .top-actions { top: calc(12px + 0.56 * var(--logo-size) - 16px); right: 8px; gap: 0; }
   .top-btn, #google-login {
     position: relative;
     flex-direction: column;
     justify-content: flex-start;
     gap: 3px;
-    height: 48px;
+    height: auto;
     min-width: 50px;
-    padding: 5px 4px 0;
+    padding: 4px 4px 6px;
     border: 0;
     border-radius: 10px;
     background: none;
@@ -685,17 +689,16 @@ dialog a { color: var(--accent); }
   .account-btn .avatar { width: 24px; height: 24px; font-size: 12px; }
   .top-btn-label, #google-login .gsi-label { font: 600 11px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--muted); letter-spacing: 0; }
   .top-btn .badge { position: absolute; top: 0; left: calc(50% + 6px); min-width: 18px; padding: 0 5px; font-size: 11px; line-height: 18px; }
-  .mute { align-self: flex-start; width: 36px; height: 36px; font-size: 18px; margin-left: 2px; border: 0; background: none; }
+  .mute { align-self: flex-start; width: 32px; height: 32px; font-size: 18px; margin-left: 2px; border: 0; background: none; }
   .mute:hover { background: var(--line); }
 }
 @media (max-width: 400px) {
   .top-actions { right: 4px; }
-  .top-btn, #google-login { min-width: 44px; padding: 0 2px; }
+  .top-btn, #google-login { min-width: 44px; padding: 4px 2px 6px; }
   .top-btn-label, #google-login .gsi-label { font-size: 10.5px; }
-  .mute { width: 32px; height: 32px; }
 }
 @media (max-width: 340px) {
-  .brand h1 { font-size: 25px; }
+  .top { --logo-size: 25px; }
   .tagline { font-size: 13px; }
 }
 

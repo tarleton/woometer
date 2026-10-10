@@ -800,6 +800,9 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 .friends .friend-list { max-height: 45vh; overflow-y: auto; }
 /* Adding a friend sits below the list, set off by a thin line. */
 .friends .add-friend { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 2px; }
+/* Send your link on the left, Close on the right; on phones the send button gets its own full-width row. */
+.friends-actions [value="close"] { margin-left: auto; }
+@media (max-width: 520px) { #friends-share { flex: 1 1 100%; } }
 /* Reassurance that sharing only goes to whoever you pick. */
 .share-safe { margin: 0; font-size: 14px; color: var(--ink); }
 .share-safe::before { content: "✓ "; color: var(--trash); font-weight: 800; }

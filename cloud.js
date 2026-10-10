@@ -1020,7 +1020,7 @@
   }
 
   async function copyShareText() {
-    if (await W.copyText(W.shareText(), "Score and link copied. Paste it anywhere.", "Copy your score and link:")) {
+    if (await W.copyText(W.shareText(), "Woo and link copied. Paste it anywhere.", "Copy your woo and link:")) {
       $("share-dialog").close();
     }
   }
@@ -1297,7 +1297,7 @@
       pill(d.theirs, `${them}: ${yesNo(d.theirs)}`),
     ]);
 
-    // Each woo score, small beside the explanation rather than a line of its own.
+    // Each woo %, small beside the explanation rather than a line of its own.
     const s = scoreOf(theirs);
     const mine = scoreOf(W.getAnswers());
     const woo = (who, sc) => {

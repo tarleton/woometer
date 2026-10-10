@@ -41,6 +41,7 @@
     } catch {
       // Private mode or storage blocked: the page still works, it just won't remember.
     }
+    window.dispatchEvent(new Event("woometer:answers"));
   }
 
   // The woo score only counts Yes and No; Don't Know answers sit it out.
@@ -232,7 +233,10 @@
     name.textContent = byId[id].name;
     if (answers[id] === "no") name.className = "struck";
     b.append(name);
-    b.addEventListener("click", onClick);
+    b.addEventListener("click", () => {
+      Sounds.open();
+      onClick();
+    });
     li.append(b);
     return li;
   }
@@ -587,10 +591,10 @@
   // Share and reset
 
   // With accounts on, cloud.js opens the Share box (your name, then ways to
-  // send your personal link). Without them, Share copies the score straight away.
+  // send your personal link). Without them, Share copies your woo straight away.
   $("share").addEventListener("click", () => {
     if (window.Woometer.openShare) window.Woometer.openShare();
-    else copyText(shareText(), "Score copied. Paste it anywhere.", "Copy your score:");
+    else copyText(shareText(), "Copied. Paste it anywhere.", "Copy your woo:");
   });
 
   function shareText() {

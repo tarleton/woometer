@@ -164,6 +164,9 @@ button { font: inherit; cursor: pointer; }
 
 .meter-read { grid-area: read; display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
 .pct { font-size: 30px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+/* "19% woo" on one line: the word sits beside the number, a little lighter. */
+.pct-line { white-space: nowrap; }
+.pct-word { font-size: 24px; font-weight: 600; color: var(--muted); }
 .pct-label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .meter-verdict { font-size: 14px; margin-top: 4px; }
 
@@ -942,8 +945,10 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 .pm-cat.you { grid-area: you-cat; }
 .pm-cat .cat-art svg { width: 64px; }
 .pair-meter .dial { width: 124px; }
-.pm-read { margin: 2px 0 0; font-size: 13px; color: var(--muted); text-align: center; }
-.pm-read b { font-size: 20px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.pm-read { display: flex; flex-direction: column; align-items: center; margin: 2px 0 0; line-height: 1.2; text-align: center; }
+.pm-read b { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.pm-read .pct-word { font-size: 16px; }
+.pm-who { font-size: 13px; color: var(--muted); }
 @media (max-width: 600px) {
   .pair-meter {
     grid-template-columns: 1fr 1fr;
@@ -1034,3 +1039,13 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 .their-pile { margin-top: 12px; }
 .their-pile summary { cursor: pointer; font-weight: 700; margin-bottom: 8px; }
 
+
+/* The star sky behind the top bar (sky.js): painted under everything in it. */
+.top > .sky {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}

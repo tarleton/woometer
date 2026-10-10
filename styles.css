@@ -775,14 +775,14 @@ dialog a { color: var(--accent); }
   width: 100%;
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
   text-align: left;
   border: 1px solid var(--line);
   background: var(--bg);
   color: var(--ink);
   border-radius: 10px;
-  padding: 8px 10px;
+  padding: 9px 12px;
 }
 .friend-list button:hover { border-color: var(--accent); }
 /* Each friend row: the friend (opens the comparison) and a small rename button. */
@@ -791,7 +791,9 @@ dialog a { color: var(--accent); }
 .friend-list .rename { width: auto; flex: none; padding: 0 12px; align-items: center; color: var(--muted); font-size: 15px; }
 .friend-list .rename:hover { color: var(--ink); }
 .friend-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.friend-meta { font-size: 12px; color: var(--muted); white-space: nowrap; }
+/* "75% agree" on the right of each friend. */
+.friend-meta { display: flex; align-items: baseline; gap: 5px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.friend-pct { font-size: 20px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
 
 /* Same width and centring as the board and side panel below it (.layout). */
 .invite {
@@ -821,26 +823,29 @@ dialog a { color: var(--accent); }
 
 .detail-stats { font-weight: 600; }
 
+.overlap {
+  margin: 12px 0;
+  padding: 14px 16px 16px;
+  text-align: center;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.overlap p { margin: 0; }
+.overlap-lead, .overlap-of { color: var(--muted); font-size: 14px; }
+.overlap-pct { font-size: 56px; font-weight: 800; line-height: 1.05; color: var(--accent); font-variant-numeric: tabular-nums; }
 .compare-bar {
   display: flex;
-  height: 14px;
+  height: 12px;
   border-radius: 999px;
   overflow: hidden;
   background: var(--line);
-  margin: 12px 0;
+  margin: 12px 0 0;
 }
 .seg { flex: 0 0 0; transition: flex-basis 0.5s; }
-.seg.agree, .dot.agree { background: var(--trash); }
-.seg.differ, .dot.differ { background: var(--woo); }
-.seg.none { background: var(--line); }
-.compare-key { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0; }
-.compare-key div { display: flex; flex-direction: column; }
-.compare-key dt { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
-.compare-key dd { margin: 0; font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
-.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
-.dot.none { background: var(--muted); }
-.compare-summary { color: var(--muted); font-size: 14px; }
-.compare h4 { margin: 12px 0 6px; }
+.seg.agree { background: var(--accent); }
+.compare-list { margin-top: 10px; }
+.compare-list summary { cursor: pointer; font-weight: 700; margin-bottom: 8px; }
 .compare-diffs {
   list-style: none;
   margin: 0;
@@ -888,7 +893,7 @@ dialog a { color: var(--accent); }
   padding: 7px 10px;
 }
 .add-friend-row input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
-.compare-score { font-weight: 600; margin: 0 0 4px; }
+.compare-score { color: var(--muted); font-size: 14px; margin: 0 0 4px; }
 .their-pile { margin-top: 12px; }
 .their-pile summary { cursor: pointer; font-weight: 700; margin-bottom: 8px; }
 

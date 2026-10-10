@@ -726,7 +726,8 @@ dialog a { color: var(--accent); }
   position: absolute;
   right: 0;
   top: calc(100% + 8px);
-  min-width: 220px;
+  min-width: 250px;
+  max-width: calc(100vw - 32px);
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -736,7 +737,10 @@ dialog a { color: var(--accent); }
 }
 .account-menu p { margin: 0; }
 .account-name { font-weight: 700; }
-.account-email { font-size: 13px; color: var(--muted); margin-bottom: 12px !important; word-break: break-all; }
+.account-email { font-size: 13px; color: var(--muted); word-break: break-all; }
+.account-providers { font-size: 13px; color: var(--muted); }
+.account-providers:empty { display: none; }
+.account-menu > .fbsi, .account-menu > .fbsi[hidden] + .account-links { margin-top: 12px; }
 .account-menu .btn { width: 100%; }
 .account-menu .fbsi { width: 100%; justify-content: center; }
 /* Sign out and the delete links: small, under a line, apart from Link Facebook. */

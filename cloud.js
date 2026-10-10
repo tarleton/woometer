@@ -619,6 +619,10 @@
     }
     $("account-name").textContent = name;
     $("account-email").textContent = user.email || "";
+    // Google and Facebook are two ways into the same account, so one Sign out covers both.
+    const has = providersOf(user);
+    const ways = Object.keys(PROVIDER_NAMES).filter((p) => has.includes(p)).map((p) => PROVIDER_NAMES[p]);
+    $("account-providers").textContent = ways.length ? `Signs in with ${ways.join(" or ")}` : "";
   }
 
   function initial(text) {

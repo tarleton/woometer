@@ -218,6 +218,10 @@ const Sounds = (function () {
   // own sound nothing more is added, and the mute button is heard as it unmutes.
   const CLICKABLE = 'button, [role="button"], a[href], summary, input[type="checkbox"], input[type="radio"]';
   const BACK_WORDS = /^(close|dismiss|cancel|not now|back|no thanks)\b/i;
+  // A popup can pick its own closing sound: the cat gallery meows goodbye.
+  function closeSound(el) {
+    return el.closest('dialog[data-close-sound="meow"]') ? meow : back;
+  }
   function isBack(el) {
     if (el.value === "close" || el.value === "cancel") return true;
     if (/(^|[-\s])close([-\s]|$)/.test(el.getAttribute("class") || "")) return true;
@@ -232,14 +236,14 @@ const Sounds = (function () {
       if (!muted) audio();
       setTimeout(() => {
         if (played) return;
-        if (isBack(el)) back();
+        if (isBack(el)) closeSound(el)();
         else tap();
       }, 0);
     },
     true
   );
   // Closing a popup with the Escape key sounds like its Close button.
-  document.addEventListener("cancel", (e) => { if (e.target.tagName === "DIALOG") back(); }, true);
+  document.addEventListener("cancel", (e) => { if (e.target.tagName === "DIALOG") closeSound(e.target)(); }, true);
 
   function setMuted(value) {
     muted = value;

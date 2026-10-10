@@ -681,7 +681,8 @@ dialog a { color: var(--accent); }
 .account-name { font-weight: 700; }
 .account-email { font-size: 13px; color: var(--muted); margin-bottom: 12px !important; word-break: break-all; }
 .account-menu .btn { width: 100%; }
-.account-menu .danger-link { display: block; margin: 12px auto 0; }
+.account-menu .danger-link, .name-dialog .danger-link { display: block; margin: 12px auto 0; }
+.name-dialog .danger-link { margin-top: 20px; }
 .danger-link:hover { color: var(--danger); }
 .btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
 .btn.danger:disabled { opacity: 0.6; cursor: progress; }

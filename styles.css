@@ -416,6 +416,21 @@ button { font: inherit; cursor: pointer; }
   .meter { order: -1; }
 }
 
+/* "Keep your answers safe": under the meter, for visitors not signed in. */
+.save-note {
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+.save-note p { margin: 0 0 10px; color: var(--muted); }
+.save-note strong { color: var(--ink); }
+.save-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+@media (max-width: 860px) {
+  .save-note { order: -1; }
+}
+
 .bin {
   border-radius: var(--radius);
   padding: 14px;

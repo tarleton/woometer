@@ -24,6 +24,10 @@
   const GOOGLE_AUTH = "https://accounts.google.com/o/oauth2/v2/auth";
   // Per-tab check values for a trip to Google's sign-in page and back.
   const GOOGLE_TRIP_KEY = "woometer.googleTrip.v1";
+  // Set when someone taps "Not now" on the "Keep your answers safe" note.
+  const SAVE_NOTE_KEY = "woometer.saveNoteHidden.v1";
+  // Answers before that note shows, so first-time visitors can look around first.
+  const SAVE_NOTE_AFTER = 3;
 
   const $ = (id) => document.getElementById(id);
   const byId = Object.fromEntries(CLAIMS.map((c) => [c.id, c]));
@@ -294,6 +298,14 @@
     });
 
     $("google-login").addEventListener("click", signInWithGoogle);
+    $("save-google").addEventListener("click", signInWithGoogle);
+    $("save-hide").addEventListener("click", () => {
+      try {
+        localStorage.setItem(SAVE_NOTE_KEY, "1");
+      } catch {}
+      renderSaveNote();
+    });
+    for (const name of ["answer", "remove", "reset"]) document.addEventListener(`woometer:${name}`, renderSaveNote);
     $("signin-google").addEventListener("click", () => {
       savePendingFriend($("signin-prompt").dataset.code, $("signin-prompt").dataset.name);
       signInWithGoogle();
@@ -393,7 +405,22 @@
 
   // Account
 
+  // What signing in does, for anyone not signed in who has answered a few.
+  function renderSaveNote() {
+    let hidden = false;
+    try {
+      hidden = localStorage.getItem(SAVE_NOTE_KEY) === "1";
+    } catch {}
+    const answered = Object.keys(W.getAnswers()).length;
+    const hide = hidden || !user.is_anonymous || !cfg.googleSignIn || answered < SAVE_NOTE_AFTER;
+    if ($("save-note").hidden === hide) return;
+    $("save-note").hidden = hide;
+    // The side column re-fits its piles to the window on resize.
+    window.dispatchEvent(new Event("resize"));
+  }
+
   function renderAccount() {
+    renderSaveNote();
     const anon = user.is_anonymous;
     // The sign-in button stays hidden until the Google provider is set up in
     // Supabase (googleSignIn in config.js).

@@ -156,7 +156,7 @@ button { font: inherit; cursor: pointer; }
 .dial:disabled .dial-hint { display: none; }
 .needle-line { stroke: var(--ink); }
 .needle-hub { fill: var(--ink); }
-#needle {
+.needle {
   transform-origin: 100px 100px;
   transform-box: view-box;
   transition: transform 0.6s cubic-bezier(.34, 1.56, .64, 1);
@@ -923,6 +923,14 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 
 .detail-stats { font-weight: 600; }
 
+/* A friend's meter at the top of the comparison: their cat, gauge and score in one row. */
+.friend-meter { display: flex; align-items: center; justify-content: center; gap: 14px; margin: -4px 0 12px; }
+.friend-cat { width: 72px; text-align: center; flex: none; }
+.friend-cat .cat-art svg { width: 64px; }
+.friend-meter .dial { width: 112px; flex: none; }
+.friend-meter .meter-read { align-items: flex-start; text-align: left; }
+.friend-meter .pct { font-size: 28px; }
+.friend-meter .pct-label { font-size: 11px; }
 .compare-head { margin: 0; font-size: 20px; line-height: 1.25; }
 #agree-on { white-space: nowrap; }
 .compare-pct { color: var(--accent); font-weight: 800; font-variant-numeric: tabular-nums; }

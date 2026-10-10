@@ -1200,6 +1200,26 @@
     return { both: agree + differ, agree, differ, agreements, differences };
   }
 
+  // The friend's own woo meter at the top of the comparison: their cat, and a
+  // copy of your meter's dial that flips to a pie of their answers.
+  let friendDial = null;
+  function showFriendMeter(friend, theirs, s) {
+    $("friend-meter").hidden = !s.answered;
+    if (!s.answered) return;
+    if (!friendDial) {
+      friendDial = W.newDial("their");
+      $("friend-cat").after(friendDial.el);
+    }
+    friendDial.unflip();
+    const unsure = CLAIMS.filter((c) => theirs[c.id] === "unsure").length;
+    friendDial.show({ pct: s.pct, woo: s.woo.length, trash: s.answered - s.woo.length, unsure });
+    const stage = Cat.stageFor(s.pct);
+    $("friend-cat-art").innerHTML = Cat.svg(stage);
+    $("friend-cat-name").textContent = Cat.name(stage);
+    $("friend-pct").textContent = `${s.pct}%`;
+    $("friend-pct-label").textContent = `${friend.display_name ? `${friend.display_name}'s` : "Their"} woo score`;
+  }
+
   async function openCompare(friend) {
     const dlg = $("compare");
     const them = friend.display_name || "Them";
@@ -1212,6 +1232,7 @@
     $("differ-box").hidden = true;
     $("their-pile").hidden = true;
     $("compare-add").hidden = Boolean(friend.friend_id);
+    $("friend-meter").hidden = true;
     dlg.showModal();
 
     const theirs = friend.friend_id ? await answersOf(friend.friend_id) : await answersForCode(friend.code);
@@ -1275,6 +1296,7 @@
     }
     $("compare-woo").replaceChildren(...scores);
     $("compare-woo").hidden = false;
+    showFriendMeter(friend, theirs, s);
     if (s.woo.length) {
       $("their-pile-title").textContent = `${friend.display_name ? `${friend.display_name}'s` : "Their"} ✨ Believe It (${s.woo.length})`;
       $("their-pile-list").replaceChildren(

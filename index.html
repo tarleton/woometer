@@ -105,7 +105,7 @@
             </linearGradient>
           </defs>
           <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#arc)" stroke-width="16" stroke-linecap="round"/>
-          <g id="needle" style="transform: rotate(-90deg)">
+          <g class="needle" id="needle" style="transform: rotate(-90deg)">
             <line x1="100" y1="100" x2="100" y2="34" class="needle-line" stroke-width="4" stroke-linecap="round"/>
           </g>
           <circle cx="100" cy="100" r="8" class="needle-hub"/>
@@ -236,6 +236,12 @@
 
   <dialog id="compare" class="compare wide">
     <form method="dialog">
+      <!-- Their woo meter, like yours: their cat, and the same gauge (copied in
+           by cloud.js) that flips to a pie of their answers when tapped. -->
+      <div class="friend-meter" id="friend-meter" hidden>
+        <span class="friend-cat" id="friend-cat"><span class="cat-art" id="friend-cat-art"></span><span class="cat-label" id="friend-cat-name"></span></span>
+        <div class="meter-read"><span class="pct" id="friend-pct"></span><span class="pct-label" id="friend-pct-label"></span></div>
+      </div>
       <!-- One tight line up top (how often you agree, out of the claims you've
            both answered Yes or No) so the lists below get the room. -->
       <h3 class="compare-head">You and <span id="compare-name"></span><span id="agree-on" hidden> agree on <span class="compare-pct" id="compare-pct"></span></span></h3>

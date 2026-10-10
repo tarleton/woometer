@@ -398,10 +398,7 @@
       renderSaveNote();
     });
     for (const name of ["answer", "remove", "reset"]) document.addEventListener(`woometer:${name}`, renderSaveNote);
-    $("signin-google").addEventListener("click", () => {
-      savePendingFriend($("signin-prompt").dataset.code, $("signin-prompt").dataset.name);
-      signInWithGoogle();
-    });
+    $("friends-google").addEventListener("click", signInWithGoogle);
     $("friends-open").addEventListener("click", () => {
       $("friends").showModal();
       $("friends-count").hidden = true;
@@ -449,6 +446,8 @@
     });
     $("name-save").addEventListener("click", saveNameFromDialog);
     $("name-google-btn").addEventListener("click", () => {
+      // Adding a friend when they left: finish it once they're back.
+      if (afterName && afterName.friend) savePendingFriend(afterName.friend.code, afterName.friend.name);
       $("name-dialog").close();
       signInWithGoogle();
     });
@@ -700,13 +699,14 @@
   // copying a link still works. Anyone not signed in can sign in with Google
   // instead, which brings their Google name; a Google account without a name
   // gets this box too. Resolves to what then() returns, or false if they cancel.
-  function withName(then) {
+  // friend is the friend being added, if any, so signing in can finish adding them.
+  function withName(then, friend) {
     if (profile.display_name) return Promise.resolve(then());
     const meta = user.user_metadata || {};
     $("name-input").value = (meta.full_name || meta.name || "").trim().slice(0, 40);
     $("name-google").hidden = !(user.is_anonymous && cfg.googleSignIn);
     return new Promise((resolve) => {
-      afterName = { then, resolve };
+      afterName = { then, resolve, friend };
       $("name-dialog").showModal();
     });
   }
@@ -800,22 +800,18 @@
   }
 
   // Adding is mutual: you appear in their list too, so either of you can compare.
-  // Friends belong to a Google account, so anyone not signed in is asked to
-  // sign in first, and the add finishes when they come back.
+  // Anyone can add a friend, signed in or not. Friends added in this browser
+  // come along if it later signs in to a Google account (see handleInvite).
   async function addFriend(code, name) {
     if (code === profile.share_code) {
       W.toast("That's your own link.");
-      return false;
-    }
-    if (user.is_anonymous && cfg.googleSignIn) {
-      askToSignIn(code, name);
       return false;
     }
     if (!name) {
       W.toast("They haven't added their name on woometer yet. Once they do, ask them to send their link again.");
       return false;
     }
-    return withName(() => addNamedFriend(code, name));
+    return withName(() => addNamedFriend(code, name), { code, name });
   }
 
   async function addNamedFriend(code, name) {
@@ -829,17 +825,14 @@
     // You added them yourself, so they don't count as new on the badge.
     const seen = seenFriends();
     if (seen) saveSeenFriends(seen.add(friendId));
-    W.toast(`${name || "Your friend"} is now in your friends.`);
+    W.toast(`${name || "Your friend"} is now in your friends.` + (keepFriendsNote() ? " Sign in with Google to keep them safe on any device." : ""));
     refreshFriends();
     return true;
   }
 
-  function askToSignIn(code, name) {
-    const dlg = $("signin-prompt");
-    dlg.dataset.code = code;
-    dlg.dataset.name = name || "";
-    $("signin-title").textContent = `Sign in to add ${name || "your friend"}`;
-    dlg.showModal();
+  // A gentle nudge for friends kept only by this browser's anonymous account.
+  function keepFriendsNote() {
+    return user.is_anonymous && cfg.googleSignIn;
   }
 
   function savePendingFriend(code, name) {
@@ -947,6 +940,7 @@
     const list = $("friend-list");
     $("friend-empty").hidden = data.length > 0;
     $("friend-hint").hidden = !data.length;
+    $("friends-keep").hidden = !(data.length && keepFriendsNote());
     showNewFriends(data.map((f) => f.friend_id), opening);
     const mine = W.getAnswers();
     const items = await Promise.all(

@@ -16,6 +16,8 @@
   const SYNCED_KEY = "woometer.synced.v1";
   // The friend someone was adding when they left to sign in with Google.
   const PENDING_FRIEND_KEY = "woometer.pendingFriend.v1";
+  // Friends already shown in this browser's Friends list, and whose account.
+  const FRIENDS_SEEN_KEY = "woometer.friendsSeen.v1";
   // Set just before the reload that follows "Delete my account", to say it worked.
   const DELETED_KEY = "woometer.accountDeleted";
   const TURNSTILE_JS = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
@@ -294,6 +296,7 @@
     });
     $("friends-open").addEventListener("click", () => {
       $("friends").showModal();
+      $("friends-count").hidden = true;
       refreshFriends();
     });
     $("avatar").addEventListener("click", (e) => {
@@ -485,6 +488,7 @@
       localStorage.removeItem(LAST_USER_KEY);
       localStorage.removeItem(PENDING_FRIEND_KEY);
       localStorage.removeItem(SYNCED_KEY);
+      localStorage.removeItem(FRIENDS_SEEN_KEY);
     } catch {}
     location.replace(homeUrl());
   }
@@ -607,6 +611,9 @@
       return false;
     }
     rememberFriendCode(code);
+    // You added them yourself, so they don't count as new on the badge.
+    const seen = seenFriends();
+    if (seen) saveSeenFriends(seen.add(friendId));
     W.toast(`${name || "Your friend"} is now in your friends.`);
     refreshFriends();
     return true;
@@ -699,8 +706,7 @@
     if (error) return logError({ error });
     const list = $("friend-list");
     $("friend-empty").hidden = data.length > 0;
-    $("friends-count").hidden = data.length === 0;
-    $("friends-count").textContent = data.length;
+    showNewFriends(data.map((f) => f.friend_id));
     const mine = W.getAnswers();
     const items = await Promise.all(
       data.map(async (f) => {
@@ -726,6 +732,36 @@
       })
     );
     list.replaceChildren(...items);
+  }
+
+  // The badge on the Friends button counts people who have added you since you
+  // last opened Friends in this browser (by tapping Add on your link). Opening
+  // Friends clears it.
+  function showNewFriends(ids) {
+    let seen = seenFriends();
+    // The first time this account's friends are listed here, nobody is new.
+    if (!seen || $("friends").open) {
+      seen = new Set(ids);
+      saveSeenFriends(seen);
+    }
+    const fresh = ids.filter((id) => !seen.has(id)).length;
+    $("friends-count").hidden = fresh === 0;
+    $("friends-count").textContent = fresh;
+    $("friends-open").setAttribute("aria-label", fresh ? `Friends, ${fresh} new` : "Friends");
+  }
+
+  function seenFriends() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(FRIENDS_SEEN_KEY));
+      if (saved && saved.user === user.id) return new Set(saved.ids);
+    } catch {}
+    return null;
+  }
+
+  function saveSeenFriends(ids) {
+    try {
+      localStorage.setItem(FRIENDS_SEEN_KEY, JSON.stringify({ user: user.id, ids: [...ids] }));
+    } catch {}
   }
 
   async function answersOf(friendId) {

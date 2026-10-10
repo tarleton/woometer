@@ -54,13 +54,13 @@ create table if not exists public.friends (
 -- pair, so only you ever see it.
 alter table public.friends add column if not exists nickname text check (char_length(nickname) <= 40);
 
--- Where people visit from, for the site owner to look at in the database.
--- One row per account per network, refreshed on every visit. The country,
--- region and city are Cloudflare's rough guess from the IP address. The
--- address itself is never kept: ip_code is a scrambled, one-way code of it
--- (see ip_code() below), so many accounts from one place stand out without
--- anyone's real address being stored. Nobody can read this table from the
--- site: it has row-level security on and no policies.
+-- Where people visit from, for the site owner to look at in the database,
+-- and later for a world map on the stats page. One row per account per IP
+-- address, refreshed on every visit. The country, region and city are
+-- Cloudflare's rough guess from the IP. ip_code is a scrambled code of the
+-- IP (see ip_code() below), used as the key and for leaving spam out of the
+-- stats. Nobody can read this table from the site: it has row-level security
+-- on and no policies, so IPs never show on any page or in shared links.
 create table if not exists public.visits (
   user_id uuid not null references auth.users (id) on delete cascade,
   ip_code text not null,
@@ -83,22 +83,28 @@ insert into public.private_settings (name, value)
 values ('ip_salt', replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''))
 on conflict (name) do nothing;
 
--- The first version of visits briefly kept the raw address in an "ip"
--- column. Scramble any such rows and rename the column.
+-- The first version of visits had only an "ip" column and no ip_code.
+-- Turn that column into ip_code; the next statement adds ip back.
 do $$
 begin
   if exists (select 1 from information_schema.columns
-             where table_schema = 'public' and table_name = 'visits' and column_name = 'ip') then
+             where table_schema = 'public' and table_name = 'visits' and column_name = 'ip')
+     and not exists (select 1 from information_schema.columns
+             where table_schema = 'public' and table_name = 'visits' and column_name = 'ip_code') then
     update public.visits set ip = substr(encode(sha256(convert_to(
       (select value from public.private_settings where name = 'ip_salt') || ip, 'UTF8')), 'hex'), 1, 16);
     alter table public.visits rename column ip to ip_code;
   end if;
 end $$;
 
--- Spam, quietly left out of the stats. Add an ip_code here (from the SQL
--- editor) and everyone who has visited from that network stops counting
--- toward the stats and "N% of people agree", the same way testers do. Their
--- own page keeps working as normal.
+-- The IP address itself, alongside its code.
+alter table public.visits add column if not exists ip text;
+
+-- Spam, quietly left out of the stats. Add an IP's code here from the SQL
+-- editor, e.g. insert into ignored_ip_codes (ip_code) values (ip_code('1.2.3.4')),
+-- and everyone who has visited from it stops counting toward the stats and
+-- "N% of people agree", the same way testers do. Their own page keeps
+-- working as normal.
 create table if not exists public.ignored_ip_codes (
   ip_code text primary key,
   note text,
@@ -167,7 +173,7 @@ language sql stable security definer set search_path = public as $$
     (select value from private_settings where name = 'ip_salt') || addr, 'UTF8')), 'hex'), 1, 16);
 $$;
 
--- Notes the caller's scrambled IP code and rough location in visits.
+-- Notes the caller's IP address, its code and rough location in visits.
 -- Supabase's gateway passes the visitor's IP and Cloudflare's location guess
 -- in as request headers. Called from ensure_profile on every page load; it
 -- never stops the page loading if something is missing.
@@ -181,10 +187,11 @@ begin
   h := coalesce(nullif(current_setting('request.headers', true), ''), '{}')::json;
   addr := nullif(btrim(coalesce(h->>'cf-connecting-ip', split_part(h->>'x-forwarded-for', ',', 1), h->>'x-real-ip', '')), '');
   if auth.uid() is null or addr is null then return; end if;
-  insert into visits (user_id, ip_code, country, region, city)
-  values (auth.uid(), ip_code(addr), nullif(h->>'cf-ipcountry', ''),
+  insert into visits (user_id, ip_code, ip, country, region, city)
+  values (auth.uid(), ip_code(addr), left(addr, 64), nullif(h->>'cf-ipcountry', ''),
           nullif(coalesce(h->>'cf-region', h->>'cf-ipregion'), ''), nullif(h->>'cf-ipcity', ''))
   on conflict (user_id, ip_code) do update set
+    ip = excluded.ip,
     country = coalesce(excluded.country, visits.country),
     region = coalesce(excluded.region, visits.region),
     city = coalesce(excluded.city, visits.city),

@@ -445,6 +445,13 @@
     });
     for (const name of ["answer", "remove", "reset"]) document.addEventListener(`woometer:${name}`, renderSaveNote);
     $("friends-google").addEventListener("click", signIn);
+    // The comparison's lists work like an accordion: opening one closes the others.
+    const lists = ["agree-box", "differ-box", "their-pile"].map($);
+    for (const box of lists) {
+      box.addEventListener("toggle", () => {
+        if (box.open) for (const other of lists) if (other !== box) other.open = false;
+      });
+    }
     $("friends-open").addEventListener("click", () => {
       $("friends").showModal();
       $("friends-count").hidden = true;

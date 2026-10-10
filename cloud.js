@@ -379,7 +379,7 @@
     const meta = user.user_metadata || {};
     const name = meta.full_name || meta.name || profile.display_name || "";
     const picture = meta.avatar_url || meta.picture;
-    const avatar = $("avatar");
+    const avatar = $("avatar-pic");
     if (picture) {
       const img = document.createElement("img");
       img.src = picture;

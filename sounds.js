@@ -3,6 +3,7 @@
 //   Sounds.trash() - a bright, pleasant two-note chime
 //   Sounds.woo()   - a low, slightly ominous descending boop
 //   Sounds.unsure() - a soft, questioning "hm?" that rises at the end
+//   Sounds.open()    - a soft little pop when opening an answered claim from a list
 //   Sounds.forward() - a quiet rising tick when opening another page
 //   Sounds.back()    - the same tick falling, when heading back to the main page
 //   Sounds.meow()    - a very soft little meow for tapping the cat, one of 21 at random
@@ -88,6 +89,16 @@ const Sounds = (function () {
     note(ac, { freq: first, start: t, length: 0.09, volume: 0.06, out });
     note(ac, { freq: second, start: t + 0.055, length: 0.13, volume: 0.06, out });
   }
+  // A gentle "pop": one quick upward-gliding blip with a faint sparkle on top.
+  function open() {
+    const ac = !muted && audio();
+    if (!ac) return;
+    const t = ac.currentTime;
+    const out = ac.destination;
+    note(ac, { freq: 520, glideTo: 880, start: t, length: 0.12, volume: 0.08, out });
+    note(ac, { freq: 1760, start: t + 0.05, length: 0.1, volume: 0.015, out });
+  }
+
   const forward = () => tick(784, 1046.5);
   const back = () => tick(1046.5, 784);
 
@@ -196,5 +207,5 @@ const Sounds = (function () {
     }
   }
 
-  return { trash, woo, unsure, forward, back, meow, setMuted, isMuted: () => muted };
+  return { trash, woo, unsure, open, forward, back, meow, setMuted, isMuted: () => muted };
 })();

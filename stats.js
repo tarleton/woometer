@@ -57,9 +57,8 @@
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
       const values = Object.entries(saved).filter(([id]) => byId[id]).map(([, v]) => v);
-      const yes = values.filter((v) => v === "yes").length;
-      const decided = yes + values.filter((v) => v === "no").length;
-      return decided ? yes / decided : null;
+      const s = WooScore.of(values);
+      return s.decided ? s.fraction : null;
     } catch {
       return null;
     }

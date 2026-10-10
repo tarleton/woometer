@@ -334,7 +334,8 @@ end $$;
 
 -- The numbers on woometer.com/stats, as one bundle: the average woo score
 -- across everyone, how many people have each score, and Yes / No / Don't Know totals
--- per claim. Only totals, never who answered what. Test accounts and ignored spam are left out.
+-- per claim. A woo score is Yes out of all a person's answers, Don't Know
+-- included, like the site's meter (score.js). Only totals, never who answered what. Test accounts and ignored spam are left out.
 -- To keep the numbers meaningful, a person counts toward the average once they
 -- have 10 Yes or No answers, and a claim is listed once it has 5. Anyone can
 -- read it, even before the site has signed them in anonymously.
@@ -347,8 +348,7 @@ language sql stable security definer set search_path = public as $$
     where not left_out_of_stats(a.user_id)
   ),
   people as (
-    select count(*) filter (where answer = 'yes')::numeric
-             / nullif(count(*) filter (where answer in ('yes', 'no')), 0) as score
+    select count(*) filter (where answer = 'yes')::numeric / count(*) as score
     from real_answers
     group by user_id
     having count(*) filter (where answer in ('yes', 'no')) >= 10
@@ -443,8 +443,7 @@ language sql stable security definer set search_path = public as $$
   ),
   people as (
     select p.continent,
-           count(*) filter (where a.answer = 'yes')::numeric
-             / nullif(count(*) filter (where a.answer in ('yes', 'no')), 0) as score
+           count(*) filter (where a.answer = 'yes')::numeric / count(*) as score
     from placed p
     join answers a on a.user_id = p.user_id
     group by p.user_id, p.continent

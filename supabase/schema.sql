@@ -203,6 +203,56 @@ begin
   delete from auth.users where id = auth.uid();
 end $$;
 
+-- The numbers on woometer.com/stats, as one bundle: the average woo score
+-- across everyone, how scores are spread out, and Yes / No / Don't Know totals
+-- per claim. Only totals, never who answered what. Test accounts are left out.
+-- To keep the numbers meaningful, a person counts toward the average once they
+-- have 10 Yes or No answers, and a claim is listed once it has 5. Anyone can
+-- read it, even before the site has signed them in anonymously.
+create or replace function public.site_stats()
+returns json
+language sql stable security definer set search_path = public as $$
+  with real_answers as (
+    select a.user_id, a.claim_id, a.answer
+    from answers a
+    where not exists (select 1 from profiles p where p.id = a.user_id and p.is_tester)
+  ),
+  people as (
+    select count(*) filter (where answer = 'yes')::numeric
+             / nullif(count(*) filter (where answer in ('yes', 'no')), 0) as score
+    from real_answers
+    group by user_id
+    having count(*) filter (where answer in ('yes', 'no')) >= 10
+  ),
+  claims as (
+    select claim_id,
+           count(*) filter (where answer = 'yes') as n_yes,
+           count(*) filter (where answer = 'no') as n_no,
+           count(*) filter (where answer = 'unsure') as n_unsure
+    from real_answers
+    group by claim_id
+    having count(*) filter (where answer in ('yes', 'no')) >= 5
+  )
+  select json_build_object(
+    'min_person_answers', 10,
+    'min_claim_answers', 5,
+    'people', (select count(*) from people),
+    'average_score', (select avg(score) from people),
+    'median_score', (select percentile_cont(0.5) within group (order by score) from people),
+    -- How many people fall in each tenth: 0-9%, 10-19%, ... 90-100%.
+    'spread', (select json_agg(coalesce(b.n, 0) order by g.i)
+               from generate_series(0, 9) as g(i)
+               left join (select least(floor(score * 10), 9)::int as i, count(*) as n
+                          from people group by 1) b on b.i = g.i),
+    'claims', coalesce((select json_agg(json_build_object(
+                          'id', claim_id, 'yes', n_yes, 'no', n_no, 'unsure', n_unsure))
+                        from claims), '[]'::json)
+  );
+$$;
+
+revoke execute on function public.site_stats() from public;
+grant execute on function public.site_stats() to anon, authenticated;
+
 revoke execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
   public.add_friend(text), public.my_friends(), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
   public.delete_my_account() from public, anon;

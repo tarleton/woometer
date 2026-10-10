@@ -358,7 +358,7 @@
     footNote(`Couldn't reach the woometer server, so your answers are only saved in this browser for now. (${detail})`);
   }
 
-  // The footer is just About · Privacy · Terms; a line above them appears
+  // The footer is just About · Stats · Privacy · Terms; a line above them appears
   // only when something has gone wrong.
   function footNote(text) {
     $("foot-note").textContent = text;

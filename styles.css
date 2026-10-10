@@ -580,7 +580,7 @@ dialog a { color: var(--accent); }
 
 .foot { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 16px 40px; }
 .foot-link { color: inherit; }
-/* Start over, for visitors not signed in (signed in, it's in the account menu). */
+/* Delete all answers, for visitors not signed in (signed in, it's in the account menu). */
 .foot .link-btn { font-size: inherit; }
 
 .toast {
@@ -717,9 +717,14 @@ dialog a { color: var(--accent); }
 .account-name { font-weight: 700; }
 .account-email { font-size: 13px; color: var(--muted); margin-bottom: 12px !important; word-break: break-all; }
 .account-menu .btn { width: 100%; }
-.account-menu .danger-link, .account-menu .menu-link, .name-dialog .danger-link { display: block; margin: 12px auto 0; }
+.account-menu .danger-link, .name-dialog .danger-link { display: block; margin: 12px auto 0; }
 .name-dialog .danger-link { margin-top: 20px; }
 .danger-link:hover { color: var(--danger); }
+/* Delete all answers and Delete my account: red, so nobody mistakes them for small stuff. */
+.account-menu .danger-link { color: var(--danger); }
+/* Room for "Delete in 3" so the button doesn't jump as it counts down. */
+.btn.countdown { min-width: 8.5em; font-variant-numeric: tabular-nums; }
+.btn.countdown:disabled { cursor: not-allowed; }
 .btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
 .btn.danger:disabled { opacity: 0.6; cursor: progress; }
 .delete-dialog { width: min(440px, calc(100vw - 32px)); }

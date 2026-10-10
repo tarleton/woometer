@@ -46,7 +46,7 @@
           <p class="account-name" id="account-name"></p>
           <p class="account-email" id="account-email"></p>
           <button type="button" id="sign-out" class="btn ghost">Sign out</button>
-          <button type="button" id="reset-account" class="link-btn menu-link">Start over (clear my answers)</button>
+          <button type="button" id="reset-account" class="link-btn danger-link">Delete all answers</button>
           <button type="button" id="delete-account" class="link-btn danger-link">Delete my account</button>
         </div>
       </div>
@@ -267,7 +267,18 @@
       <p>Your answers, friend list and name are deleted from woometer. Friends won't see you in their list anymore, and your shared link stops working. This can't be undone.</p>
       <div class="detail-actions">
         <button class="btn ghost" value="cancel">Cancel</button>
-        <button type="button" class="btn danger" id="delete-confirm">Delete</button>
+        <button type="button" class="btn danger countdown" id="delete-confirm">Delete</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="reset-dialog" class="delete-dialog">
+    <form method="dialog">
+      <h3>Are you sure you wish to delete all your answers?</h3>
+      <p>Every Yes, No and Don't Know you've given is deleted from woometer and this browser, and your score goes back to zero. Friends will have nothing to compare with you until you answer again. This can't be undone.</p>
+      <div class="detail-actions">
+        <button class="btn ghost" value="cancel">Cancel</button>
+        <button type="button" class="btn danger countdown" id="reset-confirm">Delete</button>
       </div>
     </form>
   </dialog>
@@ -322,7 +333,7 @@
 
   <footer class="foot">
     <p id="foot-note" hidden></p>
-    <p><a href="about" class="foot-link">About</a> · <a href="stats" class="foot-link">Stats</a> · <a href="privacy" class="foot-link">Privacy</a> · <a href="terms" class="foot-link">Terms</a><span id="reset-foot" hidden> · <button type="button" id="reset" class="link-btn foot-link">Start over</button></span></p>
+    <p><a href="about" class="foot-link">About</a> · <a href="stats" class="foot-link">Stats</a> · <a href="privacy" class="foot-link">Privacy</a> · <a href="terms" class="foot-link">Terms</a><span id="reset-foot" hidden> · <button type="button" id="reset" class="link-btn foot-link danger-link">Delete all answers</button></span></p>
   </footer>
 
   <script src="claims.js"></script>

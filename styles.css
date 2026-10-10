@@ -777,6 +777,8 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 .friends h3 { margin: 0; }
 .friends .bin-hint { margin: 0; }
 .friends .friend-list { max-height: 45vh; overflow-y: auto; }
+/* Adding a friend sits below the list, set off by a thin line. */
+.friends .add-friend { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 2px; }
 /* Reassurance that sharing only goes to whoever you pick. */
 .share-safe { margin: 0; font-size: 14px; color: var(--ink); }
 .share-safe::before { content: "✓ "; color: var(--trash); font-weight: 800; }

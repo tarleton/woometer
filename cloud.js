@@ -1207,11 +1207,11 @@
     return { both: agree + differ, agree, differ, agreements, differences };
   }
 
-  // Their meter and yours at the top of the comparison, cats in a bed in the middle.
+  // Their meter and yours at the top of the comparison, the cats together in the middle.
   // The gauges are copies of your meter's dial; a tap on either turns both
   // over to pies of the answers, and they start on the gauges each time.
   let pairDials = null;
-  function showPairMeter(friend, theirs, s) {
+  function showPairMeter(s) {
     $("pair-meter").hidden = !s.answered;
     if (!s.answered) return;
     if (!pairDials) {
@@ -1238,7 +1238,6 @@
       $(`${id}-cat-name`).textContent = Cat.name(stage);
       $(`${id}-pct`).textContent = `${sc.pct}%`;
     }
-    $("friend-who").textContent = friend.display_name || "Them";
     // Before you've answered anything, only their side shows.
     const youToo = sides[1][2].answered > 0;
     $("pm-you").hidden = !youToo;
@@ -1322,7 +1321,7 @@
     }
     $("compare-woo").replaceChildren(...scores);
     $("compare-woo").hidden = false;
-    showPairMeter(friend, theirs, s);
+    showPairMeter(s);
     if (s.woo.length) {
       $("their-pile-title").textContent = `${friend.display_name ? `${friend.display_name}'s` : "Their"} ✨ Believe It (${s.woo.length})`;
       $("their-pile-list").replaceChildren(

@@ -369,7 +369,7 @@
       const el = $("detail-stats");
       const id = e.detail.id;
       el.hidden = false;
-      el.textContent = "Counting everyone's answers…";
+      el.textContent = "Counting everyone's answers";
       const s = await statsFor(id);
       let mine = W.getAnswers()[id];
       if (!s) {
@@ -668,7 +668,7 @@
   async function deleteAccount() {
     const button = $("delete-confirm");
     button.disabled = true;
-    button.textContent = "Deleting…";
+    button.textContent = "Deleting";
     const { error } = await db.rpc("delete_my_account");
     if (error) {
       console.warn(error);
@@ -1104,7 +1104,7 @@
     $("agree-on").hidden = true;
     $("compare-bar").hidden = true;
     $("compare-woo").hidden = true;
-    $("compare-summary").textContent = "Loading…";
+    $("compare-summary").textContent = "Loading their answers";
     $("agree-box").hidden = true;
     $("differ-box").hidden = true;
     $("their-pile").hidden = true;

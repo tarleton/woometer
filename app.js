@@ -326,7 +326,17 @@
     dial.setAttribute("aria-label", on ? "Show the woo meter" : "Show your answers as a pie chart");
   }
 
-  dial.addEventListener("click", () => setFlipped(!dial.classList.contains("flipped")));
+  dial.addEventListener("click", () => {
+    const inner = dial.querySelector(".dial-inner");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const next = !dial.classList.contains("flipped");
+    inner.classList.remove("flipping");
+    void inner.offsetWidth; // restart the animation
+    inner.classList.add("flipping");
+    // Swap faces while the card is edge-on.
+    setTimeout(() => setFlipped(next), reduced ? 0 : 225);
+    setTimeout(() => inner.classList.remove("flipping"), 520);
+  });
 
   // Whole-number percentages that add up to 100 (largest remainder).
   function wholePercents(counts) {

@@ -125,18 +125,23 @@ button { font: inherit; cursor: pointer; }
   border: 0;
   background: none;
   color: inherit;
-  perspective: 600px;
 }
 .dial:disabled { cursor: default; }
 .dial:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; border-radius: 10px; }
-.dial-inner {
-  display: grid;
-  transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(.34, 1.56, .64, 1);
+/* Only one face is ever visible. The flip squashes the card flat, swaps faces
+   at the midpoint, then springs it back, so no browser's 3D quirks can show
+   the other side through. */
+.dial-inner { display: grid; }
+.dial .face { grid-area: 1 / 1; display: block; width: 100%; height: auto; }
+.dial .pie, .dial.flipped .gauge { visibility: hidden; }
+.dial.flipped .pie { visibility: visible; }
+.dial-inner.flipping { animation: dial-flip 0.5s ease-in-out; }
+@keyframes dial-flip {
+  0% { transform: scaleX(1); }
+  45% { transform: scaleX(0); }
+  80% { transform: scaleX(1.08); }
+  100% { transform: scaleX(1); }
 }
-.dial.flipped .dial-inner { transform: rotateY(180deg); }
-.dial .face { grid-area: 1 / 1; display: block; width: 100%; height: auto; backface-visibility: hidden; }
-.dial .pie { transform: rotateY(180deg); }
 .pie-label { font-size: 21px; font-weight: 800; fill: var(--ink); dominant-baseline: middle; }
 .dial-hint {
   position: absolute;

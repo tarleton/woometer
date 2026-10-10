@@ -232,7 +232,10 @@
     name.textContent = byId[id].name;
     if (answers[id] === "no") name.className = "struck";
     b.append(name);
-    b.addEventListener("click", onClick);
+    b.addEventListener("click", () => {
+      Sounds.open();
+      onClick();
+    });
     li.append(b);
     return li;
   }

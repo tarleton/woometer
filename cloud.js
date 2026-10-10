@@ -1200,7 +1200,7 @@
     return { both: agree + differ, agree, differ, agreements, differences };
   }
 
-  // Their meter and yours at the top of the comparison, cats in the middle.
+  // Their meter and yours at the top of the comparison, cats in a bed in the middle.
   // The gauges are copies of your meter's dial; a tap on either turns both
   // over to pies of the answers, and they start on the gauges each time.
   let pairDials = null;
@@ -1236,6 +1236,7 @@
     const youToo = sides[1][2].answered > 0;
     $("pm-you").hidden = !youToo;
     $("pm-you-cat").hidden = !youToo;
+    $("your-cat-name").hidden = !youToo;
   }
 
   async function openCompare(friend) {

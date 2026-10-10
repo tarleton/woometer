@@ -5,7 +5,7 @@
 //   Sounds.unsure() - a soft, questioning "hm?" that rises at the end
 //   Sounds.forward() - a quiet rising tick when opening another page
 //   Sounds.back()    - the same tick falling, when heading back to the main page
-//   Sounds.meow()    - a very soft little meow for tapping the cat
+//   Sounds.meow()    - a very soft little meow for tapping the cat, one of 21 at random
 const Sounds = (function () {
   const STORAGE_KEY = "woometer.muted";
   let ctx = null;
@@ -91,28 +91,73 @@ const Sounds = (function () {
   const forward = () => tick(784, 1046.5);
   const back = () => tick(1046.5, 784);
 
-  // A sawtooth voice through a sweeping band-pass filter, so it opens like "mi"
-  // and closes like "ow". Kept very quiet.
+  // Meows: a sawtooth voice through a sweeping band-pass filter, so each one
+  // opens like "mi" and closes like "ow". Twenty small cute ones and one silly
+  // low one; tapping the cat picks one at random, never the same twice running.
+  //   [start Hz, peak Hz, end Hz, length s, filter peak Hz, trill Hz (0 = none)]
+  const MEOWS = [
+    [520, 760, 430, 0.5, 2200, 0],
+    [700, 980, 560, 0.32, 2600, 0],
+    [820, 1100, 700, 0.22, 2900, 0],
+    [600, 900, 820, 0.28, 2500, 0],
+    [480, 680, 380, 0.6, 2000, 0],
+    [900, 1250, 760, 0.18, 3100, 0],
+    [640, 860, 500, 0.4, 2400, 0],
+    [560, 820, 600, 0.35, 2300, 18],
+    [750, 1050, 900, 0.25, 2800, 0],
+    [500, 720, 460, 0.45, 2100, 22],
+    [680, 940, 520, 0.3, 2600, 0],
+    [860, 1180, 980, 0.2, 3000, 0],
+    [620, 780, 420, 0.55, 2200, 0],
+    [740, 1020, 640, 0.34, 2700, 26],
+    [580, 840, 700, 0.26, 2400, 0],
+    [960, 1300, 840, 0.16, 3200, 0],
+    [540, 760, 520, 0.42, 2150, 0],
+    [660, 920, 600, 0.3, 2550, 20],
+    [800, 1080, 620, 0.28, 2850, 0],
+    [600, 880, 460, 0.38, 2350, 0],
+    // The silly one: low, long and a bit wobbly.
+    [190, 260, 140, 0.9, 900, 9],
+  ];
+  let lastMeow = -1;
+
   function meow() {
     const ac = !muted && audio();
     if (!ac) return;
+    let i;
+    do i = Math.floor(Math.random() * MEOWS.length);
+    while (i === lastMeow);
+    lastMeow = i;
+    const [f0, fPeak, fEnd, len, bright, trill] = MEOWS[i];
     const t = ac.currentTime;
-    const len = 0.5;
+    const rise = len * 0.32;
     const osc = ac.createOscillator();
     const filter = ac.createBiquadFilter();
     const gain = ac.createGain();
     osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(520, t);
-    osc.frequency.linearRampToValueAtTime(760, t + 0.16);
-    osc.frequency.exponentialRampToValueAtTime(430, t + len);
+    osc.frequency.setValueAtTime(f0, t);
+    osc.frequency.linearRampToValueAtTime(fPeak, t + rise);
+    osc.frequency.exponentialRampToValueAtTime(fEnd, t + len);
+    if (trill) {
+      // A little purring wobble in the pitch.
+      const lfo = ac.createOscillator();
+      const depth = ac.createGain();
+      lfo.frequency.value = trill;
+      depth.gain.value = f0 * 0.06;
+      lfo.connect(depth).connect(osc.frequency);
+      lfo.start(t);
+      lfo.stop(t + len + 0.05);
+    }
     filter.type = "bandpass";
     filter.Q.value = 6;
-    filter.frequency.setValueAtTime(1400, t);
-    filter.frequency.linearRampToValueAtTime(2200, t + 0.14);
-    filter.frequency.exponentialRampToValueAtTime(700, t + len);
+    filter.frequency.setValueAtTime(bright * 0.65, t);
+    filter.frequency.linearRampToValueAtTime(bright, t + rise * 0.9);
+    filter.frequency.exponentialRampToValueAtTime(Math.max(300, bright * 0.32), t + len);
+    // The low silly meow needs more push to be heard through the filter.
+    const volume = f0 < 300 ? 0.26 : 0.2;
     gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(0.2, t + 0.06);
-    gain.gain.setValueAtTime(0.2, t + 0.25);
+    gain.gain.exponentialRampToValueAtTime(volume, t + Math.min(0.06, len * 0.25));
+    gain.gain.setValueAtTime(volume, t + len * 0.5);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + len);
     osc.connect(filter).connect(gain).connect(ac.destination);
     osc.start(t);

@@ -45,10 +45,12 @@
         <div class="account-menu" id="account-menu" hidden>
           <p class="account-name" id="account-name"></p>
           <p class="account-email" id="account-email"></p>
-          <button type="button" id="link-facebook" class="btn ghost" hidden>Link Facebook</button>
-          <button type="button" id="sign-out" class="btn ghost">Sign out</button>
-          <button type="button" id="reset-account" class="link-btn danger-link">Delete all answers</button>
-          <button type="button" id="delete-account" class="link-btn danger-link">Delete my account</button>
+          <button type="button" id="link-facebook" class="fbsi" hidden><svg class="f-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.69.23 2.69.23v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.26h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"/></svg><span>Link Facebook</span></button>
+          <div class="account-links">
+            <button type="button" id="sign-out" class="link-btn">Sign out</button>
+            <button type="button" id="reset-account" class="link-btn danger-link">Delete all answers</button>
+            <button type="button" id="delete-account" class="link-btn danger-link">Delete my account</button>
+          </div>
         </div>
       </div>
       <button type="button" id="mute" class="mute" aria-pressed="false" title="Turn sound off">🔊</button>

@@ -803,6 +803,7 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 .friends .friend-list { max-height: 45vh; overflow-y: auto; }
 /* Adding a friend sits below the list, set off by a thin line. */
 .friends .add-friend { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 2px; }
+.friends-keep .link-btn { color: var(--accent); font: inherit; font-weight: 600; }
 /* Send your link on the left, Close on the right; on phones the send button gets its own full-width row. */
 .friends-actions [value="close"] { margin-left: auto; }
 @media (max-width: 520px) { #friends-share { flex: 1 1 100%; } }
@@ -968,7 +969,3 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 .their-pile { margin-top: 12px; }
 .their-pile summary { cursor: pointer; font-weight: 700; margin-bottom: 8px; }
 
-.signin-prompt { width: min(420px, calc(100vw - 32px)); }
-.signin-prompt h3 { margin: 0 0 8px; }
-.signin-prompt p { margin: 0; color: var(--muted); }
-.signin-prompt .detail-actions { align-items: center; }

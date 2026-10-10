@@ -681,6 +681,29 @@ dialog a { color: var(--accent); }
 }
 .gsi:hover { background: #1f1f20; }
 .g-logo { width: 18px; height: 18px; flex: none; }
+/* Facebook's standard button: Facebook blue with the white "f". */
+.fbsi {
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px 0 12px;
+  border-radius: 999px;
+  border: 0;
+  background: #1877f2;
+  color: #fff;
+  font: 600 14px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.fbsi:hover { background: #166fe5; }
+.fbsi:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.f-logo { width: 20px; height: 20px; flex: none; }
+/* Top-bar Sign in when Facebook is offered too: a plain person, not Google's G. */
+.person-logo { width: 18px; height: 18px; flex: none; fill: currentColor; }
+.signin-choice { width: min(400px, calc(100vw - 32px)); }
+.signin-choice h3 { margin: 0 0 6px; }
+.signin-choice p { margin: 0; color: var(--muted); }
+.signin-buttons { display: flex; flex-direction: column; align-items: stretch; gap: 10px; margin-top: 16px; }
+.signin-buttons > button { justify-content: center; }
 
 .account { position: relative; display: flex; }
 /* The Account button: your Google picture (or initial) and the word Account. */
@@ -778,7 +801,8 @@ dialog a { color: var(--accent); }
   /* Every icon gets the same 24px box so the words line up underneath. */
   .top-btn > span[aria-hidden] { height: 24px; font-size: 20px; line-height: 24px; }
   .top-btn .cat-icon { width: 24px; height: 24px; }
-  #google-login .g-logo { width: 20px; height: 20px; margin: 2px 0; }
+  #google-login .g-logo, #google-login .person-logo { width: 20px; height: 20px; margin: 2px 0; }
+  #google-login .person-logo { color: var(--muted); }
   .account-btn .avatar { width: 24px; height: 24px; font-size: 12px; }
   .top-btn-label, #google-login .gsi-label { font: 600 11px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--muted); letter-spacing: 0; }
   .top-btn .badge { position: absolute; top: 0; left: calc(50% + 6px); min-width: 18px; padding: 0 5px; font-size: 11px; line-height: 18px; }

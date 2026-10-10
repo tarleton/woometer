@@ -1,20 +1,27 @@
 // Accounts, "N% of people agree" stats and friend comparisons, backed by Supabase.
 //
 // Every visitor quietly gets an anonymous Supabase user, so stats and friend
-// links work with no sign-up. Signing in with Google links that same user, so
-// nothing is lost and answers follow you to other devices. If config.js has no
+// links work with no sign-up. Signing in with Google (or Facebook) links that
+// same user, so nothing is lost and answers follow you to other devices. If config.js has no
 // Supabase settings, or Supabase can't be reached, this file does nothing and
 // the site keeps working from localStorage alone.
 (function () {
   const cfg = window.WOOMETER_CONFIG || {};
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || !window.Woometer) return;
+  // woometer.com/?facebook=1 shows Facebook sign-in for this tab even while
+  // facebookSignIn is off, so Meta's app reviewers can try it before it's on
+  // for everyone. It survives the trip to Facebook and back.
+  try {
+    if (new URLSearchParams(location.search).get("facebook") === "1") sessionStorage.setItem("woometer.facebookTest.v1", "1");
+    if (sessionStorage.getItem("woometer.facebookTest.v1")) cfg.facebookSignIn = true;
+  } catch {}
 
   const SUPABASE_JS = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js";
   const FRIEND_CODES_KEY = "woometer.friendCodes.v1";
   const LAST_USER_KEY = "woometer.lastUser.v1";
   // The answers this browser last knew the account to hold, and whose account.
   const SYNCED_KEY = "woometer.synced.v1";
-  // The friend someone was adding when they left to sign in with Google.
+  // The friend someone was adding when they left to sign in.
   const PENDING_FRIEND_KEY = "woometer.pendingFriend.v1";
   // Friends already shown in this browser's Friends list, and whose account.
   const FRIENDS_SEEN_KEY = "woometer.friendsSeen.v1";
@@ -24,6 +31,11 @@
   const GOOGLE_AUTH = "https://accounts.google.com/o/oauth2/v2/auth";
   // Per-tab check values for a trip to Google's sign-in page and back.
   const GOOGLE_TRIP_KEY = "woometer.googleTrip.v1";
+  // Per-tab note of a sign-in through Supabase's redirect (Facebook, or Google
+  // without googleClientId): which provider, and whether it was to sign in or
+  // to link it to the account already signed in.
+  const OAUTH_TRIP_KEY = "woometer.oauthTrip.v1";
+  const PROVIDER_NAMES = { google: "Google", facebook: "Facebook" };
   // Set when someone taps "Not now" on the "Keep your answers safe" note.
   const SAVE_NOTE_KEY = "woometer.saveNoteHidden.v1";
   // Answers before that note shows, so first-time visitors can look around first.
@@ -73,14 +85,23 @@
     db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
     db.auth.onAuthStateChange((event, session) => keepSession(session));
 
-    // Linking Google to this browser's anonymous user fails when that Google
-    // account already has its own Woometer user (say, from another device).
-    // Then sign in to that user instead; the answers in this browser get merged in.
+    // Back from signing in through Supabase's redirect (see oauthTrip).
+    // Linking to this browser's anonymous user fails when that Google or
+    // Facebook account already has its own woometer user (say, from another
+    // device). Then sign in to that user instead; the answers in this browser
+    // get merged in. Linking to an account that's already signed in just says so.
+    const trip = takeOAuthTrip();
     const params = new URLSearchParams(location.hash.slice(1) + "&" + location.search.slice(1));
-    if (params.get("error_code") === "identity_already_exists") {
+    let tripProblem = null;
+    if (params.get("error")) {
       history.replaceState(null, "", location.pathname);
-      await db.auth.signInWithOAuth({ provider: "google", options: { redirectTo: homeUrl() } });
-      return;
+      const taken = params.get("error_code") === "identity_already_exists";
+      if (taken && (!trip || trip.mode === "signin")) {
+        await db.auth.signInWithOAuth({ provider: trip ? trip.provider : "google", options: { redirectTo: homeUrl() } });
+        return;
+      }
+      // access_denied: they backed out on Google's or Facebook's page.
+      if (trip && params.get("error") !== "access_denied") tripProblem = { taken, detail: params.get("error_description") || params.get("error") };
     }
 
     let { data } = await db.auth.getSession();
@@ -119,6 +140,18 @@
     if (googleProblem) {
       const detail = googleProblem.message || googleProblem.code || String(googleProblem);
       footNote(`Google sign-in didn't work, so you're not signed in. (${detail})`);
+    }
+    if (trip) {
+      const name = PROVIDER_NAMES[trip.provider] || trip.provider;
+      if (tripProblem && trip.mode === "link") {
+        W.toast(tripProblem.taken
+          ? `That ${name} account already has its own woometer account, so it wasn't linked to this one.`
+          : `${name} couldn't be linked just now. (${tripProblem.detail})`);
+      } else if (tripProblem) {
+        footNote(`${name} sign-in didn't work, so you're not signed in. (${tripProblem.detail})`);
+      } else if (trip.mode === "link" && providersOf(user).includes(trip.provider)) {
+        W.toast(`${name} is linked. You can sign in with either one.`);
+      }
     }
     try {
       if (sessionStorage.getItem(DELETED_KEY)) {
@@ -389,8 +422,21 @@
       else el.textContent = `${split} ${pct(s[mine], total)}% agree with you.`;
     });
 
-    $("google-login").addEventListener("click", signInWithGoogle);
+    $("google-login").addEventListener("click", signIn);
     $("save-google").addEventListener("click", signInWithGoogle);
+    $("save-facebook").addEventListener("click", signInWithFacebook);
+    $("choice-google").addEventListener("click", () => {
+      $("signin-choice").close();
+      signInWithGoogle();
+    });
+    $("choice-facebook").addEventListener("click", () => {
+      $("signin-choice").close();
+      signInWithFacebook();
+    });
+    $("link-facebook").addEventListener("click", () => {
+      setMenu(false);
+      signInWithFacebook();
+    });
     $("save-hide").addEventListener("click", () => {
       try {
         localStorage.setItem(SAVE_NOTE_KEY, "1");
@@ -398,7 +444,7 @@
       renderSaveNote();
     });
     for (const name of ["answer", "remove", "reset"]) document.addEventListener(`woometer:${name}`, renderSaveNote);
-    $("friends-google").addEventListener("click", signInWithGoogle);
+    $("friends-google").addEventListener("click", signIn);
     $("friends-open").addEventListener("click", () => {
       $("friends").showModal();
       $("friends-count").hidden = true;
@@ -445,12 +491,14 @@
       if (profile.display_name) W.toast("Your name can't be blank: friends see it in their list.");
     });
     $("name-save").addEventListener("click", saveNameFromDialog);
-    $("name-google-btn").addEventListener("click", () => {
-      // Adding a friend when they left: finish it once they're back.
-      if (afterName && afterName.friend) savePendingFriend(afterName.friend.code, afterName.friend.name);
-      $("name-dialog").close();
-      signInWithGoogle();
-    });
+    for (const [id, go] of [["name-google-btn", signInWithGoogle], ["name-facebook-btn", signInWithFacebook]]) {
+      $(id).addEventListener("click", () => {
+        // Adding a friend when they left: finish it once they're back.
+        if (afterName && afterName.friend) savePendingFriend(afterName.friend.code, afterName.friend.name);
+        $("name-dialog").close();
+        go();
+      });
+    }
     $("name-dialog").addEventListener("close", () => {
       if (afterName) afterName.resolve(false);
       afterName = null;
@@ -526,7 +574,7 @@
       hidden = localStorage.getItem(SAVE_NOTE_KEY) === "1";
     } catch {}
     const answered = Object.keys(W.getAnswers()).length;
-    const hide = hidden || !user.is_anonymous || !cfg.googleSignIn || answered < SAVE_NOTE_AFTER;
+    const hide = hidden || !user.is_anonymous || !(cfg.googleSignIn || cfg.facebookSignIn) || answered < SAVE_NOTE_AFTER;
     if ($("save-note").hidden === hide) return;
     $("save-note").hidden = hide;
     // The side column re-fits its piles to the window on resize.
@@ -536,11 +584,23 @@
   function renderAccount() {
     renderSaveNote();
     const anon = user.is_anonymous;
-    // The sign-in button stays hidden until the Google provider is set up in
-    // Supabase (googleSignIn in config.js).
-    $("google-login").hidden = !anon || !cfg.googleSignIn;
-    $("google-login").title = "Sign in with Google to keep your answers and friends on any device";
+    // Each sign-in button stays hidden until its provider is set up in
+    // Supabase (googleSignIn and facebookSignIn in config.js). With both, the
+    // top-bar Sign in offers a choice, so it shows a plain person instead of the G.
+    const both = cfg.googleSignIn && cfg.facebookSignIn;
+    $("google-login").hidden = !anon || !(cfg.googleSignIn || cfg.facebookSignIn);
+    $("google-login").querySelector(".g-logo").toggleAttribute("hidden", !cfg.googleSignIn || both);
+    $("google-login").querySelector(".person-logo").toggleAttribute("hidden", !cfg.facebookSignIn);
+    $("google-login").setAttribute("aria-label", both ? "Sign in" : `Sign in with ${cfg.googleSignIn ? "Google" : "Facebook"}`);
+    $("google-login").title = `${both ? "Sign in" : `Sign in with ${cfg.googleSignIn ? "Google" : "Facebook"}`} to keep your answers and friends on any device`;
+    $("save-google").hidden = !cfg.googleSignIn;
+    $("save-facebook").hidden = !cfg.facebookSignIn;
+    $("save-how").textContent = both ? "Sign in with Google or Facebook" : `Sign in with ${cfg.googleSignIn ? "Google" : "Facebook"}`;
+    $("choice-google").hidden = !cfg.googleSignIn;
+    $("choice-facebook").hidden = !cfg.facebookSignIn;
+    $("friends-google").textContent = both ? "Sign in" : `Sign in with ${cfg.googleSignIn ? "Google" : "Facebook"}`;
     $("account").hidden = anon;
+    $("link-facebook").hidden = anon || !cfg.facebookSignIn || providersOf(user).includes("facebook");
     if (anon) return;
 
     const meta = user.user_metadata || {};
@@ -570,14 +630,55 @@
     $("avatar").setAttribute("aria-expanded", String(open));
   }
 
+  // The top-bar Sign in (and the Friends note): straight to Google, or a
+  // choice of Google or Facebook when both are on.
+  function signIn() {
+    if (cfg.googleSignIn && cfg.facebookSignIn) return $("signin-choice").showModal();
+    return cfg.googleSignIn ? signInWithGoogle() : signInWithFacebook();
+  }
+
   async function signInWithGoogle() {
     // crypto.subtle (for the nonce) only exists on https pages.
     if (cfg.googleClientId && window.crypto && crypto.subtle) return goToGoogle();
+    return oauthTrip("google", "signin");
+  }
+
+  // Facebook goes through Supabase's redirect; Facebook's screen names the
+  // Meta app (woometer), not the Supabase address. Signed in already, this
+  // links Facebook to the same account (Link Facebook in the account menu).
+  function signInWithFacebook() {
+    return oauthTrip("facebook", user.is_anonymous ? "signin" : "link");
+  }
+
+  // Keep the same user so answers and friends carry over. linkIdentity needs
+  // "manual linking" on in Supabase; without it, fall back to a plain sign-in.
+  async function oauthTrip(provider, mode) {
     const options = { redirectTo: homeUrl() };
-    // Keep the same user so answers and friends carry over. linkIdentity needs
-    // "manual linking" on in Supabase; without it, fall back to a plain sign-in.
-    const { error } = await db.auth.linkIdentity({ provider: "google", options });
-    if (error) await db.auth.signInWithOAuth({ provider: "google", options });
+    try {
+      sessionStorage.setItem(OAUTH_TRIP_KEY, JSON.stringify({ provider, mode }));
+    } catch {}
+    const { error } = await db.auth.linkIdentity({ provider, options });
+    if (!error) return;
+    console.warn(`Woometer: linking ${provider} failed.`, error);
+    if (mode === "signin") return db.auth.signInWithOAuth({ provider, options });
+    takeOAuthTrip();
+    W.toast(`${PROVIDER_NAMES[provider]} couldn't be linked just now. Try again in a moment.`);
+  }
+
+  function takeOAuthTrip() {
+    try {
+      const trip = JSON.parse(sessionStorage.getItem(OAUTH_TRIP_KEY));
+      sessionStorage.removeItem(OAUTH_TRIP_KEY);
+      return trip && trip.provider ? trip : null;
+    } catch {
+      return null;
+    }
+  }
+
+  // The sign-ins on this account: "google", "facebook" (anonymous has none).
+  function providersOf(u) {
+    const meta = (u.app_metadata && u.app_metadata.providers) || [];
+    return [...new Set([...meta, ...(u.identities || []).map((i) => i.provider)])];
   }
 
   // Sign in on Google's own page and come straight back with an ID token, so
@@ -704,7 +805,11 @@
     if (profile.display_name) return Promise.resolve(then());
     const meta = user.user_metadata || {};
     $("name-input").value = (meta.full_name || meta.name || "").trim().slice(0, 40);
-    $("name-google").hidden = !(user.is_anonymous && cfg.googleSignIn);
+    const both = cfg.googleSignIn && cfg.facebookSignIn;
+    $("name-google").hidden = !(user.is_anonymous && (cfg.googleSignIn || cfg.facebookSignIn));
+    $("name-google-btn").hidden = !cfg.googleSignIn;
+    $("name-facebook-btn").hidden = !cfg.facebookSignIn;
+    $("name-or").textContent = `to use your ${both ? "Google or Facebook" : cfg.googleSignIn ? "Google" : "Facebook"} name, or type a name:`;
     return new Promise((resolve) => {
       afterName = { then, resolve, friend };
       $("name-dialog").showModal();
@@ -825,14 +930,14 @@
     // You added them yourself, so they don't count as new on the badge.
     const seen = seenFriends();
     if (seen) saveSeenFriends(seen.add(friendId));
-    W.toast(`${name || "Your friend"} is now in your friends.` + (keepFriendsNote() ? " Sign in with Google to keep them safe on any device." : ""));
+    W.toast(`${name || "Your friend"} is now in your friends.` + (keepFriendsNote() ? ` ${$("friends-google").textContent} to keep them safe on any device.` : ""));
     refreshFriends();
     return true;
   }
 
   // A gentle nudge for friends kept only by this browser's anonymous account.
   function keepFriendsNote() {
-    return user.is_anonymous && cfg.googleSignIn;
+    return user.is_anonymous && Boolean(cfg.googleSignIn || cfg.facebookSignIn);
   }
 
   function savePendingFriend(code, name) {

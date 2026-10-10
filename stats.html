@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="styles.css">
   <style>
     .policy { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; line-height: 1.5; }
-    .policy h2 { margin: 32px 0 6px; font-size: 20px; }
+    .policy h2 { margin: 28px 0 4px; font-size: 20px; }
     .policy a { color: var(--accent); }
     .policy .lede { color: var(--muted); margin-top: 4px; }
     .top a.home { color: inherit; text-decoration: none; }
@@ -33,10 +33,21 @@
     .spread-axis span { flex: 1; text-align: center; font-size: 10px; line-height: 1.2; color: var(--muted); min-width: 0; }
 
     .ranked { list-style: none; padding: 0; margin: 12px 0 0; counter-reset: rank; }
-    .ranked li { counter-increment: rank; display: grid; grid-template-columns: 24px 1fr; gap: 2px 8px; padding: 10px 0; border-bottom: 1px solid var(--line); }
-    .ranked li::before { content: counter(rank); color: var(--muted); font-variant-numeric: tabular-nums; grid-row: span 3; }
-    .ranked .name { font-weight: 600; }
-    .ranked .split { display: flex; gap: 2px; height: 20px; margin-top: 6px; }
+    /* Phones: name and percentages on one line, the bar under them.
+       Wider screens: all on one line. */
+    .ranked li { counter-increment: rank; display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; grid-template-areas: "n name meta" "n bar bar"; align-items: center; gap: 4px 8px; padding: 7px 0; border-bottom: 1px solid var(--line); }
+    .ranked li::before { content: counter(rank); grid-area: n; align-self: start; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+    .ranked li.more { display: none; }
+    .ranked.open li.more { display: grid; }
+    .ranked .name { grid-area: name; font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ranked .split { grid-area: bar; display: flex; gap: 2px; height: 20px; }
+    @media (min-width: 640px) {
+      .ranked li { grid-template-columns: 18px minmax(0, 1fr) minmax(0, 1.1fr) 168px; grid-template-areas: "n name bar meta"; }
+      .ranked li::before { align-self: center; }
+      .ranked .meta { text-align: right; }
+    }
+    .show-more { margin-top: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--accent); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .show-more:hover { border-color: var(--accent); }
     .ranked .split span { position: relative; flex: 1 1 0; min-width: 22px; padding-left: 6px; font-size: 12px; font-weight: 600; line-height: 20px; color: #fff; font-variant-numeric: tabular-nums; cursor: default; outline: none; }
     .ranked .split span:first-child { border-radius: 5px 0 0 5px; }
     .ranked .split span:last-child { border-radius: 0 5px 5px 0; }
@@ -53,7 +64,7 @@
     .ranked .split .y { background: var(--woo); }
     .ranked .split .x { background: var(--trash); }
     .ranked .split .u { background: var(--unsure); }
-    .ranked .meta { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    .ranked .meta { grid-area: meta; color: var(--muted); font-size: 13px; white-space: nowrap; }
 
     .map-section h2 { margin-top: 16px; }
     .world { display: block; width: 100%; height: auto; margin-top: 12px; background: #120e19; border: 1px solid var(--line); border-radius: var(--radius); }
@@ -124,6 +135,12 @@
         <h2>⚖️ Most evenly split</h2>
         <p class="lede">The claims people disagree on the most, closest to half and half.</p>
         <ol class="ranked" id="split"></ol>
+      </section>
+
+      <section id="unsure-section">
+        <h2>🤷 Most Don't Know</h2>
+        <p class="lede">The claims the most people aren't sure about.</p>
+        <ol class="ranked" id="unsure"></ol>
       </section>
 
       <p class="note" id="method-note"></p>

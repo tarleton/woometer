@@ -24,7 +24,12 @@
 //   electric-universe, expanding-earth, hollow-moon, lhc-doomsday,
 //   irreducible-complexity, dyatlov-pass, philadelphia-experiment, amityville,
 //   puma-punku, face-on-mars, kirlian, biorhythms, phrenology, sleep-learning,
-//   hho-kits, water-car.
+//   hho-kits, water-car, diana-murdered, procter-gamble-satanic,
+//   psychic-animals, mayan-2012, jim-jones, heavens-gate, nazca-lines,
+//   denver-airport, elixir-immortality, jfk-conspiracy, stolen-election-2020,
+//   climate-hoax, great-replacement, myers-briggs, carnivore-diet, chronic-lyme,
+//   king-tut-curse, bilderberg, aum-shinrikyo, branch-davidians, moses-torah,
+//   divine-emperor.
 
 // `short` is the label on the filter buttons, when the full one is long.
 const CATEGORIES = {
@@ -561,22 +566,6 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/Frequency_illusion",
   },
   {
-    id: "mayan-2012",
-    name: "Mayan 2012 Apocalypse",
-    category: "divination",
-    question: "Do you believe the ancient Maya calendar foretold the end of the world in 2012?",
-    verdict: "December 21, 2012 was just the end of a cycle (b'ak'tun) in the Maya Long Count calendar. Maya inscriptions refer to dates thousands of years later, and nothing happened.",
-    link: "https://en.wikipedia.org/wiki/2012_phenomenon",
-  },
-  {
-    id: "psychic-animals",
-    name: "Psychic Pets",
-    category: "divination",
-    question: "Do you believe some animals, like Paul the Octopus, can predict future events?",
-    verdict: "Paul picked 8 of 8 matches in the 2010 World Cup, about 1-in-256 odds. With many animals 'predicting' around the world, a few are bound to get lucky, and those are the ones that make the news.",
-    link: "https://en.wikipedia.org/wiki/Paul_the_Octopus",
-  },
-  {
     id: "spoon-bending",
     name: "Spoon Bending",
     category: "divination",
@@ -1037,14 +1026,6 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/Genetically_modified_food_controversies",
   },
   {
-    id: "carnivore-diet",
-    name: "Carnivore Diet",
-    category: "health",
-    question: "Do you believe an all-meat carnivore diet can cure chronic diseases?",
-    verdict: "There are no controlled trials showing it cures any disease; the claims rest on testimonials. The WHO's cancer agency classifies processed meat as a cause of colorectal cancer.",
-    link: "https://en.wikipedia.org/wiki/Carnivore_diet",
-  },
-  {
     id: "aids-denialism",
     name: "HIV Doesn't Cause AIDS",
     category: "health",
@@ -1067,14 +1048,6 @@ const CLAIMS = [
     question: "Do you believe Morgellons is a disease in which strange fibers grow out of the skin?",
     verdict: "A CDC study of 115 patients published in 2012 found no infection or parasite; the fibers examined were mostly cotton, likely from clothing. The distress is real, but the condition resembles delusional parasitosis.",
     link: "https://en.wikipedia.org/wiki/Morgellons",
-  },
-  {
-    id: "chronic-lyme",
-    name: "Chronic Lyme Disease",
-    category: "health",
-    question: "Do you believe 'chronic Lyme' is a hidden long-term infection that needs months of antibiotics?",
-    verdict: "Lingering symptoms after Lyme disease are real, but randomized trials, including one in NEJM in 2001, found long-term antibiotics worked no better than placebo, and long IV antibiotic courses have caused serious infections and deaths.",
-    link: "https://en.wikipedia.org/wiki/Chronic_Lyme_disease",
   },
   {
     id: "adrenal-fatigue",
@@ -1401,14 +1374,6 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/Men_in_black",
   },
   {
-    id: "nazca-lines",
-    name: "Nazca Lines",
-    category: "paranormal",
-    question: "Do you believe Peru's Nazca lines were made for aliens to see?",
-    verdict: "They were made by the Nazca culture (roughly 500 BC to 500 AD) by moving dark surface stones to expose lighter ground. In 1982 Joe Nickell's team reproduced a large Nazca figure using only stakes, string and simple measuring.",
-    link: "https://en.wikipedia.org/wiki/Nazca_Lines",
-  },
-  {
     id: "nibiru",
     name: "Nibiru / Planet X",
     category: "paranormal",
@@ -1561,14 +1526,6 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/Hollow_Earth",
   },
   {
-    id: "king-tut-curse",
-    name: "King Tut's Curse",
-    category: "magic",
-    question: "Do you believe a pharaoh's curse killed people who opened King Tutankhamun's tomb?",
-    verdict: "A 2002 BMJ study found the 25 Westerners present at the tomb's openings lived to an average of 70, no shorter than others. Howard Carter, who led the excavation, lived until 1939.",
-    link: "https://en.wikipedia.org/wiki/Curse_of_the_pharaohs",
-  },
-  {
     id: "hope-diamond",
     name: "Cursed Objects",
     category: "magic",
@@ -1603,36 +1560,12 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/9/11_conspiracy_theories",
   },
   {
-    id: "jfk-conspiracy",
-    name: "JFK Second Gunman",
-    category: "conspiracy",
-    question: "Do you believe a second gunman was involved in President Kennedy's assassination?",
-    verdict: "The Warren Commission (1964) found Oswald acted alone. A 1979 House committee suggested a second shooter based on a police dictabelt recording, but a 1982 National Academy of Sciences panel found that acoustic evidence was flawed.",
-    link: "https://en.wikipedia.org/wiki/John_F._Kennedy_assassination_conspiracy_theories",
-  },
-  {
-    id: "diana-murdered",
-    name: "Diana Was Murdered",
-    category: "conspiracy",
-    question: "Do you believe Princess Diana was deliberately murdered?",
-    verdict: "Scotland Yard's Operation Paget (2006) found no evidence of a plot. A 2008 inquest jury ruled unlawful killing caused by grossly negligent driving by chauffeur Henri Paul, who was drunk, and the pursuing paparazzi.",
-    link: "https://en.wikipedia.org/wiki/Death_of_Diana,_Princess_of_Wales",
-  },
-  {
     id: "sandy-hook-hoax",
     name: "Sandy Hook Hoax",
     category: "conspiracy",
     question: "Do you believe the 2012 Sandy Hook school shooting was staged with crisis actors?",
     verdict: "Twenty children and six staff were killed on December 14, 2012. In 2022, courts in Connecticut and Texas ordered Alex Jones to pay victims' families more than $1 billion for defaming them with his hoax claims.",
     link: "https://en.wikipedia.org/wiki/Sandy_Hook_Elementary_School_shooting",
-  },
-  {
-    id: "denver-airport",
-    name: "Denver Airport Secrets",
-    category: "conspiracy",
-    question: "Do you believe Denver International Airport hides a secret underground bunker for the elite?",
-    verdict: "Its tunnels were built for an automated baggage system so troubled it delayed the airport's 1995 opening and was scrapped in 2005. The airport now jokes about the theories in its own exhibits.",
-    link: "https://en.wikipedia.org/wiki/Denver_International_Airport",
   },
   {
     id: "haarp",
@@ -1659,14 +1592,6 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/Agenda_21",
   },
   {
-    id: "great-replacement",
-    name: "Great Replacement",
-    category: "conspiracy",
-    question: "Do you believe elites are deliberately orchestrating immigration to replace white populations?",
-    verdict: "This is a debunked conspiracy theory popularized by French writer Renaud Camus in 2011. Population change reflects ordinary migration and birth-rate trends, and no coordinating plot has ever been found.",
-    link: "https://en.wikipedia.org/wiki/Great_Replacement_conspiracy_theory",
-  },
-  {
     id: "new-world-order",
     name: "New World Order",
     category: "conspiracy",
@@ -1691,14 +1616,6 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/Freemasonry",
   },
   {
-    id: "bilderberg",
-    name: "Bilderberg Rule",
-    category: "conspiracy",
-    question: "Do you believe the Bilderberg Group secretly decides how the world is run?",
-    verdict: "Bilderberg is an annual private conference of politicians, executives and academics, held since 1954. It publishes its attendee lists and topics, issues no resolutions, and has no power to enforce anything.",
-    link: "https://en.wikipedia.org/wiki/Bilderberg_Meeting",
-  },
-  {
     id: "qanon",
     name: "QAnon",
     category: "conspiracy",
@@ -1721,14 +1638,6 @@ const CLAIMS = [
     question: "Do you believe Wayfair sold trafficked children disguised as expensive cabinets?",
     verdict: "The 2020 claim was checked by fact-checkers: the high prices matched industrial-grade storage cabinets, the girls' names were ordinary product names, and no evidence of trafficking was found.",
     link: "https://en.wikipedia.org/wiki/Wayfair",
-  },
-  {
-    id: "stolen-election-2020",
-    name: "Stolen 2020 Election",
-    category: "conspiracy",
-    question: "Do you believe the 2020 US presidential election was stolen through rigged voting machines?",
-    verdict: "Trump's campaign and allies lost or withdrew more than 60 lawsuits, and Georgia's full hand recount matched the machine count. In 2023 Fox News paid Dominion $787.5 million to settle defamation claims over the machine-fraud stories.",
-    link: "https://en.wikipedia.org/wiki/Attempts_to_overturn_the_2020_United_States_presidential_election",
   },
   {
     id: "plandemic",
@@ -1761,14 +1670,6 @@ const CLAIMS = [
     question: "Do you believe the Holocaust is a hoax?",
     verdict: "About six million Jews were murdered, documented by Nazi Germany's own records, the camps, perpetrators' confessions at Nuremberg and survivors' testimony. In 2000 a UK court ruled David Irving had deliberately distorted evidence to deny it.",
     link: "https://en.wikipedia.org/wiki/Holocaust_denial",
-  },
-  {
-    id: "climate-hoax",
-    name: "Climate Change Hoax",
-    category: "conspiracy",
-    question: "Do you believe human-caused climate change is a hoax?",
-    verdict: "Thermometers, satellites and ocean buoys show more than 1.2°C of warming since the late 1800s, as CO2 rose from about 280 to over 420 ppm. In 2021 the IPCC called human influence on warming 'unequivocal'.",
-    link: "https://en.wikipedia.org/wiki/Climate_change_denial",
   },
   {
     id: "tartaria",
@@ -1836,14 +1737,6 @@ const CLAIMS = [
     verdict: "Some churches denounced the cards as occult around 1999. Pokémon grew out of creator Satoshi Tajiri's childhood hobby of collecting insects, and there is no evidence it has led anyone into the occult.",
     link: "https://en.wikipedia.org/wiki/Pok%C3%A9mon",
   },
-  {
-    id: "procter-gamble-satanic",
-    name: "Procter & Gamble's Satanic Logo",
-    category: "conspiracy",
-    question: "Do you believe Procter & Gamble's old moon-and-stars logo is a satanic symbol?",
-    verdict: "The rumor spread for decades, much of it through Amway distributors. In 2007 a US jury awarded P&G $19.25 million against distributors who spread it. The logo dates to the 1800s as a simple trademark.",
-    link: "https://en.wikipedia.org/wiki/Procter_%26_Gamble",
-  },
 
   // Fringe Science (added)
   {
@@ -1903,14 +1796,6 @@ const CLAIMS = [
     question: "Do you believe rock songs contain hidden satanic messages, played backward, that influence listeners?",
     verdict: "In the 1990 Judas Priest trial a judge found no proof of harmful hidden messages, and experiments show people mostly hear backward 'messages' only after being told what to listen for.",
     link: "https://en.wikipedia.org/wiki/Backmasking",
-  },
-  {
-    id: "myers-briggs",
-    name: "Myers-Briggs Types",
-    category: "popsych",
-    question: "Do you believe your Myers-Briggs type reliably predicts how well you'll do in a job?",
-    verdict: "It can be a fun way to reflect on preferences, but studies find it predicts job performance poorly and many people get a different type when retested weeks later. Its publisher says it shouldn't be used for hiring.",
-    link: "https://en.wikipedia.org/wiki/Myers%E2%80%93Briggs_Type_Indicator",
   },
   {
     id: "polygraph",
@@ -2565,14 +2450,6 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/Sufism",
   },
   {
-    id: "moses-torah",
-    name: "Moses Wrote the Torah",
-    category: "worldreligion",
-    question: "Do you believe Moses personally wrote the first five books of the Bible?",
-    verdict: "The Torah describes Moses' own death and burial, and refers to events after his time. Biblical scholars date its sources to several authors writing centuries later.",
-    link: "https://en.wikipedia.org/wiki/Mosaic_authorship",
-  },
-  {
     id: "jewish-messiah",
     name: "The Coming Messiah",
     category: "worldreligion",
@@ -2693,22 +2570,6 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/Kami",
   },
   {
-    id: "divine-emperor",
-    name: "Divine Emperor",
-    category: "worldreligion",
-    question: "Do you believe Japan's imperial family is descended from the sun goddess Amaterasu?",
-    verdict: "Historians regard the first emperor, Jimmu (said to reign from 660 BCE), as legendary. In the 1946 Humanity Declaration, Emperor Hirohito publicly rejected the idea that he was a living god.",
-    link: "https://en.wikipedia.org/wiki/Humanity_Declaration",
-  },
-  {
-    id: "elixir-immortality",
-    name: "Elixir of Immortality",
-    category: "worldreligion",
-    question: "Do you believe Taoist alchemy can produce an elixir that lets you live forever?",
-    verdict: "No elixir has ever extended life. Several Tang dynasty emperors are believed to have died from mercury and arsenic poisoning after taking alchemical elixirs.",
-    link: "https://en.wikipedia.org/wiki/Chinese_alchemy",
-  },
-  {
     id: "chinvat-bridge",
     name: "Chinvat Bridge",
     category: "worldreligion",
@@ -2799,14 +2660,6 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/Ra%C3%ABlism",
   },
   {
-    id: "heavens-gate",
-    name: "Heaven's Gate",
-    category: "newreligion",
-    question: "Do you believe a spaceship trailed Comet Hale-Bopp in 1997, ready to carry souls to a higher level?",
-    verdict: "Astronomers found no object following the comet; the 'companion' in an amateur photo was a star. Believing in it, 39 Heaven's Gate members died by suicide in March 1997.",
-    link: "https://en.wikipedia.org/wiki/Heaven%27s_Gate_(religious_group)",
-  },
-  {
     id: "unification-church",
     name: "Moon as Messiah",
     category: "newreligion",
@@ -2869,30 +2722,6 @@ const CLAIMS = [
     question: "Do you believe you can train your soul to leave your body and travel to other planes, as Eckankar teaches?",
     verdict: "There is no verified evidence that awareness can leave the body. Founder Paul Twitchell started Eckankar in 1965, and researcher David C. Lane documented that he copied large passages from earlier writers.",
     link: "https://en.wikipedia.org/wiki/Eckankar",
-  },
-  {
-    id: "aum-shinrikyo",
-    name: "Aum Shinrikyo",
-    category: "newreligion",
-    question: "Do you believe Aum Shinrikyo leader Shoko Asahara had supernatural powers?",
-    verdict: "His 'levitation' photo showed a cross-legged jump. His followers' 1995 sarin gas attack on the Tokyo subway killed more than a dozen people, and Asahara was executed in 2018.",
-    link: "https://en.wikipedia.org/wiki/Aum_Shinrikyo",
-  },
-  {
-    id: "branch-davidians",
-    name: "David Koresh",
-    category: "newreligion",
-    question: "Do you believe Branch Davidian leader David Koresh was the chosen one who could open the Bible's Seven Seals?",
-    verdict: "There is no evidence for his claims. The 1993 Waco siege ended in a fire that killed 76 people, including Koresh and more than 20 children.",
-    link: "https://en.wikipedia.org/wiki/Branch_Davidians",
-  },
-  {
-    id: "jim-jones",
-    name: "Jim Jones Healings",
-    category: "newreligion",
-    question: "Do you believe Peoples Temple leader Jim Jones could heal people of cancer?",
-    verdict: "Former members said the 'tumors' were chicken gizzards palmed by aides. In 1978, 918 people died in Guyana, 909 at Jonestown itself, most by forced or coerced cyanide poisoning.",
-    link: "https://en.wikipedia.org/wiki/Peoples_Temple",
   },
   {
     id: "children-of-god",

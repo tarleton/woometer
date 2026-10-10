@@ -320,6 +320,8 @@
     });
     $("delete-confirm").addEventListener("click", deleteAccount);
     $("copy-friend-link").addEventListener("click", copyFriendLink);
+    $("share-copy").addEventListener("click", copyShareText);
+    $("share-native").addEventListener("click", sendShareText);
     $("add-friend-btn").addEventListener("click", addFriendFromInput);
     $("add-friend-link").addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
@@ -348,6 +350,7 @@
     $("invite-close").addEventListener("click", () => ($("invite").hidden = true));
     W.shareUrl = friendLink;
     W.withName = withName;
+    W.openShare = openShare;
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") refreshFriends();
     });
@@ -596,7 +599,7 @@
     } catch {}
   }
 
-  // A shared link is woometer.com/?f=CODE (from Share or Copy my friend link).
+  // A shared link is woometer.com/?f=CODE (from the Share box).
   // Opening one only shows the sharer's results; adding them as a friend is a
   // separate tap. Friends added in this browser are remembered, so they can be
   // re-added when this browser switches to a different (existing) account.
@@ -756,15 +759,37 @@
     return `${homeUrl()}?f=${profile.share_code}`;
   }
 
+  // The Share box. Your link shows your name, so it asks for one first.
+  function openShare() {
+    withName(() => {
+      $("my-name").value = profile.display_name || "";
+      $("share-preview").textContent = W.shareText();
+      // Phones can hand the message straight to Messages, WhatsApp and so on.
+      const canSend = typeof navigator.share === "function";
+      $("share-native").hidden = !canSend;
+      $("share-copy").classList.toggle("ghost", canSend);
+      $("share-dialog").showModal();
+    });
+  }
+
+  async function copyShareText() {
+    if (await W.copyText(W.shareText(), "Score and link copied. Paste it anywhere.", "Copy your score and link:")) {
+      $("share-dialog").close();
+    }
+  }
+
+  async function sendShareText() {
+    try {
+      await navigator.share({ text: W.shareText() });
+      $("share-dialog").close();
+    } catch (err) {
+      if (err.name !== "AbortError") copyShareText();
+    }
+  }
+
   function copyFriendLink() {
     withName(async () => {
-      const link = friendLink();
-      try {
-        await navigator.clipboard.writeText(link);
-        W.toast("Friend link copied.");
-      } catch {
-        window.prompt("Copy your friend link:", link);
-      }
+      if (await W.copyText(friendLink(), "Link copied.", "Copy your link:")) $("share-dialog").close();
     });
   }
 

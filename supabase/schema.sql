@@ -55,19 +55,54 @@ create table if not exists public.friends (
 alter table public.friends add column if not exists nickname text check (char_length(nickname) <= 40);
 
 -- Where people visit from, for the site owner to look at in the database.
--- One row per account per IP address, refreshed on every visit. The country,
--- region and city are Cloudflare's rough guess from the IP. Nobody can read
--- this table from the site: it has row-level security on and no policies.
+-- One row per account per network, refreshed on every visit. The country,
+-- region and city are Cloudflare's rough guess from the IP address. The
+-- address itself is never kept: ip_code is a scrambled, one-way code of it
+-- (see ip_code() below), so many accounts from one place stand out without
+-- anyone's real address being stored. Nobody can read this table from the
+-- site: it has row-level security on and no policies.
 create table if not exists public.visits (
   user_id uuid not null references auth.users (id) on delete cascade,
-  ip text not null,
+  ip_code text not null,
   country text,
   region text,
   city text,
   first_seen timestamptz not null default now(),
   last_seen timestamptz not null default now(),
   visit_count integer not null default 1,
-  primary key (user_id, ip)
+  primary key (user_id, ip_code)
+);
+
+-- Settings only the database can see. Holds the random salt that scrambles
+-- IP addresses; it is made here on first run and never leaves the database.
+create table if not exists public.private_settings (
+  name text primary key,
+  value text not null
+);
+insert into public.private_settings (name, value)
+values ('ip_salt', replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''))
+on conflict (name) do nothing;
+
+-- The first version of visits briefly kept the raw address in an "ip"
+-- column. Scramble any such rows and rename the column.
+do $$
+begin
+  if exists (select 1 from information_schema.columns
+             where table_schema = 'public' and table_name = 'visits' and column_name = 'ip') then
+    update public.visits set ip = substr(encode(sha256(convert_to(
+      (select value from public.private_settings where name = 'ip_salt') || ip, 'UTF8')), 'hex'), 1, 16);
+    alter table public.visits rename column ip to ip_code;
+  end if;
+end $$;
+
+-- Spam, quietly left out of the stats. Add an ip_code here (from the SQL
+-- editor) and everyone who has visited from that network stops counting
+-- toward the stats and "N% of people agree", the same way testers do. Their
+-- own page keeps working as normal.
+create table if not exists public.ignored_ip_codes (
+  ip_code text primary key,
+  note text,
+  created_at timestamptz not null default now()
 );
 
 -- Row-level security
@@ -76,6 +111,8 @@ alter table public.profiles enable row level security;
 alter table public.answers enable row level security;
 alter table public.friends enable row level security;
 alter table public.visits enable row level security;
+alter table public.private_settings enable row level security;
+alter table public.ignored_ip_codes enable row level security;
 
 drop policy if exists "read own profile" on public.profiles;
 create policy "read own profile" on public.profiles
@@ -111,7 +148,7 @@ create policy "remove own friends" on public.friends
 -- Profiles are created and renamed only through the functions below.
 grant usage on schema public to anon, authenticated;
 revoke all on public.profiles, public.answers, public.friends from anon;
-revoke all on public.visits from anon, authenticated;
+revoke all on public.visits, public.private_settings, public.ignored_ip_codes from anon, authenticated;
 revoke insert, update, delete on public.profiles from authenticated;
 revoke insert, update on public.friends from authenticated;
 grant select on public.profiles to authenticated;
@@ -120,10 +157,20 @@ grant select, delete on public.friends to authenticated;
 
 -- Functions
 
--- Notes the caller's IP address and rough location in visits. Supabase's
--- gateway passes the visitor's IP and Cloudflare's location guess in as
--- request headers. Called from ensure_profile on every page load; it never
--- stops the page loading if something is missing.
+-- The scrambled code for an IP address: the first 16 hex characters of a
+-- salted SHA-256. The same address always gets the same code, but the code
+-- can't be turned back into the address.
+create or replace function public.ip_code(addr text)
+returns text
+language sql stable security definer set search_path = public as $$
+  select substr(encode(sha256(convert_to(
+    (select value from private_settings where name = 'ip_salt') || addr, 'UTF8')), 'hex'), 1, 16);
+$$;
+
+-- Notes the caller's scrambled IP code and rough location in visits.
+-- Supabase's gateway passes the visitor's IP and Cloudflare's location guess
+-- in as request headers. Called from ensure_profile on every page load; it
+-- never stops the page loading if something is missing.
 create or replace function public.record_visit()
 returns void
 language plpgsql security definer set search_path = public as $$
@@ -134,10 +181,10 @@ begin
   h := coalesce(nullif(current_setting('request.headers', true), ''), '{}')::json;
   addr := nullif(btrim(coalesce(h->>'cf-connecting-ip', split_part(h->>'x-forwarded-for', ',', 1), h->>'x-real-ip', '')), '');
   if auth.uid() is null or addr is null then return; end if;
-  insert into visits (user_id, ip, country, region, city)
-  values (auth.uid(), left(addr, 64), nullif(h->>'cf-ipcountry', ''),
+  insert into visits (user_id, ip_code, country, region, city)
+  values (auth.uid(), ip_code(addr), nullif(h->>'cf-ipcountry', ''),
           nullif(coalesce(h->>'cf-region', h->>'cf-ipregion'), ''), nullif(h->>'cf-ipcity', ''))
-  on conflict (user_id, ip) do update set
+  on conflict (user_id, ip_code) do update set
     country = coalesce(excluded.country, visits.country),
     region = coalesce(excluded.region, visits.region),
     city = coalesce(excluded.city, visits.city),
@@ -146,6 +193,15 @@ begin
 exception when others then
   return;
 end $$;
+
+-- True for accounts kept out of the stats: testers, and anyone who has
+-- visited from a network listed in ignored_ip_codes.
+create or replace function public.left_out_of_stats(uid uuid)
+returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from profiles p where p.id = uid and p.is_tester)
+      or exists (select 1 from visits v join ignored_ip_codes i using (ip_code) where v.user_id = uid);
+$$;
 
 -- Returns the caller's profile, creating it on first visit.
 create or replace function public.ensure_profile()
@@ -242,7 +298,7 @@ $$;
 
 -- Yes, No and Don't Know totals per claim across everyone, for "N% of people
 -- agree". Pass a list of claim ids to get just those, or nothing for every claim.
--- Test accounts are left out. Dropped first because the Don't Know column
+-- Test accounts and ignored spam are left out. Dropped first because the Don't Know column
 -- changed what it returns.
 drop function if exists public.claim_stats(text[]);
 create function public.claim_stats(only_ids text[] default null)
@@ -254,7 +310,7 @@ language sql stable security definer set search_path = public as $$
          count(*) filter (where a.answer = 'unsure')
   from answers a
   where (only_ids is null or a.claim_id = any (only_ids))
-    and not exists (select 1 from profiles p where p.id = a.user_id and p.is_tester)
+    and not left_out_of_stats(a.user_id)
   group by a.claim_id;
 $$;
 
@@ -271,7 +327,7 @@ end $$;
 
 -- The numbers on woometer.com/stats, as one bundle: the average woo score
 -- across everyone, how many people have each score, and Yes / No / Don't Know totals
--- per claim. Only totals, never who answered what. Test accounts are left out.
+-- per claim. Only totals, never who answered what. Test accounts and ignored spam are left out.
 -- To keep the numbers meaningful, a person counts toward the average once they
 -- have 10 Yes or No answers, and a claim is listed once it has 5. Anyone can
 -- read it, even before the site has signed them in anonymously.
@@ -281,7 +337,7 @@ language sql stable security definer set search_path = public as $$
   with real_answers as (
     select a.user_id, a.claim_id, a.answer
     from answers a
-    where not exists (select 1 from profiles p where p.id = a.user_id and p.is_tester)
+    where not left_out_of_stats(a.user_id)
   ),
   people as (
     select count(*) filter (where answer = 'yes')::numeric
@@ -326,5 +382,5 @@ grant execute on function public.ensure_profile(), public.set_display_name(text)
   public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
   public.delete_my_account() to authenticated;
 
--- record_visit only runs inside ensure_profile, never called directly.
-revoke execute on function public.record_visit() from public, anon, authenticated;
+-- These only run inside the functions above, never called directly.
+revoke execute on function public.record_visit(), public.ip_code(text), public.left_out_of_stats(uuid) from public, anon, authenticated;

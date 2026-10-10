@@ -382,6 +382,110 @@ $$;
 revoke execute on function public.site_stats() from public;
 grant execute on function public.site_stats() to anon, authenticated;
 
+-- Which continent each country is in, for the world map on /stats. Countries
+-- are the two-letter codes Cloudflare puts in visits.country. Made by
+-- tools/build-world-map.js; nobody can read it from the site.
+create table if not exists public.country_continents (
+  code text primary key,
+  continent text not null
+);
+alter table public.country_continents enable row level security;
+revoke all on public.country_continents from anon, authenticated;
+insert into public.country_continents (code, continent) values
+  ('AW', 'north-america'), ('AF', 'asia'), ('AO', 'africa'), ('AI', 'north-america'), ('AX', 'europe'), ('AL', 'europe'), ('AD', 'europe'), ('AE', 'asia'), ('AR', 'south-america'), ('AM', 'asia'),
+  ('AS', 'oceania'), ('AG', 'north-america'), ('AU', 'oceania'), ('AT', 'europe'), ('AZ', 'asia'), ('BI', 'africa'), ('BE', 'europe'), ('BJ', 'africa'), ('BF', 'africa'), ('BD', 'asia'),
+  ('BG', 'europe'), ('BH', 'asia'), ('BS', 'north-america'), ('BA', 'europe'), ('BL', 'north-america'), ('SH', 'africa'), ('BY', 'europe'), ('BZ', 'north-america'), ('BM', 'north-america'), ('BO', 'south-america'),
+  ('BQ', 'north-america'), ('BR', 'south-america'), ('BB', 'north-america'), ('BN', 'asia'), ('BT', 'asia'), ('BW', 'africa'), ('CF', 'africa'), ('CA', 'north-america'), ('CC', 'oceania'), ('CH', 'europe'),
+  ('CL', 'south-america'), ('CN', 'asia'), ('CI', 'africa'), ('CM', 'africa'), ('CD', 'africa'), ('CG', 'africa'), ('CK', 'oceania'), ('CO', 'south-america'), ('KM', 'africa'), ('CV', 'africa'),
+  ('CR', 'north-america'), ('CU', 'north-america'), ('CW', 'north-america'), ('CX', 'oceania'), ('KY', 'north-america'), ('CY', 'europe'), ('CZ', 'europe'), ('DE', 'europe'), ('DJ', 'africa'), ('DM', 'north-america'),
+  ('DK', 'europe'), ('DO', 'north-america'), ('DZ', 'africa'), ('EC', 'south-america'), ('EG', 'africa'), ('ER', 'africa'), ('EH', 'africa'), ('ES', 'europe'), ('EE', 'europe'), ('ET', 'africa'),
+  ('FI', 'europe'), ('FJ', 'oceania'), ('FK', 'south-america'), ('FR', 'europe'), ('FO', 'europe'), ('FM', 'oceania'), ('GA', 'africa'), ('GB', 'europe'), ('GE', 'asia'), ('GG', 'europe'),
+  ('GH', 'africa'), ('GI', 'europe'), ('GN', 'africa'), ('GP', 'north-america'), ('GM', 'africa'), ('GW', 'africa'), ('GQ', 'africa'), ('GR', 'europe'), ('GD', 'north-america'), ('GL', 'north-america'),
+  ('GT', 'north-america'), ('GF', 'south-america'), ('GU', 'oceania'), ('GY', 'south-america'), ('HK', 'asia'), ('HN', 'north-america'), ('HR', 'europe'), ('HT', 'north-america'), ('HU', 'europe'), ('ID', 'asia'),
+  ('IM', 'europe'), ('IN', 'asia'), ('IO', 'africa'), ('IE', 'europe'), ('IR', 'asia'), ('IQ', 'asia'), ('IS', 'europe'), ('IL', 'asia'), ('IT', 'europe'), ('JM', 'north-america'),
+  ('JE', 'europe'), ('JO', 'asia'), ('JP', 'asia'), ('KZ', 'asia'), ('KE', 'africa'), ('KG', 'asia'), ('KH', 'asia'), ('KI', 'oceania'), ('KN', 'north-america'), ('KR', 'asia'),
+  ('XK', 'europe'), ('KW', 'asia'), ('LA', 'asia'), ('LB', 'asia'), ('LR', 'africa'), ('LY', 'africa'), ('LC', 'north-america'), ('LI', 'europe'), ('LK', 'asia'), ('LS', 'africa'),
+  ('LT', 'europe'), ('LU', 'europe'), ('LV', 'europe'), ('MO', 'asia'), ('MF', 'north-america'), ('MA', 'africa'), ('MC', 'europe'), ('MD', 'europe'), ('MG', 'africa'), ('MV', 'asia'),
+  ('MX', 'north-america'), ('MH', 'oceania'), ('MK', 'europe'), ('ML', 'africa'), ('MT', 'europe'), ('MM', 'asia'), ('ME', 'europe'), ('MN', 'asia'), ('MP', 'oceania'), ('MZ', 'africa'),
+  ('MR', 'africa'), ('MS', 'north-america'), ('MQ', 'north-america'), ('MU', 'africa'), ('MW', 'africa'), ('MY', 'asia'), ('YT', 'africa'), ('NA', 'africa'), ('NC', 'oceania'), ('NE', 'africa'),
+  ('NF', 'oceania'), ('NG', 'africa'), ('NI', 'north-america'), ('NU', 'oceania'), ('NL', 'europe'), ('NO', 'europe'), ('NP', 'asia'), ('NR', 'oceania'), ('NZ', 'oceania'), ('OM', 'asia'),
+  ('PK', 'asia'), ('PA', 'north-america'), ('PN', 'oceania'), ('PE', 'south-america'), ('PH', 'asia'), ('PW', 'oceania'), ('PG', 'oceania'), ('PL', 'europe'), ('PR', 'north-america'), ('KP', 'asia'),
+  ('PT', 'europe'), ('PY', 'south-america'), ('PS', 'asia'), ('PF', 'oceania'), ('QA', 'asia'), ('RE', 'africa'), ('RO', 'europe'), ('RU', 'europe'), ('RW', 'africa'), ('SA', 'asia'),
+  ('SD', 'africa'), ('SN', 'africa'), ('SG', 'asia'), ('SJ', 'europe'), ('SB', 'oceania'), ('SL', 'africa'), ('SV', 'north-america'), ('SM', 'europe'), ('SO', 'africa'), ('PM', 'north-america'),
+  ('RS', 'europe'), ('SS', 'africa'), ('ST', 'africa'), ('SR', 'south-america'), ('SK', 'europe'), ('SI', 'europe'), ('SE', 'europe'), ('SZ', 'africa'), ('SX', 'north-america'), ('SC', 'africa'),
+  ('SY', 'asia'), ('TC', 'north-america'), ('TD', 'africa'), ('TG', 'africa'), ('TH', 'asia'), ('TJ', 'asia'), ('TK', 'oceania'), ('TM', 'asia'), ('TL', 'asia'), ('TO', 'oceania'),
+  ('TT', 'north-america'), ('TN', 'africa'), ('TR', 'asia'), ('TV', 'oceania'), ('TW', 'asia'), ('TZ', 'africa'), ('UG', 'africa'), ('UA', 'europe'), ('UM', 'north-america'), ('UY', 'south-america'),
+  ('US', 'north-america'), ('UZ', 'asia'), ('VA', 'europe'), ('VC', 'north-america'), ('VE', 'south-america'), ('VG', 'north-america'), ('VI', 'north-america'), ('VN', 'asia'), ('VU', 'oceania'), ('WF', 'oceania'),
+  ('WS', 'oceania'), ('YE', 'asia'), ('ZA', 'africa'), ('ZM', 'africa'), ('ZW', 'africa')
+on conflict (code) do update set continent = excluded.continent;
+
+-- The world map on woometer.com/stats: how many people answered from each
+-- country, and totals per continent. Each person is placed in the country of
+-- their latest visit. Only counts and totals leave the database, never IPs,
+-- cities or who answered what, and testers and ignored networks are left out.
+-- A continent shows its average and claims once at least 3 people there have
+-- 10 Yes or No answers; claims need 5 Yes or No answers there, like site_stats.
+create or replace function public.map_stats()
+returns json
+language sql stable security definer set search_path = public as $$
+  with home as (
+    select distinct on (v.user_id) v.user_id, upper(v.country) as code
+    from visits v
+    where v.country is not null
+    order by v.user_id, v.last_seen desc
+  ),
+  placed as (
+    select h.user_id, h.code, cc.continent
+    from home h
+    join country_continents cc on cc.code = h.code
+    where exists (select 1 from answers a where a.user_id = h.user_id)
+      and not left_out_of_stats(h.user_id)
+  ),
+  people as (
+    select p.continent,
+           count(*) filter (where a.answer = 'yes')::numeric
+             / nullif(count(*) filter (where a.answer in ('yes', 'no')), 0) as score
+    from placed p
+    join answers a on a.user_id = p.user_id
+    group by p.user_id, p.continent
+    having count(*) filter (where a.answer in ('yes', 'no')) >= 10
+  ),
+  continents as (
+    select continent, count(*) as n, avg(score) as average_score
+    from people
+    group by continent
+  ),
+  claims as (
+    select p.continent, a.claim_id,
+           count(*) filter (where a.answer = 'yes') as n_yes,
+           count(*) filter (where a.answer = 'no') as n_no,
+           count(*) filter (where a.answer = 'unsure') as n_unsure
+    from placed p
+    join answers a on a.user_id = p.user_id
+    where p.continent in (select continent from continents where n >= 3)
+    group by p.continent, a.claim_id
+    having count(*) filter (where a.answer in ('yes', 'no')) >= 5
+  )
+  select json_build_object(
+    'min_people', 3,
+    'min_person_answers', 10,
+    'min_claim_answers', 5,
+    'countries', coalesce((select json_agg(json_build_object('code', code, 'n', n))
+                           from (select code, count(*) as n from placed group by code) x), '[]'::json),
+    'continents', coalesce((select json_agg(json_build_object(
+                     'key', c.continent,
+                     'people', c.n,
+                     'average_score', case when c.n >= 3 then c.average_score end,
+                     'claims', coalesce((select json_agg(json_build_object(
+                                  'id', cl.claim_id, 'yes', cl.n_yes, 'no', cl.n_no, 'unsure', cl.n_unsure))
+                                from claims cl where cl.continent = c.continent), '[]'::json)))
+                   from continents c), '[]'::json)
+  );
+$$;
+
+revoke execute on function public.map_stats() from public;
+grant execute on function public.map_stats() to anon, authenticated;
+
 revoke execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
   public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
   public.delete_my_account() from public, anon;

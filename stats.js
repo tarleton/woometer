@@ -20,6 +20,12 @@
   loadScript(SUPABASE_JS)
     .then(async () => {
       const db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+      // The map has its own function; if it isn't in the database yet, the
+      // map just stays hidden.
+      db.rpc("map_stats").then(({ data, error }) => {
+        if (error) console.warn("woometer: map isn't available.", error);
+        else renderMap(data);
+      });
       const { data, error } = await db.rpc("site_stats");
       if (error) throw error;
       render(data);
@@ -188,5 +194,107 @@
         return li;
       })
     );
+  }
+
+  // World map: a star on each country people answered from, bigger for more
+  // people, and continent totals when one is tapped.
+  const GLOBES = { "north-america": "🌎", "south-america": "🌎", europe: "🌍", africa: "🌍", asia: "🌏", oceania: "🌏" };
+  const SVG = "http://www.w3.org/2000/svg";
+
+  function starPath(x, y, r) {
+    const pts = [];
+    for (let i = 0; i < 10; i++) {
+      const a = (Math.PI / 5) * i - Math.PI / 2;
+      const d = i % 2 ? r * 0.45 : r;
+      pts.push(`${(x + d * Math.cos(a)).toFixed(1)},${(y + d * Math.sin(a)).toFixed(1)}`);
+    }
+    return `M${pts.join("L")}Z`;
+  }
+
+  function renderMap(m) {
+    const map = window.WORLD_MAP;
+    if (!m || !map || !(m.countries || []).length) return;
+    const svg = $("world");
+    svg.setAttribute("viewBox", `0 0 ${map.width} ${map.height}`);
+    const byKey = Object.fromEntries((m.continents || []).map((c) => [c.key, c]));
+    const counts = {};
+    for (const c of m.countries) {
+      const pt = map.points[c.code];
+      if (pt) counts[pt[2]] = (counts[pt[2]] || 0) + c.n;
+    }
+
+    const lands = {};
+    for (const [key, d] of Object.entries(map.shapes)) {
+      const land = document.createElementNS(SVG, "path");
+      land.setAttribute("d", d);
+      land.setAttribute("class", "land");
+      land.setAttribute("tabindex", "0");
+      land.setAttribute("role", "button");
+      land.setAttribute("aria-label", map.continents[key]);
+      const pick = () => {
+        Object.values(lands).forEach((l) => l.classList.toggle("on", l === land));
+        showRegion(key, byKey[key], counts[key] || 0, m);
+      };
+      land.addEventListener("click", pick);
+      land.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          pick();
+        }
+      });
+      lands[key] = land;
+      svg.append(land);
+    }
+
+    m.countries.forEach((c, i) => {
+      const pt = map.points[c.code];
+      if (!pt) return;
+      const star = document.createElementNS(SVG, "path");
+      star.setAttribute("d", starPath(pt[0], pt[1], Math.min(26, 9 + 5 * Math.sqrt(c.n))));
+      star.setAttribute("class", "star");
+      star.style.animationDelay = `${(i * 0.7) % 3}s`;
+      svg.append(star);
+    });
+    $("map-section").hidden = false;
+  }
+
+  function showRegion(key, c, answered, m) {
+    const name = `${GLOBES[key]} ${window.WORLD_MAP.continents[key]}`;
+    const box = $("region");
+    box.replaceChildren();
+    const h = document.createElement("h3");
+    h.textContent = name;
+    box.append(h);
+    const line = (html) => {
+      const p = document.createElement("p");
+      p.innerHTML = html;
+      box.append(p);
+    };
+    if (!answered) {
+      line("Nobody has answered from here yet.");
+      return;
+    }
+    const people = c ? c.people : 0;
+    if (people < m.min_people) {
+      line(`<b>${answered}</b> ${answered === 1 ? "person has" : "people have"} answered from here. Stats show once ${m.min_people} people here have answered at least ${m.min_person_answers} claims.`);
+      return;
+    }
+    line(`<b>${people}</b> people counted · average woo score <b>${pct(c.average_score)}</b>`);
+    const claims = (c.claims || [])
+      .filter((x) => byId[x.id])
+      .map((x) => ({ ...x, claim: byId[x.id], share: x.yes / (x.yes + x.no), total: x.yes + x.no }));
+    if (!claims.length) return;
+    const top = (score) => claims.reduce((best, x) => (score(x) > score(best) ? x : best));
+    const believed = top((x) => x.share + x.total / 1e6);
+    const trashed = top((x) => 1 - x.share + x.total / 1e6);
+    const label = (x) => esc(`${CATEGORIES[x.claim.category].icon} ${x.claim.name}`);
+    if (believed.yes) line(`Most believed: <b>${label(believed)}</b> (${pct(believed.share)})`);
+    line(`Most trashed: <b>${label(trashed)}</b> (${pct(1 - trashed.share)} No)`);
+  }
+
+  function esc(str) {
+    const d = document.createElement("div");
+    d.textContent = str;
+    return d.innerHTML;
   }
 })();

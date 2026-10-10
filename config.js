@@ -13,6 +13,13 @@ window.WOOMETER_CONFIG = {
   // address. Needs https://woometer.com as an authorized redirect URI on the
   // client. Leave empty to sign in through Supabase's redirect instead.
   googleClientId: "458207142283-nm9ussa779v4th6hpgf8871kphc11s4q.apps.googleusercontent.com",
+  // Set to true once Facebook is enabled under Supabase Authentication >
+  // Providers (with the Meta app's ID and secret). Facebook sign-in goes
+  // through Supabase's redirect; Facebook's screen names the Meta app
+  // (woometer). The Meta app needs
+  // https://jtzwtqzsevsiuyobkvaw.supabase.co/auth/v1/callback as a valid OAuth
+  // redirect URI and the email permission.
+  facebookSignIn: false,
   // Cloudflare Turnstile site key (public), for the spam check on new sign-ins.
   // Set this first, then turn on CAPTCHA protection in Supabase (Authentication
   // > Attack Protection) with the matching secret. Empty means no spam check.

@@ -39,12 +39,13 @@
     <div class="top-actions">
       <button type="button" id="share" class="top-btn" aria-label="Share my score with a friend" title="Share your results with a friend"><span aria-hidden="true">🔗</span><span class="top-btn-label">Share</span></button>
       <button type="button" id="friends-open" class="top-btn" aria-label="Friends" title="Friends" hidden><svg class="cat-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.2 9.5 L5 2.8 L9.6 6.2 Q12 5.5 14.4 6.2 L19 2.8 L19.8 9.5 Q21 12.5 20 15.5 Q18.4 21 12 21 Q5.6 21 4 15.5 Q3 12.5 4.2 9.5 Z" fill="#eda65c" stroke="#5a3a1e" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.1 5 L6.6 8 L8.4 6.8 Z M17.9 5 L17.4 8 L15.6 6.8 Z" fill="#f7c8a0"/><circle cx="9" cy="12.6" r="1.35" fill="#2a1a10"/><circle cx="15" cy="12.6" r="1.35" fill="#2a1a10"/><path d="M10.9 15.1 h2.2 l-1.1 1.2 z" fill="#d9707a"/><path d="M12 16.3 q-1 1.5 -2.5 0.8 M12 16.3 q1 1.5 2.5 0.8 M3 14 l4 .6 M3.4 16.6 l3.8 -.6 M21 14 l-4 .6 M20.6 16.6 l-3.8 -.6" fill="none" stroke="#5a3a1e" stroke-width="0.9" stroke-linecap="round"/></svg><span class="top-btn-label">Friends</span><b class="badge" id="friends-count" hidden></b></button>
-      <button type="button" id="google-login" class="gsi" aria-label="Sign in with Google" hidden><svg class="g-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span class="gsi-label">Sign in</span></button>
+      <button type="button" id="google-login" class="gsi" aria-label="Sign in with Google" hidden><svg class="g-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><svg class="person-logo" viewBox="0 0 24 24" aria-hidden="true" hidden><circle cx="12" cy="8" r="4.2"/><path d="M3.5 21c.9-4.6 4.3-7 8.5-7s7.6 2.4 8.5 7z"/></svg><span class="gsi-label">Sign in</span></button>
       <div class="account" id="account" hidden>
         <button type="button" id="avatar" class="top-btn account-btn" aria-haspopup="true" aria-expanded="false"><span class="avatar" id="avatar-pic" aria-hidden="true"></span><span class="top-btn-label">Account</span></button>
         <div class="account-menu" id="account-menu" hidden>
           <p class="account-name" id="account-name"></p>
           <p class="account-email" id="account-email"></p>
+          <button type="button" id="link-facebook" class="btn ghost" hidden>Link Facebook</button>
           <button type="button" id="sign-out" class="btn ghost">Sign out</button>
           <button type="button" id="reset-account" class="link-btn danger-link">Delete all answers</button>
           <button type="button" id="delete-account" class="link-btn danger-link">Delete my account</button>
@@ -119,9 +120,10 @@
       <!-- For visitors not signed in, once they've answered a few: what signing
            in does for them. Hidden for good in that browser after "Not now". -->
       <section class="save-note" id="save-note" aria-label="Keep your answers" hidden>
-        <p><strong>Keep your answers safe.</strong> Sign in with Google and they're kept with your account, on any phone or computer, even if this browser gets cleared. Your friends come along too.</p>
+        <p><strong>Keep your answers safe.</strong> <span id="save-how">Sign in with Google</span> and they're kept with your account, on any phone or computer, even if this browser gets cleared. Your friends come along too.</p>
         <div class="save-actions">
           <button type="button" class="gsi" id="save-google"><svg class="g-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span class="gsi-label">Sign in with Google</span></button>
+          <button type="button" class="fbsi" id="save-facebook" hidden><svg class="f-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.69.23 2.69.23v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.26h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"/></svg><span>Continue with Facebook</span></button>
           <button type="button" class="link-btn" id="save-hide">Not now</button>
         </div>
       </section>
@@ -285,7 +287,8 @@
       <p>Only people you send your link to, or add as a friend, will see it. woometer never posts or sends anything for you.</p>
       <div class="name-google" id="name-google" hidden>
         <button type="button" class="gsi" id="name-google-btn"><svg class="g-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span class="gsi-label">Sign in with Google</span></button>
-        <span class="name-or">to use your Google name, or type a name:</span>
+        <button type="button" class="fbsi" id="name-facebook-btn" hidden><svg class="f-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.69.23 2.69.23v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.26h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"/></svg><span>Continue with Facebook</span></button>
+        <span class="name-or" id="name-or">to use your Google name, or type a name:</span>
       </div>
       <input type="text" id="name-input" maxlength="40" autocomplete="name" placeholder="Your name" aria-label="Your name">
       <div class="detail-actions">
@@ -306,6 +309,21 @@
       </div>
       <!-- Rarely wanted, so small and well away from Save. -->
       <button type="button" id="nickname-remove" class="link-btn danger-link">Remove from my friends</button>
+    </form>
+  </dialog>
+
+  <!-- Sign in: Google or Facebook (only when facebookSignIn is on). -->
+  <dialog id="signin-choice" class="signin-choice">
+    <form method="dialog">
+      <h3>Sign in</h3>
+      <p>Keep your answers and friends safe on any phone or computer.</p>
+      <div class="signin-buttons">
+        <button type="button" class="gsi" id="choice-google"><svg class="g-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span class="gsi-label">Sign in with Google</span></button>
+        <button type="button" class="fbsi" id="choice-facebook"><svg class="f-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.69.23 2.69.23v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.26h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"/></svg><span>Continue with Facebook</span></button>
+      </div>
+      <div class="detail-actions">
+        <button class="btn ghost" value="close">Not now</button>
+      </div>
     </form>
   </dialog>
 

@@ -3,6 +3,9 @@
 //   Sounds.trash() - a bright, pleasant two-note chime
 //   Sounds.woo()   - a low, slightly ominous descending boop
 //   Sounds.unsure() - a soft, questioning "hm?" that rises at the end
+//   Sounds.forward() - a quiet rising tick when opening another page
+//   Sounds.back()    - the same tick falling, when heading back to the main page
+//   Sounds.meow()    - a very soft little meow for tapping the cat
 const Sounds = (function () {
   const STORAGE_KEY = "woometer.muted";
   let ctx = null;
@@ -76,6 +79,69 @@ const Sounds = (function () {
     note(ac, { freq: 659.3, glideTo: 830.6, start: t + 0.12, length: 0.32, volume: 0.12, out });
   }
 
+  // Page-turn ticks: two quick, quiet sine blips, up for forward, down for back.
+  function tick(first, second) {
+    const ac = !muted && audio();
+    if (!ac) return;
+    const t = ac.currentTime;
+    const out = ac.destination;
+    note(ac, { freq: first, start: t, length: 0.09, volume: 0.06, out });
+    note(ac, { freq: second, start: t + 0.055, length: 0.13, volume: 0.06, out });
+  }
+  const forward = () => tick(784, 1046.5);
+  const back = () => tick(1046.5, 784);
+
+  // A sawtooth voice through a sweeping band-pass filter, so it opens like "mi"
+  // and closes like "ow". Kept very quiet.
+  function meow() {
+    const ac = !muted && audio();
+    if (!ac) return;
+    const t = ac.currentTime;
+    const len = 0.5;
+    const osc = ac.createOscillator();
+    const filter = ac.createBiquadFilter();
+    const gain = ac.createGain();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(520, t);
+    osc.frequency.linearRampToValueAtTime(760, t + 0.16);
+    osc.frequency.exponentialRampToValueAtTime(430, t + len);
+    filter.type = "bandpass";
+    filter.Q.value = 6;
+    filter.frequency.setValueAtTime(1400, t);
+    filter.frequency.linearRampToValueAtTime(2200, t + 0.14);
+    filter.frequency.exponentialRampToValueAtTime(700, t + len);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.2, t + 0.06);
+    gain.gain.setValueAtTime(0.2, t + 0.25);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    osc.connect(filter).connect(gain).connect(ac.destination);
+    osc.start(t);
+    osc.stop(t + len + 0.05);
+  }
+
+  // Links between woometer's pages get a tick. The sound has to start while the
+  // click is still being handled (phones block audio on a page that has just
+  // loaded), so the page change waits a moment for the tick to be heard.
+  const SUBPAGE = /\/(about|privacy|terms|stats)(\.html)?$/;
+  function navSoundFor(link) {
+    const url = new URL(link.href, location.href);
+    if (url.origin !== location.origin) return null;
+    if (url.pathname === location.pathname && url.search === location.search) return null;
+    if (SUBPAGE.test(url.pathname)) return forward;
+    if (/\/(index\.html)?$/.test(url.pathname)) return back;
+    return null;
+  }
+  document.addEventListener("click", (e) => {
+    if (muted || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const link = e.target.closest && e.target.closest("a[href]");
+    if (!link || (link.target && link.target !== "_self") || link.hasAttribute("download")) return;
+    const play = navSoundFor(link);
+    if (!play) return;
+    play();
+    e.preventDefault();
+    setTimeout(() => location.assign(link.href), 140);
+  });
+
   function setMuted(value) {
     muted = value;
     try {
@@ -85,5 +151,5 @@ const Sounds = (function () {
     }
   }
 
-  return { trash, woo, unsure, setMuted, isMuted: () => muted };
+  return { trash, woo, unsure, forward, back, meow, setMuted, isMuted: () => muted };
 })();

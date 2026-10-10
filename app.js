@@ -450,12 +450,16 @@
     });
   }
 
-  $("cat").addEventListener("click", openCats);
-  $("mini-cat").addEventListener("click", openCats);
+  function catTapped() {
+    Sounds.meow();
+    openCats();
+  }
+  $("cat").addEventListener("click", catTapped);
+  $("mini-cat").addEventListener("click", catTapped);
   $("mini-cat").addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      openCats();
+      catTapped();
     }
   });
 

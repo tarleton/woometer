@@ -90,9 +90,9 @@
       .sort((a, b) => Math.abs(a.share - 0.5) - Math.abs(b.share - 0.5) || byMost(a, b))
       .slice(0, LIST_SIZE);
 
-    renderList("believed", believed, (c) => `${pct(c.share)} believe it`);
-    renderList("rejected", rejected, (c) => `${pct(1 - c.share)} put it in the Trash Bin`);
-    renderList("split", split, (c) => `${pct(c.share)} believe it, ${pct(1 - c.share)} don't`);
+    renderList("believed", believed);
+    renderList("rejected", rejected);
+    renderList("split", split);
 
     $("method-note").textContent =
       `How these are counted: the woo score is the share of Yes and No answers that were Yes, and ` +
@@ -156,7 +156,7 @@
     if (minePct !== null) $("spread-note").textContent = "How many people have each woo score. Your score is in the highlighted bar.";
   }
 
-  function renderList(id, items, describe) {
+  function renderList(id, items) {
     $(`${id}-section`).hidden = items.length === 0;
     $(id).replaceChildren(
       ...items.map((c) => {
@@ -177,8 +177,9 @@
 
         const meta = document.createElement("span");
         meta.className = "meta";
-        const unsure = c.unsure ? `, ${c.unsure} don't know` : "";
-        meta.textContent = `${describe(c)} · ${c.total} ${c.total === 1 ? "answer" : "answers"}${unsure}`;
+        // e.g. "20% believe (1) · 80% don't (4) · 2 don't know"
+        const unsure = c.unsure ? ` · ${c.unsure} don't know` : "";
+        meta.textContent = `${pct(c.share)} believe (${c.yes}) · ${pct(1 - c.share)} don't (${c.no})${unsure}`;
 
         li.append(name, bar, meta);
         return li;

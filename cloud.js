@@ -337,7 +337,7 @@
     });
     $("delete-account").addEventListener("click", () => {
       setMenu(false);
-      $("delete-dialog").showModal();
+      W.confirmDelete($("delete-dialog"));
     });
     $("delete-confirm").addEventListener("click", deleteAccount);
     $("copy-friend-link").addEventListener("click", copyFriendLink);

@@ -597,29 +597,46 @@
     }
   }
 
-  // Start over is kept out of the way: in the account menu when signed in
-  // (cloud.js), otherwise at the very bottom of the page once there's
-  // something to clear.
+  // Delete all answers is kept out of the way: in the account menu when signed
+  // in (cloud.js), otherwise at the very bottom of the page once there's
+  // something to delete.
   function renderReset() {
     const signedIn = window.Woometer && window.Woometer.signedIn;
     $("reset-foot").hidden = signedIn || !Object.keys(answers).length;
   }
 
+  // Big deletes count down 3, 2, 1 before the button works, so a stray tap
+  // can't wipe anything. Cancel works straight away.
+  function confirmDelete(dialog) {
+    const button = dialog.querySelector(".countdown");
+    clearInterval(button.timer);
+    let left = 3;
+    const tick = () => {
+      button.disabled = left > 0;
+      button.textContent = left > 0 ? `Delete in ${left}` : "Delete";
+      if (left-- <= 0) clearInterval(button.timer);
+    };
+    tick();
+    button.timer = setInterval(tick, 1000);
+    dialog.showModal();
+  }
+
   function startOver() {
     if (!Object.keys(answers).length) {
-      toast("There's nothing to clear yet.");
+      toast("There's nothing to delete yet.");
       return;
     }
-    const sure = confirm(
-      "Clear all your answers and start over? This can't be undone, and friends will have nothing to compare with you until you answer again."
-    );
-    if (!sure) return;
+    confirmDelete($("reset-dialog"));
+  }
+  $("reset").addEventListener("click", startOver);
+  $("reset-confirm").addEventListener("click", () => {
+    $("reset-dialog").close();
     answers = {};
     save();
     renderAll();
     emit("reset", {});
-  }
-  $("reset").addEventListener("click", startOver);
+    toast("All your answers were deleted.");
+  });
 
   const muteBtn = $("mute");
   function renderMute() {
@@ -715,6 +732,7 @@
     shareText,
     copyText,
     startOver,
+    confirmDelete,
     renderReset,
   };
 

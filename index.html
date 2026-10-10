@@ -236,11 +236,14 @@
 
   <dialog id="compare" class="compare wide">
     <form method="dialog">
-      <!-- Their woo meter, like yours: their cat, and the same gauge (copied in
-           by cloud.js) that flips to a pie of their answers when tapped. -->
-      <div class="friend-meter" id="friend-meter" hidden>
-        <span class="friend-cat" id="friend-cat"><span class="cat-art" id="friend-cat-art"></span><span class="cat-label" id="friend-cat-name"></span></span>
-        <div class="meter-read"><span class="pct" id="friend-pct"></span><span class="pct-label" id="friend-pct-label"></span></div>
+      <!-- Their meter and yours side by side, cats in the middle. The gauges
+           are copies of your meter's (added by cloud.js); tapping either
+           turns both over to pies of the answers. -->
+      <div class="pair-meter" id="pair-meter" hidden>
+        <div class="pm-side them" id="pm-them"><p class="pm-read"><b id="friend-pct"></b> <span id="friend-who"></span></p></div>
+        <span class="pm-cat them"><span class="cat-art" id="friend-cat-art"></span><span class="cat-label" id="friend-cat-name"></span></span>
+        <span class="pm-cat you" id="pm-you-cat"><span class="cat-art" id="your-cat-art"></span><span class="cat-label" id="your-cat-name"></span></span>
+        <div class="pm-side you" id="pm-you"><p class="pm-read"><b id="your-pct"></b> <span>You</span></p></div>
       </div>
       <!-- One tight line up top (how often you agree, out of the claims you've
            both answered Yes or No) so the lists below get the room. -->

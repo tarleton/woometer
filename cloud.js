@@ -28,6 +28,8 @@
   const SAVE_NOTE_KEY = "woometer.saveNoteHidden.v1";
   // Answers before that note shows, so first-time visitors can look around first.
   const SAVE_NOTE_AFTER = 3;
+  // A spare copy of this browser's sign-in (see keepSession).
+  const SESSION_KEY = "woometer.session.v1";
 
   const $ = (id) => document.getElementById(id);
   const byId = Object.fromEntries(CLAIMS.map((c) => [c.id, c]));
@@ -42,6 +44,11 @@
   let afterName = null;
   // What the account holds, as far as this browser knows: { [claimId]: answer }.
   let synced = {};
+  // True while signing out or deleting the account on purpose, so the spare
+  // sign-in isn't kept or put back.
+  let leaving = false;
+  // The "answers aren't reaching woometer" note shows once per visit.
+  let warned = false;
 
   loadScript(SUPABASE_JS)
     .then(start)
@@ -64,6 +71,7 @@
     // Read Google's reply before supabase-js looks at the address bar.
     const google = takeGoogleReply();
     db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    db.auth.onAuthStateChange((event, session) => keepSession(session));
 
     // Linking Google to this browser's anonymous user fails when that Google
     // account already has its own Woometer user (say, from another device).
@@ -76,6 +84,11 @@
     }
 
     let { data } = await db.auth.getSession();
+    // Lost the sign-in since last time? Put the same one back (see keepSession).
+    if (!data.session) {
+      const back = await restoreSession();
+      if (back) data = { session: back };
+    }
     let googleProblem = null;
     if (google) {
       googleProblem = await useGoogleToken(google, data.session);
@@ -87,6 +100,7 @@
       data = res.data;
     }
     user = data.session.user;
+    keepSession(data.session);
 
     const { data: rows, error } = await db.rpc("ensure_profile");
     if (error) throw error;
@@ -195,10 +209,87 @@
       if (last && id in last && !(id in local) && last[id] === value) toRemove.push(id);
       else merged[id] = value;
     }
-    if (toSend.length) logError({ error: await saveRows(toSend) });
-    if (toRemove.length) await removeRows(toRemove);
+    if (toSend.length) answersNotSaved(await saveRows(toSend));
+    if (toRemove.length) logError({ error: await removeRows(toRemove) });
     keepSynced();
     W.setAnswers(merged);
+  }
+
+  // Brings the account in line with this browser: sends new and changed
+  // answers and removes taken-back ones, including any that didn't get
+  // through earlier. Returns the error, if any.
+  async function sendChanges() {
+    if (!(await stillSignedIn())) return { message: "not signed in" };
+    const local = W.getAnswers();
+    const send = Object.entries(local)
+      .filter(([id, value]) => synced[id] !== value)
+      .map(([id, value]) => row(id, value));
+    // Answers to retired claims stay on the server; this page never shows them.
+    const drop = Object.keys(synced).filter((id) => byId[id] && !(id in local));
+    if (send.length) {
+      let error = await saveRows(send);
+      // One answer the database refuses (a check constraint, say) shouldn't
+      // hold up the rest, so try them one by one.
+      if (error && send.length > 1 && /^2[23]/.test(error.code || "")) {
+        error = null;
+        for (const r of send) error = (await saveRows([r])) || error;
+      }
+      if (error) return error;
+    }
+    if (drop.length) return removeRows(drop);
+    return null;
+  }
+
+  // Keeping the sign-in
+  //
+  // supabase-js keeps the sign-in in this browser's storage. On 10 Oct 2026 an
+  // iPhone lost it 12 seconds into a visit: every answer after that went out
+  // signed out and was quietly refused, and signing in later made a brand-new
+  // account with a new share link. So the page keeps a spare copy of its own
+  // and puts the same sign-in back whenever supabase-js comes up empty.
+  function keepSession(session) {
+    if (leaving || !session || !session.refresh_token) return;
+    try {
+      localStorage.setItem(
+        SESSION_KEY,
+        JSON.stringify({ user: session.user.id, access_token: session.access_token, refresh_token: session.refresh_token })
+      );
+    } catch {}
+  }
+
+  function forgetSession() {
+    leaving = true;
+    try {
+      localStorage.removeItem(SESSION_KEY);
+    } catch {}
+  }
+
+  // Signs back in from the spare copy; with who, only as that user.
+  async function restoreSession(who) {
+    let spare = null;
+    try {
+      spare = JSON.parse(localStorage.getItem(SESSION_KEY));
+    } catch {}
+    if (leaving || !spare || !spare.refresh_token || (who && spare.user !== who)) return null;
+    const { data, error } = await db.auth.setSession({ access_token: spare.access_token, refresh_token: spare.refresh_token });
+    if (error || !data.session) {
+      console.warn("Woometer: couldn't put the sign-in back.", error);
+      return null;
+    }
+    return data.session;
+  }
+
+  // Is this page still signed in as user? If the browser dropped the sign-in,
+  // this puts it back first.
+  let rescue = null;
+  async function stillSignedIn() {
+    const { data } = await db.auth.getSession();
+    if (data.session) {
+      keepSession(data.session);
+      return data.session.user.id === user.id;
+    }
+    rescue ||= restoreSession(user.id).finally(() => (rescue = null));
+    return !!(await rescue);
   }
 
   // Saves go to the database one at a time, in the order they were made, so a
@@ -235,7 +326,7 @@
 
   async function removeRows(ids) {
     const res = await db.from("answers").delete().eq("user_id", user.id).in("claim_id", ids);
-    if (res.error) return logError(res);
+    if (res.error) return res.error;
     for (const id of ids) delete synced[id];
     keepSynced();
   }
@@ -247,8 +338,8 @@
   function wireEvents() {
     document.addEventListener("woometer:answer", async (e) => {
       const { id, value } = e.detail;
-      const error = await inOrder(() => saveRows([row(id, value)]));
-      if (error) return logError({ error });
+      const error = await inOrder(sendChanges);
+      if (error) return answersNotSaved(error);
       const s = await statsFor(id);
       // Only the latest tap on a claim gets a message. No Don't Know count
       // means the database isn't counting them yet.
@@ -260,14 +351,15 @@
       else W.toast(`${pct(s[value], total)}% of ${people} agree with you.`);
     });
 
-    document.addEventListener("woometer:remove", (e) => {
-      inOrder(() => removeRows([e.detail.id]));
+    document.addEventListener("woometer:remove", () => {
+      inOrder(async () => answersNotSaved(await sendChanges()));
     });
 
     document.addEventListener("woometer:reset", () => {
       inOrder(async () => {
+        if (!(await stillSignedIn())) return answersNotSaved({ message: "not signed in" });
         const res = await db.from("answers").delete().eq("user_id", user.id);
-        if (res.error) return logError(res);
+        if (res.error) return answersNotSaved(res.error);
         synced = {};
         keepSynced();
       });
@@ -374,7 +466,9 @@
     W.withName = withName;
     W.openShare = openShare;
     document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") refreshFriends();
+      if (document.visibilityState !== "visible") return;
+      // Back on the page: send anything that didn't get through, then refresh.
+      inOrder(async () => answersNotSaved(await sendChanges())).then(() => refreshFriends());
     });
   }
 
@@ -405,7 +499,19 @@
     footNote(`Couldn't reach the woometer server, so your answers are only saved in this browser for now. (${detail})`);
   }
 
-  // The footer is just About · Stats · Privacy · Terms; a line above them appears
+  // Answers that can't be saved get a note on screen too, once per visit, not
+  // just the line at the bottom of the page.
+  function answersNotSaved(error) {
+    if (!error) return null;
+    logError({ error });
+    if (!warned) {
+      warned = true;
+      W.toast("Your answers aren't reaching woometer right now. They're kept on this device and will be sent when it's back.");
+    }
+    return null;
+  }
+
+  // The footer is just About · Privacy · Terms; a line above them appears
   // only when something has gone wrong.
   function footNote(text) {
     $("foot-note").textContent = text;
@@ -537,6 +643,7 @@
   }
 
   async function signOut() {
+    forgetSession();
     await db.auth.signOut();
     startFresh();
   }
@@ -572,6 +679,7 @@
       return;
     }
     // The session is already gone on the server, so only clear it here.
+    forgetSession();
     await db.auth.signOut({ scope: "local" });
     try {
       sessionStorage.setItem(DELETED_KEY, "1");

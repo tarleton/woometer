@@ -66,7 +66,6 @@
     .ranked .split .u { background: var(--unsure); }
     .ranked .meta { grid-area: meta; color: var(--muted); font-size: 13px; white-space: nowrap; }
 
-    .map-section h2 { margin-top: 16px; }
     .world { display: block; width: 100%; height: auto; margin-top: 12px; background: #120e19; border: 1px solid var(--line); border-radius: var(--radius); }
     .world .land { fill: #2a2236; stroke: #15111c; stroke-width: 1; cursor: pointer; transition: fill 0.2s; outline: none; }
     .world .land:hover, .world .land:focus-visible { fill: #3a2f4b; }
@@ -97,12 +96,10 @@
 
   <main class="policy">
     <h2 style="font-size: 28px; margin-top: 8px">What everyone believes</h2>
-    <p class="lede">Totals from everyone's answers, all mixed together. Nobody's own answers are shown here.</p>
+    <p class="lede">Everyone's answers combined, never anyone's own.<span id="map-hint" hidden> Tap a continent to see just its answers.</span></p>
 
     <section class="map-section" id="map-section" hidden>
-      <h2>Where people answer from</h2>
-      <p class="lede">Each star is a country people have answered from. Tap a continent to see only its answers below.</p>
-      <svg class="world" id="world" role="group" aria-label="World map"></svg>
+      <svg class="world" id="world" role="group" aria-label="World map. Each star is a country people answered from."></svg>
       <div class="chips" id="chips" role="group" aria-label="Show stats for"></div>
     </section>
 

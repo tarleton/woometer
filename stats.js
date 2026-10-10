@@ -349,6 +349,7 @@
         .map((key) => chip(key, `${GLOBES[key]} ${map.continents[key]}`))
     );
     $("map-section").hidden = false;
+    $("map-hint").hidden = false;
   }
 
   function showRegion(key, c, answered, m) {

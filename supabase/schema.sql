@@ -54,11 +54,28 @@ create table if not exists public.friends (
 -- pair, so only you ever see it.
 alter table public.friends add column if not exists nickname text check (char_length(nickname) <= 40);
 
+-- Where people visit from, for the site owner to look at in the database.
+-- One row per account per IP address, refreshed on every visit. The country,
+-- region and city are Cloudflare's rough guess from the IP. Nobody can read
+-- this table from the site: it has row-level security on and no policies.
+create table if not exists public.visits (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  ip text not null,
+  country text,
+  region text,
+  city text,
+  first_seen timestamptz not null default now(),
+  last_seen timestamptz not null default now(),
+  visit_count integer not null default 1,
+  primary key (user_id, ip)
+);
+
 -- Row-level security
 
 alter table public.profiles enable row level security;
 alter table public.answers enable row level security;
 alter table public.friends enable row level security;
+alter table public.visits enable row level security;
 
 drop policy if exists "read own profile" on public.profiles;
 create policy "read own profile" on public.profiles
@@ -94,6 +111,7 @@ create policy "remove own friends" on public.friends
 -- Profiles are created and renamed only through the functions below.
 grant usage on schema public to anon, authenticated;
 revoke all on public.profiles, public.answers, public.friends from anon;
+revoke all on public.visits from anon, authenticated;
 revoke insert, update, delete on public.profiles from authenticated;
 revoke insert, update on public.friends from authenticated;
 grant select on public.profiles to authenticated;
@@ -102,6 +120,33 @@ grant select, delete on public.friends to authenticated;
 
 -- Functions
 
+-- Notes the caller's IP address and rough location in visits. Supabase's
+-- gateway passes the visitor's IP and Cloudflare's location guess in as
+-- request headers. Called from ensure_profile on every page load; it never
+-- stops the page loading if something is missing.
+create or replace function public.record_visit()
+returns void
+language plpgsql security definer set search_path = public as $$
+declare
+  h json;
+  addr text;
+begin
+  h := coalesce(nullif(current_setting('request.headers', true), ''), '{}')::json;
+  addr := nullif(btrim(coalesce(h->>'cf-connecting-ip', split_part(h->>'x-forwarded-for', ',', 1), h->>'x-real-ip', '')), '');
+  if auth.uid() is null or addr is null then return; end if;
+  insert into visits (user_id, ip, country, region, city)
+  values (auth.uid(), left(addr, 64), nullif(h->>'cf-ipcountry', ''),
+          nullif(coalesce(h->>'cf-region', h->>'cf-ipregion'), ''), nullif(h->>'cf-ipcity', ''))
+  on conflict (user_id, ip) do update set
+    country = coalesce(excluded.country, visits.country),
+    region = coalesce(excluded.region, visits.region),
+    city = coalesce(excluded.city, visits.city),
+    last_seen = now(),
+    visit_count = visits.visit_count + 1;
+exception when others then
+  return;
+end $$;
+
 -- Returns the caller's profile, creating it on first visit.
 create or replace function public.ensure_profile()
 returns table (display_name text, share_code text)
@@ -109,6 +154,7 @@ language plpgsql security definer set search_path = public as $$
 begin
   if auth.uid() is null then raise exception 'not signed in'; end if;
   insert into profiles (id) values (auth.uid()) on conflict (id) do nothing;
+  perform record_visit();
   return query select p.display_name, p.share_code from profiles p where p.id = auth.uid();
 end $$;
 
@@ -279,3 +325,6 @@ revoke execute on function public.ensure_profile(), public.set_display_name(text
 grant execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
   public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
   public.delete_my_account() to authenticated;
+
+-- record_visit only runs inside ensure_profile, never called directly.
+revoke execute on function public.record_visit() from public, anon, authenticated;

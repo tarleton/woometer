@@ -789,13 +789,20 @@
         name.className = "friend-name";
         name.textContent = friendName(f) || "Unnamed friend";
         if (f.nickname && f.display_name && f.nickname !== f.display_name) name.title = f.display_name;
+        // How much common ground, out of the claims you've both answered Yes or No.
         const meta = document.createElement("span");
         meta.className = "friend-meta";
-        // Out of the claims you've both answered; with hundreds of claims the
-        // share of the whole list would read 0% for a long time.
-        meta.textContent = c.both
-          ? `Agree on ${pct(c.agree, c.both)}% of ${c.both} shared`
-          : "Nothing to compare yet";
+        if (c.both) {
+          const num = document.createElement("strong");
+          num.className = "friend-pct";
+          num.textContent = `${pct(c.agree, c.both)}%`;
+          const word = document.createElement("span");
+          word.textContent = "agree";
+          meta.append(num, word);
+          b.setAttribute("aria-label", `${name.textContent}, you agree on ${num.textContent}`);
+        } else {
+          meta.textContent = "Nothing to compare yet";
+        }
         b.append(name, meta);
         b.addEventListener("click", () => openCompare({ ...f, display_name: friendName(f) }));
         li.append(b);
@@ -886,47 +893,33 @@
     return Object.fromEntries(data.map((r) => [r.claim_id, r.answer]));
   }
 
-  // Percentages are out of every claim currently on the list, so they add up
-  // to 100 and stay honest as new claims are added that neither has answered.
-  // A Don't Know on either side counts as "not both answered".
+  // Common ground: only claims you've both answered Yes or No count, so Don't
+  // Know and anything still on either board stay out of it.
   function compare(mine, theirs) {
-    const total = CLAIMS.length;
+    const agreements = [];
     const differences = [];
     const sure = (v) => (v === "yes" || v === "no" ? v : null);
-    let agree = 0;
-    let onlyMe = 0;
-    let onlyThem = 0;
     for (const c of CLAIMS) {
       const a = sure(mine[c.id]);
       const b = sure(theirs[c.id]);
-      if (a && b) {
-        if (a === b) agree++;
-        else differences.push({ claim: c, mine: a, theirs: b });
-      } else if (a && !theirs[c.id]) onlyMe++;
-      else if (b && !mine[c.id]) onlyThem++;
+      if (a && b) (a === b ? agreements : differences).push({ claim: c, mine: a, theirs: b });
     }
+    const agree = agreements.length;
     const differ = differences.length;
-    const both = agree + differ;
-    return {
-      total,
-      both,
-      agree,
-      differ,
-      onlyMe,
-      onlyThem,
-      differences,
-      agreePct: pct(agree, total),
-      differPct: pct(differ, total),
-      notBothPct: total ? 100 - pct(agree, total) - pct(differ, total) : 0,
-    };
+    return { both: agree + differ, agree, differ, agreements, differences };
   }
 
   async function openCompare(friend) {
     const dlg = $("compare");
     const name = friend.display_name || "your friend";
+    const them = friend.display_name || "Them";
     $("compare-name").textContent = friend.display_name || "Unnamed friend";
+    $("overlap-lead").hidden = true;
+    $("compare-pct").hidden = true;
+    $("compare-bar").hidden = true;
     $("compare-summary").textContent = "Loading…";
-    $("compare-diffs").replaceChildren();
+    $("agree-box").hidden = true;
+    $("differ-box").hidden = true;
     dlg.showModal();
 
     $("compare-score").textContent = "";
@@ -941,12 +934,48 @@
     }
     const c = compare(W.getAnswers(), theirs);
 
+    const agreed = pct(c.agree, c.both);
+    $("overlap-lead").hidden = !c.both;
+    $("compare-pct").hidden = !c.both;
+    $("compare-bar").hidden = !c.both;
+    $("compare-pct").textContent = `${agreed}%`;
+    $("compare-summary").textContent = c.both
+      ? `of the ${c.both === 1 ? "claim" : `${c.both} claims`} you've both answered Yes or No.`
+      : "Nothing to compare yet. Once you've both answered some of the same claims Yes or No, you'll see how much you agree.";
+    $("compare-agree").style.flexBasis = `${agreed}%`;
+
+    const yesNo = (v) => (v === "yes" ? "Yes" : "No");
+    const pill = (v, text) => {
+      const el = document.createElement("span");
+      el.className = `pill ${v}`;
+      el.textContent = text;
+      return el;
+    };
+    const fill = (box, title, label, list, rows, pills) => {
+      $(box).hidden = rows.length === 0;
+      $(box).open = false;
+      $(title).textContent = `${label} (${rows.length})`;
+      $(list).replaceChildren(
+        ...rows.map((d) => {
+          const li = document.createElement("li");
+          const label = document.createElement("span");
+          label.textContent = d.claim.name;
+          li.append(label, ...pills(d));
+          return li;
+        })
+      );
+    };
+    fill("agree-box", "agree-title", "Agree on", "compare-agrees", c.agreements, (d) => [pill(d.mine, `Both: ${yesNo(d.mine)}`)]);
+    fill("differ-box", "differ-title", "Differ on", "compare-diffs", c.differences, (d) => [
+      pill(d.mine, `You: ${yesNo(d.mine)}`),
+      pill(d.theirs, `${them}: ${yesNo(d.theirs)}`),
+    ]);
+
     // Their own results, so a shared link shows what they believe, not just the overlap.
     const s = scoreOf(theirs);
     const mine = scoreOf(W.getAnswers());
     $("compare-score").textContent = s.answered
-      ? `${friend.display_name || "They"}: ${s.pct}% woo, rejecting ${100 - s.pct}% of ${s.answered} answered.` +
-        (mine.answered ? ` You: ${mine.pct}% woo.` : "")
+      ? `${friend.display_name || "They"}: ${s.pct}% woo.` + (mine.answered ? ` You: ${mine.pct}% woo.` : "")
       : `${friend.display_name || "They"} haven't answered anything yet.`;
     if (s.woo.length) {
       $("their-pile-title").textContent = `${friend.display_name ? `${friend.display_name}'s` : "Their"} ✨ Believe It (${s.woo.length})`;
@@ -968,42 +997,6 @@
         if (await addFriend(friend.code, friend.display_name)) $("compare-add").hidden = true;
       };
     }
-
-    $("compare-agree").style.flexBasis = `${c.agreePct}%`;
-    $("compare-differ").style.flexBasis = `${c.differPct}%`;
-    $("compare-none").style.flexBasis = `${c.notBothPct}%`;
-    $("compare-agree-pct").textContent = `${c.agreePct}%`;
-    $("compare-differ-pct").textContent = `${c.differPct}%`;
-    $("compare-none-pct").textContent = `${c.notBothPct}%`;
-
-    const lines = [];
-    lines.push(
-      c.both
-        ? `Of the ${c.both} claims you've both answered, you agree on ${pct(c.agree, c.both)}%.`
-        : `You haven't both answered any of the same claims yet.`
-    );
-    const claims = (n) => (n === 1 ? "1 claim" : `${n} claims`);
-    const are = (n) => (n === 1 ? "is" : "are");
-    if (c.onlyThem) lines.push(`${claims(c.onlyThem)} they've answered ${are(c.onlyThem)} still on your board.`);
-    if (c.onlyMe) lines.push(`${claims(c.onlyMe)} you've answered ${are(c.onlyMe)} still on ${name}'s board.`);
-    $("compare-summary").textContent = lines.join(" ");
-
-    $("compare-diffs-title").hidden = c.differences.length === 0;
-    $("compare-diffs").replaceChildren(
-      ...c.differences.map((d) => {
-        const li = document.createElement("li");
-        const label = document.createElement("span");
-        label.textContent = d.claim.name;
-        const you = document.createElement("span");
-        you.className = `pill ${d.mine}`;
-        you.textContent = `You: ${d.mine === "yes" ? "Yes" : "No"}`;
-        const them = document.createElement("span");
-        them.className = `pill ${d.theirs}`;
-        them.textContent = `${friend.display_name || "Them"}: ${d.theirs === "yes" ? "Yes" : "No"}`;
-        li.append(label, you, them);
-        return li;
-      })
-    );
 
     $("compare-remove").onclick = async () => {
       if (!confirm(`Remove ${name} from your friend list?`)) return;

@@ -1276,31 +1276,43 @@
       : "Nothing to compare yet. Once you've both answered some of the same claims Yes or No, you'll see how much you agree.";
     $("compare-agree").style.flexBasis = `${agreed}%`;
 
-    const yesNo = (v) => (v === "yes" ? "Yes" : "No");
-    const pill = (v, text) => {
-      const el = document.createElement("span");
-      el.className = `pill ${v}`;
-      el.textContent = text;
-      return el;
-    };
-    const fill = (box, title, label, list, rows, pills) => {
+    // Every list is tags like a Believe It pile; tap one for the claim.
+    const chips = (claims) =>
+      claims.map((claim) => {
+        const li = document.createElement("li");
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = claim.name;
+        b.addEventListener("click", () => W.openDetail(claim.id));
+        li.append(b);
+        return li;
+      });
+    // Agree on and Differ on split by who said Yes, so the tags alone are enough.
+    const fill = (box, title, label, list, rows, groups) => {
       $(box).hidden = rows.length === 0;
       $(box).open = false;
       $(title).textContent = `${label} (${rows.length})`;
       $(list).replaceChildren(
-        ...rows.map((d) => {
-          const li = document.createElement("li");
-          const label = document.createElement("span");
-          label.textContent = d.claim.name;
-          li.append(label, ...pills(d));
-          return li;
+        ...groups.flatMap(([heading, keep]) => {
+          const claims = rows.filter(keep).map((d) => d.claim);
+          if (!claims.length) return [];
+          const h = document.createElement("p");
+          h.className = "chip-group";
+          h.textContent = `${heading} (${claims.length})`;
+          const ul = document.createElement("ul");
+          ul.className = "pile";
+          ul.append(...chips(claims));
+          return [h, ul];
         })
       );
     };
-    fill("agree-box", "agree-title", "Agree on", "compare-agrees", c.agreements, (d) => [pill(d.mine, `Both: ${yesNo(d.mine)}`)]);
-    fill("differ-box", "differ-title", "Differ on", "compare-diffs", c.differences, (d) => [
-      pill(d.mine, `You: ${yesNo(d.mine)}`),
-      pill(d.theirs, `${them}: ${yesNo(d.theirs)}`),
+    fill("agree-box", "agree-title", "Agree on", "compare-agrees", c.agreements, [
+      ["✨ You both believe", (d) => d.mine === "yes"],
+      ["🗑 Neither of you believes", (d) => d.mine === "no"],
+    ]);
+    fill("differ-box", "differ-title", "Differ on", "compare-diffs", c.differences, [
+      ["✨ Only you believe", (d) => d.mine === "yes"],
+      [`✨ Only ${friend.display_name ? `${friend.display_name} believes` : "they believe"}`, (d) => d.theirs === "yes"],
     ]);
 
     // Each woo %, small beside the explanation rather than a line of its own.
@@ -1324,17 +1336,7 @@
     showPairMeter(s);
     if (s.woo.length) {
       $("their-pile-title").textContent = `${friend.display_name ? `${friend.display_name}'s` : "Their"} ✨ Believe It (${s.woo.length})`;
-      $("their-pile-list").replaceChildren(
-        ...s.woo.map((claim) => {
-          const li = document.createElement("li");
-          const b = document.createElement("button");
-          b.type = "button";
-          b.textContent = claim.name;
-          b.addEventListener("click", () => W.openDetail(claim.id));
-          li.append(b);
-          return li;
-        })
-      );
+      $("their-pile-list").replaceChildren(...chips(s.woo));
       $("their-pile").hidden = false;
     }
     if (friend.code) {

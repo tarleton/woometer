@@ -229,19 +229,13 @@
 
   <dialog id="compare" class="compare wide">
     <form method="dialog">
-      <p class="detail-cat">You and</p>
-      <h3 id="compare-name"></h3>
-      <!-- Common ground first: how often you agree, out of the claims you've
-           both answered Yes or No. -->
-      <div class="overlap">
-        <p class="overlap-lead" id="overlap-lead">You agree on</p>
-        <p class="overlap-pct" id="compare-pct"></p>
-        <p class="overlap-of" id="compare-summary"></p>
-        <div class="compare-bar" id="compare-bar" aria-hidden="true">
-          <span class="seg agree" id="compare-agree"></span>
-        </div>
+      <!-- One tight line up top (how often you agree, out of the claims you've
+           both answered Yes or No) so the lists below get the room. -->
+      <h3 class="compare-head">You and <span id="compare-name"></span><span id="agree-on" hidden> agree on <span class="compare-pct" id="compare-pct"></span></span></h3>
+      <div class="compare-bar" id="compare-bar" aria-hidden="true">
+        <span class="seg agree" id="compare-agree"></span>
       </div>
-      <p class="compare-score" id="compare-score"></p>
+      <p class="compare-sub"><span id="compare-summary"></span><span class="compare-woo" id="compare-woo" hidden></span></p>
       <details class="compare-list" id="agree-box" hidden>
         <summary id="agree-title"></summary>
         <ul class="compare-diffs" id="compare-agrees"></ul>

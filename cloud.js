@@ -1101,17 +1101,15 @@
     const dlg = $("compare");
     const them = friend.display_name || "Them";
     $("compare-name").textContent = friend.display_name || "Unnamed friend";
-    $("overlap-lead").hidden = true;
-    $("compare-pct").hidden = true;
+    $("agree-on").hidden = true;
     $("compare-bar").hidden = true;
+    $("compare-woo").hidden = true;
     $("compare-summary").textContent = "Loading…";
     $("agree-box").hidden = true;
     $("differ-box").hidden = true;
-    dlg.showModal();
-
-    $("compare-score").textContent = "";
     $("their-pile").hidden = true;
     $("compare-add").hidden = Boolean(friend.friend_id);
+    dlg.showModal();
 
     const theirs = friend.friend_id ? await answersOf(friend.friend_id) : await answersForCode(friend.code);
     if (!theirs) {
@@ -1121,12 +1119,11 @@
     const c = compare(W.getAnswers(), theirs);
 
     const agreed = pct(c.agree, c.both);
-    $("overlap-lead").hidden = !c.both;
-    $("compare-pct").hidden = !c.both;
+    $("agree-on").hidden = !c.both;
     $("compare-bar").hidden = !c.both;
     $("compare-pct").textContent = `${agreed}%`;
     $("compare-summary").textContent = c.both
-      ? `of the ${c.both === 1 ? "claim" : `${c.both} claims`} you've both answered Yes or No.`
+      ? `Of the ${c.both === 1 ? "one claim" : `${c.both} claims`} you both answered Yes or No.`
       : "Nothing to compare yet. Once you've both answered some of the same claims Yes or No, you'll see how much you agree.";
     $("compare-agree").style.flexBasis = `${agreed}%`;
 
@@ -1157,12 +1154,24 @@
       pill(d.theirs, `${them}: ${yesNo(d.theirs)}`),
     ]);
 
-    // Their own results, so a shared link shows what they believe, not just the overlap.
+    // Each woo score, small beside the explanation rather than a line of its own.
     const s = scoreOf(theirs);
     const mine = scoreOf(W.getAnswers());
-    $("compare-score").textContent = s.answered
-      ? `${friend.display_name || "They"}: ${s.pct}% woo.` + (mine.answered ? ` You: ${mine.pct}% woo.` : "")
-      : `${friend.display_name || "They"} haven't answered anything yet.`;
+    const woo = (who, sc) => {
+      const el = document.createElement("span");
+      const b = document.createElement("b");
+      b.textContent = `${sc.pct}%`;
+      el.append(`${who} `, b, " woo");
+      return el;
+    };
+    const scores = [mine.answered && woo("You", mine), s.answered && woo(them, s)].filter(Boolean);
+    if (!s.answered) {
+      const none = document.createElement("span");
+      none.textContent = `${friend.display_name ? `${friend.display_name} hasn't` : "They haven't"} answered anything yet.`;
+      scores.push(none);
+    }
+    $("compare-woo").replaceChildren(...scores);
+    $("compare-woo").hidden = false;
     if (s.woo.length) {
       $("their-pile-title").textContent = `${friend.display_name ? `${friend.display_name}'s` : "Their"} ✨ Believe It (${s.woo.length})`;
       $("their-pile-list").replaceChildren(

@@ -580,8 +580,6 @@ dialog a { color: var(--accent); }
 
 .foot { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 16px 40px; }
 .foot-link { color: inherit; }
-/* Delete all answers, for visitors not signed in (signed in, it's in the account menu). */
-.foot .link-btn { font-size: inherit; }
 
 .toast {
   position: fixed;

@@ -224,7 +224,7 @@ begin
 end $$;
 
 -- The numbers on woometer.com/stats, as one bundle: the average woo score
--- across everyone, how scores are spread out, and Yes / No / Don't Know totals
+-- across everyone, how many people have each score, and Yes / No / Don't Know totals
 -- per claim. Only totals, never who answered what. Test accounts are left out.
 -- To keep the numbers meaningful, a person counts toward the average once they
 -- have 10 Yes or No answers, and a claim is listed once it has 5. Anyone can
@@ -259,11 +259,11 @@ language sql stable security definer set search_path = public as $$
     'people', (select count(*) from people),
     'average_score', (select avg(score) from people),
     'median_score', (select percentile_cont(0.5) within group (order by score) from people),
-    -- How many people fall in each tenth: 0-9%, 10-19%, ... 90-100%.
-    'spread', (select json_agg(coalesce(b.n, 0) order by g.i)
-               from generate_series(0, 9) as g(i)
-               left join (select least(floor(score * 10), 9)::int as i, count(*) as n
-                          from people group by 1) b on b.i = g.i),
+    -- How many people have each whole-number score, 0 to 100, as
+    -- [{"pct": 4, "n": 3}, ...]. The page groups these into ranges.
+    'scores', coalesce((select json_agg(json_build_object('pct', pct, 'n', n) order by pct)
+                        from (select round(score * 100)::int as pct, count(*) as n
+                              from people group by 1) x), '[]'::json),
     'claims', coalesce((select json_agg(json_build_object(
                           'id', claim_id, 'yes', n_yes, 'no', n_no, 'unsure', n_unsure))
                         from claims), '[]'::json)

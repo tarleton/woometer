@@ -70,7 +70,7 @@
       $("your-score").textContent = pct(mine);
       $("your-tile").hidden = false;
     }
-    renderSpread(s.spread || [], mine);
+    renderSpread(scoreCounts(s), mine);
 
     // Claims removed from the site since people answered them are left out.
     const claims = (s.claims || [])
@@ -108,31 +108,52 @@
     $("stats-body").hidden = false;
   }
 
-  function renderSpread(spread, mine) {
-    const max = Math.max(1, ...spread);
-    const mineBucket = mine === null ? -1 : Math.min(9, Math.floor(mine * 10));
+  // Most people score low, so the ranges are narrow at the bottom and wide at
+  // the top, to keep everyone from landing in one bar.
+  const RANGES = [[0, 2], [3, 5], [6, 8], [9, 11], [12, 15], [16, 20], [21, 30], [31, 50], [51, 100]];
+
+  // Older versions of site_stats sent tenths ("spread") instead of exact
+  // scores; those still show, just in the old ten bars.
+  function scoreCounts(s) {
+    if (Array.isArray(s.scores)) {
+      return RANGES.map(([lo, hi]) => ({
+        label: lo === hi ? `${lo}%` : `${lo}–${hi}%`,
+        n: s.scores.filter((x) => x.pct >= lo && x.pct <= hi).reduce((sum, x) => sum + x.n, 0),
+        has: (pct) => pct >= lo && pct <= hi,
+      }));
+    }
+    return (s.spread || []).map((n, i) => ({
+      label: `${i * 10}%`,
+      n,
+      has: (pct) => Math.min(9, Math.floor(pct / 10)) === i,
+    }));
+  }
+
+  function renderSpread(groups, mine) {
+    const max = Math.max(1, ...groups.map((g) => g.n));
+    const minePct = mine === null ? null : Math.round(mine * 100);
     $("spread").replaceChildren(
-      ...spread.map((n, i) => {
+      ...groups.map((g) => {
         const col = document.createElement("div");
         col.className = "col";
         const label = document.createElement("span");
         label.className = "n";
-        label.textContent = n || "";
+        label.textContent = g.n || "";
         const bar = document.createElement("div");
-        bar.className = "bar" + (i === mineBucket ? " mine" : "");
-        bar.style.height = `${(n / max) * 100}%`;
+        bar.className = "bar" + (minePct !== null && g.has(minePct) ? " mine" : "");
+        bar.style.height = `${(g.n / max) * 100}%`;
         col.append(label, bar);
         return col;
       })
     );
     $("spread-axis").replaceChildren(
-      ...spread.map((_, i) => {
+      ...groups.map((g) => {
         const span = document.createElement("span");
-        span.textContent = `${i * 10}%`;
+        span.textContent = g.label;
         return span;
       })
     );
-    if (mineBucket >= 0) $("spread-note").textContent = "How many people have each woo score. Your score is in the highlighted bar.";
+    if (minePct !== null) $("spread-note").textContent = "How many people have each woo score. Your score is in the highlighted bar.";
   }
 
   function renderList(id, items, describe) {

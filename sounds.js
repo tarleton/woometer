@@ -7,6 +7,10 @@
 //   Sounds.forward() - a quiet rising tick when opening another page
 //   Sounds.back()    - the same tick falling, when heading back to the main page
 //   Sounds.meow()    - a very soft little meow for tapping the cat, one of 21 at random
+//   Sounds.tap()     - the softest blip, for any other button
+// Every button and link on the site makes a sound on its own (see the click
+// handler at the bottom): Close, Cancel and the like get back(), the rest tap(),
+// unless the button already played its own sound.
 const Sounds = (function () {
   const STORAGE_KEY = "woometer.muted";
   let ctx = null;
@@ -30,7 +34,9 @@ const Sounds = (function () {
   }
 
   // One enveloped oscillator note. `glideTo` bends the pitch over the note.
+  let played = false; // whether the current click has already made a sound
   function note(ac, { type = "sine", freq, glideTo, start, length, volume, out }) {
+    played = true;
     const osc = ac.createOscillator();
     const gain = ac.createGain();
     osc.type = type;
@@ -102,6 +108,13 @@ const Sounds = (function () {
   const forward = () => tick(784, 1046.5);
   const back = () => tick(1046.5, 784);
 
+  // A single soft blip, quieter and shorter than everything else.
+  function tap() {
+    const ac = !muted && audio();
+    if (!ac) return;
+    note(ac, { freq: 880, glideTo: 990, start: ac.currentTime, length: 0.07, volume: 0.045, out: ac.destination });
+  }
+
   // Meows: a sawtooth voice through a sweeping band-pass filter, so each one
   // opens like "mi" and closes like "ow". Twenty small cute ones and one silly
   // low one; tapping the cat picks one at random, never the same twice running.
@@ -139,6 +152,7 @@ const Sounds = (function () {
     do i = Math.floor(Math.random() * MEOWS.length);
     while (i === lastMeow);
     lastMeow = i;
+    played = true;
     const [f0, fPeak, fEnd, len, bright, trill] = MEOWS[i];
     const t = ac.currentTime;
     const rise = len * 0.32;
@@ -198,6 +212,35 @@ const Sounds = (function () {
     setTimeout(() => location.assign(link.href), 140);
   });
 
+  // Every other button, link and checkbox. The click is noted before the page
+  // handles it (that also wakes the audio while the tap still counts as one),
+  // and the sound is chosen once it has been handled: if the button played its
+  // own sound nothing more is added, and the mute button is heard as it unmutes.
+  const CLICKABLE = 'button, [role="button"], a[href], summary, input[type="checkbox"], input[type="radio"]';
+  const BACK_WORDS = /^(close|dismiss|cancel|not now|back|no thanks)\b/i;
+  function isBack(el) {
+    if (el.value === "close" || el.value === "cancel") return true;
+    if (/(^|[-\s])close([-\s]|$)/.test(el.getAttribute("class") || "")) return true;
+    return BACK_WORDS.test((el.getAttribute("aria-label") || el.textContent || "").trim());
+  }
+  window.addEventListener(
+    "click",
+    (e) => {
+      const el = e.target.closest && e.target.closest(CLICKABLE);
+      if (!el || el.disabled) return;
+      played = false;
+      if (!muted) audio();
+      setTimeout(() => {
+        if (played) return;
+        if (isBack(el)) back();
+        else tap();
+      }, 0);
+    },
+    true
+  );
+  // Closing a popup with the Escape key sounds like its Close button.
+  document.addEventListener("cancel", (e) => { if (e.target.tagName === "DIALOG") back(); }, true);
+
   function setMuted(value) {
     muted = value;
     try {
@@ -207,5 +250,5 @@ const Sounds = (function () {
     }
   }
 
-  return { trash, woo, unsure, open, forward, back, meow, setMuted, isMuted: () => muted };
+  return { trash, woo, unsure, open, forward, back, tap, meow, setMuted, isMuted: () => muted };
 })();

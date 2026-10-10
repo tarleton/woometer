@@ -166,8 +166,6 @@ button { font: inherit; cursor: pointer; }
 .pct { font-size: 30px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
 .pct-label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .meter-verdict { font-size: 14px; margin-top: 4px; }
-.why-link { font-size: 12px; margin-top: 6px; color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
-.why-link:hover { color: var(--accent); }
 
 /* The corner buttons line up with the middle of the logo's letters, which
    sits a little over half the logo's size below the header's 12px padding. */
@@ -457,9 +455,15 @@ button { font: inherit; cursor: pointer; }
 .fun-stat:hover { border-color: var(--accent); }
 .fun-stat-head { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; }
 .fun-stat-more { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--accent); }
-.fun-stat-text { display: block; margin-top: 6px; min-height: 2.8em; font-size: 14px; line-height: 1.4; color: var(--muted); transition: opacity 0.3s; }
+.fun-stat-text { display: block; margin-top: 6px; font-size: 14px; line-height: 1.4; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity 0.3s; }
 .fun-stat-text b { color: var(--ink); }
 .fun-stat-text.fade { opacity: 0; }
+/* "Why do these beliefs go together?": a link to /about, styled to match. */
+.why-box .fun-stat-head { font-size: 15px; }
+@media (max-width: 860px) {
+  /* One column: keep it up top, just under the score. */
+  .why-box { order: -1; }
+}
 
 .bin h2 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
 .bin .count {

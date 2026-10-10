@@ -49,8 +49,8 @@
       const mine = yourScore();
       facts.push(
         mine === null
-          ? `The average woo score is <b>${pct(s.average_score)}</b>.`
-          : `The average woo score is <b>${pct(s.average_score)}</b>. Yours: <b>${pct(mine)}</b>`
+          ? `The average woo reading is <b>${pct(s.average_score)}</b>.`
+          : `The average woo reading is <b>${pct(s.average_score)}</b>. Yours: <b>${pct(mine)}</b>`
       );
       if (s.people > 1) facts.push(`<b>${s.people}</b> people have taken the woometer.`);
     }

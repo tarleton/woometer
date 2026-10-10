@@ -1020,7 +1020,7 @@
   }
 
   async function copyShareText() {
-    if (await W.copyText(W.shareText(), "Score and link copied. Paste it anywhere.", "Copy your score and link:")) {
+    if (await W.copyText(W.shareText(), "Woo reading and link copied. Paste it anywhere.", "Copy your woo reading and link:")) {
       $("share-dialog").close();
     }
   }
@@ -1217,7 +1217,7 @@
     $("friend-cat-art").innerHTML = Cat.svg(stage);
     $("friend-cat-name").textContent = Cat.name(stage);
     $("friend-pct").textContent = `${s.pct}%`;
-    $("friend-pct-label").textContent = `${friend.display_name ? `${friend.display_name}'s` : "Their"} woo score`;
+    $("friend-pct-label").textContent = `${friend.display_name ? `${friend.display_name}'s` : "Their"} woo reading`;
   }
 
   async function openCompare(friend) {
@@ -1278,7 +1278,7 @@
       pill(d.theirs, `${them}: ${yesNo(d.theirs)}`),
     ]);
 
-    // Each woo score, small beside the explanation rather than a line of its own.
+    // Each woo reading, small beside the explanation rather than a line of its own.
     const s = scoreOf(theirs);
     const mine = scoreOf(W.getAnswers());
     const woo = (who, sc) => {

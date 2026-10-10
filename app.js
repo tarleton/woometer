@@ -22,7 +22,6 @@
   try {
     showAnswered = localStorage.getItem(SHOW_ANSWERED_KEY) === "1";
   } catch {}
-  let detailId = null;
   let catStage = null;
 
   function load() {
@@ -502,12 +501,13 @@
   // Animate a copy of the card shrinking into the bin, then call done().
   function flyInto(card, bin, done) {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const from = card.getBoundingClientRect();
-    const to = bin.getBoundingClientRect();
-    if (reduced || !isOnScreen(bin)) {
+    // Answers given from the detail popup have no card to fly.
+    if (reduced || !card || !isOnScreen(bin)) {
       done();
       return;
     }
+    const from = card.getBoundingClientRect();
+    const to = bin.getBoundingClientRect();
 
     const flyer = card.cloneNode(true);
     flyer.classList.add("flyer");
@@ -544,26 +544,31 @@
 
   function openDetail(id) {
     const c = byId[id];
-    detailId = id;
     $("detail-cat").textContent = `${CATEGORIES[c.category].icon} ${CATEGORIES[c.category].label}`;
     $("detail-name").textContent = c.name;
     $("detail-q").textContent = c.question;
     $("detail-verdict").textContent = c.verdict;
     $("detail-link").href = c.link;
-    $("detail-undo").hidden = !answers[id];
+    // The same three buttons as the board: the current answer is greyed out, and
+    // tapping another moves the claim to that pile.
+    const row = $("detail-answer");
+    row.replaceChildren();
+    for (const [value, label, cls] of [["yes", "Yes", "yes"], ["unsure", "Don't Know", "unsure"], ["no", "No", "no"]]) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = cls;
+      b.textContent = label;
+      b.disabled = answers[id] === value;
+      if (b.disabled) b.title = "Your answer";
+      b.addEventListener("click", () => {
+        detail.close();
+        answer(id, value, null);
+      });
+      row.append(b);
+    }
     detail.showModal();
     emit("detail", { id });
   }
-
-  $("detail-undo").addEventListener("click", () => {
-    if (detailId) {
-      delete answers[detailId];
-      save();
-      renderAll();
-      emit("remove", { id: detailId });
-    }
-    detail.close();
-  });
 
   // Share and reset
 

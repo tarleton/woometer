@@ -575,6 +575,10 @@ dialog h3 { margin: 4px 0 8px; font-size: 22px; }
 .detail-q { color: var(--muted); }
 .detail-verdict { border-left: 3px solid var(--trash); padding-left: 10px; }
 dialog a { color: var(--accent); }
+/* The answer buttons in the detail popup, centred under the evidence. */
+.detail-answer { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 360px; margin: 18px auto 0; }
+.detail-answer .unsure { padding: 9px 4px; font-size: 14px; background: var(--unsure); }
+.detail-answer button:disabled { opacity: 0.3; filter: grayscale(1); cursor: default; }
 .detail-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
 
 /* Cloudflare's spam check; empty unless it needs a click. */

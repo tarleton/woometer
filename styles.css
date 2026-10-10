@@ -440,8 +440,6 @@ button { font: inherit; cursor: pointer; }
 .bin.trash { background: var(--trash-soft); border-color: var(--trash); }
 .bin.woo { background: var(--woo-soft); border-color: var(--woo); }
 .bin.unsure { background: var(--unsure-soft); border-color: var(--unsure); padding: 10px 14px; }
-/* "Start over" sits quietly under the piles, once there's something to clear. */
-.reset-row { margin: 0; text-align: center; }
 .bin.unsure h2 { font-size: 16px; }
 .bin.unsure .bin-hint { margin-bottom: 6px; }
 .bin.bump { transform: scale(1.04); }
@@ -561,6 +559,8 @@ dialog a { color: var(--accent); }
 
 .foot { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 16px 40px; }
 .foot-link { color: inherit; }
+/* Start over, for visitors not signed in (signed in, it's in the account menu). */
+.foot .link-btn { font-size: inherit; }
 
 .toast {
   position: fixed;
@@ -696,7 +696,7 @@ dialog a { color: var(--accent); }
 .account-name { font-weight: 700; }
 .account-email { font-size: 13px; color: var(--muted); margin-bottom: 12px !important; word-break: break-all; }
 .account-menu .btn { width: 100%; }
-.account-menu .danger-link, .name-dialog .danger-link { display: block; margin: 12px auto 0; }
+.account-menu .danger-link, .account-menu .menu-link, .name-dialog .danger-link { display: block; margin: 12px auto 0; }
 .name-dialog .danger-link { margin-top: 20px; }
 .danger-link:hover { color: var(--danger); }
 .btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }

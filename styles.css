@@ -1001,26 +1001,9 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 /* Lists grow to full length: only the popup scrolls, never a box inside it. */
 .compare-list { margin-top: 10px; }
 .compare-list summary { cursor: pointer; font-weight: 700; margin-bottom: 8px; }
-.compare-diffs {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.compare-diffs li {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 6px;
-}
-.pill { font-size: 12px; font-weight: 700; color: #fff; border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
-.pill.yes { background: var(--woo); }
-.pill.no { background: var(--trash); }
+/* Agree on / Differ on: small headings over tags, like a Believe It pile. */
+.chip-group { margin: 12px 0 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.chip-group:first-child { margin-top: 0; }
 
 @media (max-width: 360px) {
   .mini-cat { display: none; }

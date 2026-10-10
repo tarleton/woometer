@@ -756,6 +756,8 @@ dialog a { color: var(--accent); }
 }
 
 .friends form { display: flex; flex-direction: column; gap: 10px; min-width: min(420px, calc(100vw - 76px)); }
+/* Friends and the comparison it opens: roomy on computers, full width on phones. */
+dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 .friends h3 { margin: 0; }
 .friends .bin-hint { margin: 0; }
 .friends .friend-list { max-height: 45vh; overflow-y: auto; }

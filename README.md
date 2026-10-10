@@ -63,6 +63,10 @@ Supabase's free plan pauses a project after about a week with no activity. [`.gi
 
 `index.html` has Open Graph and Twitter tags pointing at [`icons/og-image.png`](icons/og-image.png). Its source is [`tools/og-image.html`](tools/og-image.html); re-render it with `node tools/render-og-image.js` (needs Playwright).
 
+## Logo
+
+The top-bar logo is also a PNG at [`woometer.com/logo.png`](logo.png) (wide) and [`woometer.com/logo-square.png`](logo-square.png) (1024x1024, for app icons). Both are rendered from the logo in `index.html` and `styles.css`; re-render them with `node tools/render-logo.js` (needs Playwright).
+
 ## Hosting on GitHub Pages
 
 1. In the repo, go to **Settings → Pages** and set the source to **Deploy from a branch**, branch `main`, folder `/ (root)`.

@@ -1003,14 +1003,13 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 .compare-woo b { color: var(--ink); }
 .seg { flex: 0 0 0; transition: flex-basis 0.5s; }
 .seg.agree { background: var(--accent); }
+/* Lists grow to full length: only the popup scrolls, never a box inside it. */
 .compare-list { margin-top: 10px; }
 .compare-list summary { cursor: pointer; font-weight: 700; margin-bottom: 8px; }
 .compare-diffs {
   list-style: none;
   margin: 0;
   padding: 0;
-  max-height: 50vh;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 6px;

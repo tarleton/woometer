@@ -297,7 +297,7 @@
     $("friends-open").addEventListener("click", () => {
       $("friends").showModal();
       $("friends-count").hidden = true;
-      refreshFriends();
+      refreshFriends(true);
     });
     $("avatar").addEventListener("click", (e) => {
       e.stopPropagation();
@@ -700,13 +700,15 @@
     }
   }
 
-  async function refreshFriends() {
+  // opening: true when the person just opened Friends, so everyone listed has
+  // now been seen even if they close it before the list finishes loading.
+  async function refreshFriends(opening = false) {
     if (!db) return;
     const { data, error } = await db.rpc("my_friends");
     if (error) return logError({ error });
     const list = $("friend-list");
     $("friend-empty").hidden = data.length > 0;
-    showNewFriends(data.map((f) => f.friend_id));
+    showNewFriends(data.map((f) => f.friend_id), opening);
     const mine = W.getAnswers();
     const items = await Promise.all(
       data.map(async (f) => {
@@ -737,10 +739,10 @@
   // The badge on the Friends button counts people who have added you since you
   // last opened Friends in this browser (by tapping Add on your link). Opening
   // Friends clears it.
-  function showNewFriends(ids) {
+  function showNewFriends(ids, opening) {
     let seen = seenFriends();
     // The first time this account's friends are listed here, nobody is new.
-    if (!seen || $("friends").open) {
+    if (!seen || opening || $("friends").open) {
       seen = new Set(ids);
       saveSeenFriends(seen);
     }

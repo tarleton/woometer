@@ -558,26 +558,32 @@
 
   // Share and reset
 
-  // With accounts on, cloud.js first makes sure you have a name, since the
-  // personal link shows it to whoever opens it.
+  // With accounts on, cloud.js opens the Share box (your name, then ways to
+  // send your personal link). Without them, Share copies the score straight away.
   $("share").addEventListener("click", () => {
-    if (window.Woometer.withName) window.Woometer.withName(shareScore);
-    else shareScore();
+    if (window.Woometer.openShare) window.Woometer.openShare();
+    else copyText(shareText(), "Score copied. Paste it anywhere.", "Copy your score:");
   });
 
-  async function shareScore() {
+  function shareText() {
     const s = score();
     // With accounts on, cloud.js supplies a personal link that shows this result.
     const personal = window.Woometer.shareUrl && window.Woometer.shareUrl();
     const link = personal || location.origin + location.pathname;
-    const text = s.answered
-      ? `I'm ${s.pct}% woo on the woometer: I reject ${100 - s.pct}% of the ${s.answered} claims I've answered. ${personal ? "See my results and compare with yours:" : "What do you believe?"} ${link}`
+    return s.answered
+      ? `I'm ${s.pct}% woo on the woometer: I reject ${100 - s.pct}% of the ${s.answered === 1 ? "claim" : `${s.answered} claims`} I've answered. ${personal ? "See my results and compare with yours:" : "What do you believe?"} ${link}`
       : `What do you believe? ${link}`;
+  }
+
+  // Resolves to true once copied; falls back to a box to copy from by hand.
+  async function copyText(text, done, ask) {
     try {
       await navigator.clipboard.writeText(text);
-      toast("Score copied. Paste it anywhere.");
+      toast(done);
+      return true;
     } catch {
-      window.prompt("Copy your score:", text);
+      window.prompt(ask, text);
+      return false;
     }
   }
 
@@ -681,6 +687,8 @@
     },
     toast,
     openDetail,
+    shareText,
+    copyText,
   };
 
   renderFilters();

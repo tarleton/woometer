@@ -164,6 +164,9 @@ button { font: inherit; cursor: pointer; }
 
 .meter-read { grid-area: read; display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
 .pct { font-size: 30px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+/* "19% woo" on one line: the word sits beside the number, a little lighter. */
+.pct-line { white-space: nowrap; }
+.pct-word { font-size: 24px; font-weight: 600; color: var(--muted); }
 .pct-label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .meter-verdict { font-size: 14px; margin-top: 4px; }
 
@@ -931,6 +934,7 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 .friend-meter .meter-read { align-items: flex-start; text-align: left; }
 .friend-meter .pct { font-size: 28px; }
 .friend-meter .pct-label { font-size: 11px; }
+.friend-meter .pct-word { font-size: 22px; }
 .compare-head { margin: 0; font-size: 20px; line-height: 1.25; }
 #agree-on { white-space: nowrap; }
 .compare-pct { color: var(--accent); font-weight: 800; font-variant-numeric: tabular-nums; }

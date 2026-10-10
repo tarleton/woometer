@@ -83,11 +83,17 @@
       .filter((c) => byId[c.id])
       .map((c) => ({ ...c, claim: byId[c.id], share: c.yes / (c.yes + c.no), total: c.yes + c.no }));
     const byMost = (a, b) => b.total - a.total;
-    const believed = [...claims].sort((a, b) => b.share - a.share || byMost(a, b)).slice(0, LIST_SIZE);
+    // Ranked by how many people put it on that side, then by share, then by
+    // fewer Don't Knows: 8 believers beat 7, whatever else they answered.
+    const fewerUnsure = (a, b) => a.unsure - b.unsure;
+    const believed = claims
+      .filter((c) => c.yes > 0)
+      .sort((a, b) => b.yes - a.yes || b.share - a.share || fewerUnsure(a, b))
+      .slice(0, LIST_SIZE);
     const shown = new Set(believed.map((c) => c.id));
     const rejected = claims
-      .filter((c) => !shown.has(c.id))
-      .sort((a, b) => a.share - b.share || byMost(a, b))
+      .filter((c) => !shown.has(c.id) && c.no > 0)
+      .sort((a, b) => b.no - a.no || a.share - b.share || fewerUnsure(a, b))
       .slice(0, LIST_SIZE);
     rejected.forEach((c) => shown.add(c.id));
     const split = claims
@@ -297,8 +303,8 @@
       .map((x) => ({ ...x, claim: byId[x.id], share: x.yes / (x.yes + x.no), total: x.yes + x.no }));
     if (!claims.length) return;
     const top = (score) => claims.reduce((best, x) => (score(x) > score(best) ? x : best));
-    const believed = top((x) => x.share + x.total / 1e6);
-    const trashed = top((x) => 1 - x.share + x.total / 1e6);
+    const believed = top((x) => x.yes + x.share / 2 - x.unsure / 1e6);
+    const trashed = top((x) => x.no + (1 - x.share) / 2 - x.unsure / 1e6);
     const label = (x) => esc(`${CATEGORIES[x.claim.category].icon} ${x.claim.name}`);
     if (believed.yes) line(`Most believed: <b>${label(believed)}</b> (${pct(believed.share)})`);
     line(`Most trashed: <b>${label(trashed)}</b> (${pct(1 - trashed.share)} No)`);

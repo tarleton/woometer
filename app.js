@@ -302,7 +302,7 @@
     $("mini-trash-count").textContent = s.trash;
     $("mini-woo-count").textContent = s.woo;
     $("mini-unsure-count").textContent = s.unsure;
-    $("reset-row").hidden = !Object.keys(answers).length;
+    renderReset();
     showMiniUnsure(s.unsure > 0);
     $("mini-pct").textContent = `${s.pct}%`;
     // -90deg is all the way left (0%), +90deg all the way right (100%).
@@ -597,14 +597,29 @@
     }
   }
 
-  $("reset").addEventListener("click", () => {
-    if (!Object.keys(answers).length) return;
-    if (!confirm("Clear all your answers and start over?")) return;
+  // Start over is kept out of the way: in the account menu when signed in
+  // (cloud.js), otherwise at the very bottom of the page once there's
+  // something to clear.
+  function renderReset() {
+    const signedIn = window.Woometer && window.Woometer.signedIn;
+    $("reset-foot").hidden = signedIn || !Object.keys(answers).length;
+  }
+
+  function startOver() {
+    if (!Object.keys(answers).length) {
+      toast("There's nothing to clear yet.");
+      return;
+    }
+    const sure = confirm(
+      "Clear all your answers and start over? This can't be undone, and friends will have nothing to compare with you until you answer again."
+    );
+    if (!sure) return;
     answers = {};
     save();
     renderAll();
     emit("reset", {});
-  });
+  }
+  $("reset").addEventListener("click", startOver);
 
   const muteBtn = $("mute");
   function renderMute() {
@@ -699,6 +714,8 @@
     openDetail,
     shareText,
     copyText,
+    startOver,
+    renderReset,
   };
 
   renderFilters();

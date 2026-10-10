@@ -46,6 +46,7 @@
           <p class="account-name" id="account-name"></p>
           <p class="account-email" id="account-email"></p>
           <button type="button" id="sign-out" class="btn ghost">Sign out</button>
+          <button type="button" id="reset-account" class="link-btn menu-link">Start over (clear my answers)</button>
           <button type="button" id="delete-account" class="link-btn danger-link">Delete my account</button>
         </div>
       </div>
@@ -140,7 +141,6 @@
         <p class="bin-hint">These don't count toward your score.</p>
         <ul class="pile" id="unsure-pile"></ul>
       </section>
-      <p class="reset-row" id="reset-row" hidden><button type="button" id="reset" class="link-btn">Start over</button></p>
 
     </aside>
   </main>
@@ -315,7 +315,7 @@
 
   <footer class="foot">
     <p id="foot-note" hidden></p>
-    <p><a href="about" class="foot-link">About</a> · <a href="stats" class="foot-link">Stats</a> · <a href="privacy" class="foot-link">Privacy</a> · <a href="terms" class="foot-link">Terms</a></p>
+    <p><a href="about" class="foot-link">About</a> · <a href="stats" class="foot-link">Stats</a> · <a href="privacy" class="foot-link">Privacy</a> · <a href="terms" class="foot-link">Terms</a><span id="reset-foot" hidden> · <button type="button" id="reset" class="link-btn foot-link">Start over</button></span></p>
   </footer>
 
   <script src="claims.js"></script>

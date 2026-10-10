@@ -451,9 +451,16 @@ language sql stable security definer set search_path = public as $$
     having count(*) filter (where a.answer in ('yes', 'no')) >= 10
   ),
   continents as (
-    select continent, count(*) as n, avg(score) as average_score
+    select continent, count(*) as n, avg(score) as average_score,
+           percentile_cont(0.5) within group (order by score) as median_score
     from people
     group by continent
+  ),
+  scores as (
+    select continent, round(score * 100)::int as pct, count(*) as n
+    from people
+    where continent in (select continent from continents where n >= 3)
+    group by continent, round(score * 100)::int
   ),
   claims as (
     select p.continent, a.claim_id,
@@ -476,6 +483,9 @@ language sql stable security definer set search_path = public as $$
                      'key', c.continent,
                      'people', c.n,
                      'average_score', case when c.n >= 3 then c.average_score end,
+                     'median_score', case when c.n >= 3 then c.median_score end,
+                     'scores', coalesce((select json_agg(json_build_object('pct', sc.pct, 'n', sc.n) order by sc.pct)
+                                from scores sc where sc.continent = c.continent), '[]'::json),
                      'claims', coalesce((select json_agg(json_build_object(
                                   'id', cl.claim_id, 'yes', cl.n_yes, 'no', cl.n_no, 'unsure', cl.n_unsure))
                                 from claims cl where cl.continent = c.continent), '[]'::json)))

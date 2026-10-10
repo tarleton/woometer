@@ -11,6 +11,8 @@
   const $ = (id) => document.getElementById(id);
   const byId = Object.fromEntries(CLAIMS.map((c) => [c.id, c]));
   const pct = (x) => `${Math.round(x * 100)}%`;
+  // site_stats for everyone, kept so "All" can switch back to it.
+  let everyone = null;
 
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
     notReady();
@@ -20,15 +22,16 @@
   loadScript(SUPABASE_JS)
     .then(async () => {
       const db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
-      // The map has its own function; if it isn't in the database yet, the
-      // map just stays hidden.
-      db.rpc("map_stats").then(({ data, error }) => {
-        if (error) console.warn("woometer: map isn't available.", error);
-        else renderMap(data);
-      });
+      // The map (and each continent's numbers) has its own function; if it
+      // isn't in the database yet, the map just stays hidden.
+      const mapLoad = db.rpc("map_stats");
       const { data, error } = await db.rpc("site_stats");
       if (error) throw error;
+      everyone = data;
       render(data);
+      const { data: m, error: mapError } = await mapLoad;
+      if (mapError) console.warn("woometer: map isn't available.", mapError);
+      else renderMap(m);
     })
     .catch((err) => {
       console.warn("woometer: stats aren't available.", err);
@@ -62,13 +65,16 @@
     }
   }
 
-  function render(s) {
+  // s is site_stats for everyone, or one continent's numbers from map_stats
+  // (same shape). where is that continent's name, or "" for everyone.
+  function render(s, where = "") {
     if (!s) return notReady();
     const mine = yourScore();
+    document.querySelectorAll("#stats-body h2 .where").forEach((el) => (el.textContent = where && `in ${where}`));
 
     if (s.people > 0) {
       $("avg-score").textContent = pct(s.average_score);
-      $("median-score").textContent = pct(s.median_score);
+      $("median-score").textContent = s.median_score == null ? "–" : pct(s.median_score);
     }
     $("people-count").textContent = s.people;
     $("people-label").textContent = s.people === 1 ? "person counted" : "people counted";
@@ -108,17 +114,24 @@
       .sort((a, b) => b.unsure - a.unsure || b.unsure / (b.total + b.unsure) - a.unsure / (a.total + a.unsure))
       .slice(0, LIST_SIZE);
 
-    renderList("believed", believed);
-    renderList("rejected", rejected);
-    renderList("split", split);
-    renderList("unsure", unsure, (c) => `${pct(c.unsure / (c.total + c.unsure))} don't know`);
+    // For everyone, an empty list just hides; for a continent it says why.
+    const empty = where ? "Not enough answers here yet." : "";
+    renderList("believed", believed, undefined, empty);
+    renderList("rejected", rejected, undefined, empty);
+    renderList("split", split, undefined, empty && "No claims are split here yet.");
+    renderList("unsure", unsure, (c) => `${pct(c.unsure / (c.total + c.unsure))} don't know`, empty && "Nobody here has picked Don't Know enough yet.");
 
     $("method-note").textContent =
       `How these are counted: the woo score is the share of Yes and No answers that were Yes, and ` +
       `Don't Know answers don't count either way. A person is included once they've answered at least ` +
       `${s.min_person_answers} claims Yes or No, and a claim is listed once at least ` +
-      `${s.min_claim_answers} people have answered it Yes or No.`;
+      `${s.min_claim_answers} people have answered it Yes or No.` +
+      (where
+        ? ` Each person is placed by the country they last answered from, and a continent shows once ` +
+          `${s.min_people} people there are counted.`
+        : "");
 
+    $("stats-body").hidden = true;
     $("stats-status").hidden = s.people > 0 || claims.length > 0;
     if (!$("stats-status").hidden) {
       $("stats-status").textContent = "Not enough people have answered yet to show stats. Please check back soon.";
@@ -185,9 +198,18 @@
   // Each list shows its top few, with a button for the rest.
   const SHOW_FIRST = 5;
 
-  function renderList(id, items, describe = (c) => `${pct(c.share)} believe · ${pct(1 - c.share)} don't`) {
-    $(`${id}-section`).hidden = items.length === 0;
+  function renderList(id, items, describe = (c) => `${pct(c.share)} believe · ${pct(1 - c.share)} don't`, empty = "") {
+    $(`${id}-section`).hidden = items.length === 0 && !empty;
     const list = $(id);
+    if (!items.length) {
+      list.classList.remove("open");
+      list.nextElementSibling?.classList.contains("show-more") && list.nextElementSibling.remove();
+      const li = document.createElement("li");
+      li.className = "none";
+      li.textContent = empty;
+      list.replaceChildren(li);
+      return;
+    }
     list.classList.remove("open");
     list.nextElementSibling?.classList.contains("show-more") && list.nextElementSibling.remove();
     if (items.length > SHOW_FIRST) {
@@ -241,7 +263,8 @@
   }
 
   // World map: a star on each country people answered from, bigger for more
-  // people, and continent totals when one is tapped.
+  // people. Tapping a continent (or its chip) switches the whole page to just
+  // that continent; "All" or tapping the sea switches back to everyone.
   const GLOBES = { "north-america": "🌎", "south-america": "🌎", europe: "🌍", africa: "🌍", asia: "🌏", oceania: "🌏" };
   const SVG = "http://www.w3.org/2000/svg";
 
@@ -268,6 +291,14 @@
     }
 
     const lands = {};
+    const chips = {};
+    const pick = (key) => {
+      Object.entries(lands).forEach(([k, l]) => l.classList.toggle("on", k === key));
+      Object.entries(chips).forEach(([k, b]) => b.setAttribute("aria-pressed", String(k === (key || "all"))));
+      if (!key) render(everyone);
+      else showRegion(key, byKey[key], counts[key] || 0, m);
+    };
+
     for (const [key, d] of Object.entries(map.shapes)) {
       const land = document.createElementNS(SVG, "path");
       land.setAttribute("d", d);
@@ -275,20 +306,20 @@
       land.setAttribute("tabindex", "0");
       land.setAttribute("role", "button");
       land.setAttribute("aria-label", map.continents[key]);
-      const pick = () => {
-        Object.values(lands).forEach((l) => l.classList.toggle("on", l === land));
-        showRegion(key, byKey[key], counts[key] || 0, m);
-      };
-      land.addEventListener("click", pick);
+      land.addEventListener("click", (e) => {
+        e.stopPropagation();
+        pick(land.classList.contains("on") ? null : key);
+      });
       land.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          pick();
+          pick(key);
         }
       });
       lands[key] = land;
       svg.append(land);
     }
+    svg.addEventListener("click", () => pick(null));
 
     m.countries.forEach((c, i) => {
       const pt = map.points[c.code];
@@ -299,46 +330,53 @@
       star.style.animationDelay = `${(i * 0.7) % 3}s`;
       svg.append(star);
     });
+
+    // A chip for everyone, then one for each continent anyone answered from.
+    const chip = (key, text) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.textContent = text;
+      b.setAttribute("aria-pressed", String(key === "all"));
+      b.addEventListener("click", () => pick(key === "all" ? null : key));
+      chips[key] = b;
+      return b;
+    };
+    $("chips").replaceChildren(
+      chip("all", "🌐 All"),
+      ...Object.keys(map.continents)
+        .filter((key) => counts[key])
+        .map((key) => chip(key, `${GLOBES[key]} ${map.continents[key]}`))
+    );
     $("map-section").hidden = false;
   }
 
   function showRegion(key, c, answered, m) {
     const name = `${GLOBES[key]} ${window.WORLD_MAP.continents[key]}`;
-    const box = $("region");
-    box.replaceChildren();
-    const h = document.createElement("h3");
-    h.textContent = name;
-    box.append(h);
-    const line = (html) => {
-      const p = document.createElement("p");
-      p.innerHTML = html;
-      box.append(p);
-    };
-    if (!answered) {
-      line("Nobody has answered from here yet.");
-      return;
-    }
     const people = c ? c.people : 0;
-    if (people < m.min_people) {
-      line(`<b>${answered}</b> ${answered === 1 ? "person has" : "people have"} answered from here. Stats show once ${m.min_people} people here have answered at least ${m.min_person_answers} claims.`);
+    if (!everyone || people < m.min_people) {
+      $("stats-body").hidden = true;
+      const status = $("stats-status");
+      status.hidden = false;
+      status.textContent = !answered
+        ? `Nobody has answered from ${window.WORLD_MAP.continents[key]} yet.`
+        : `Not enough answers from ${window.WORLD_MAP.continents[key]} yet. ` +
+          `${answered} ${answered === 1 ? "person has" : "people have"} answered from here, and stats show once ` +
+          `${m.min_people} people here have answered at least ${m.min_person_answers} claims.`;
       return;
     }
-    line(`<b>${people}</b> people counted · average woo score <b>${pct(c.average_score)}</b>`);
-    const claims = (c.claims || [])
-      .filter((x) => byId[x.id])
-      .map((x) => ({ ...x, claim: byId[x.id], share: x.yes / (x.yes + x.no), total: x.yes + x.no }));
-    if (!claims.length) return;
-    const top = (score) => claims.reduce((best, x) => (score(x) > score(best) ? x : best));
-    const believed = top((x) => x.yes + x.share / 2 - x.unsure / 1e6);
-    const trashed = top((x) => x.no + (1 - x.share) / 2 - x.unsure / 1e6);
-    const label = (x) => esc(`${CATEGORIES[x.claim.category].icon} ${x.claim.name}`);
-    if (believed.yes) line(`Most believed: <b>${label(believed)}</b> (${pct(believed.share)})`);
-    line(`Most trashed: <b>${label(trashed)}</b> (${pct(1 - trashed.share)} No)`);
-  }
-
-  function esc(str) {
-    const d = document.createElement("div");
-    d.textContent = str;
-    return d.innerHTML;
+    render(
+      {
+        people,
+        average_score: c.average_score,
+        median_score: c.median_score,
+        scores: c.scores || [],
+        claims: c.claims || [],
+        min_people: m.min_people,
+        min_person_answers: m.min_person_answers,
+        min_claim_answers: m.min_claim_answers,
+      },
+      name
+    );
   }
 })();

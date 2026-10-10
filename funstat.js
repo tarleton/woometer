@@ -49,23 +49,23 @@
       const mine = yourScore();
       facts.push(
         mine === null
-          ? `The average woo score here is <b>${pct(s.average_score)}</b>.`
-          : `The average woo score here is <b>${pct(s.average_score)}</b>. Yours is <b>${pct(mine)}</b>.`
+          ? `The average woo score is <b>${pct(s.average_score)}</b>.`
+          : `The average woo score is <b>${pct(s.average_score)}</b>. Yours: <b>${pct(mine)}</b>`
       );
-      if (s.people > 1) facts.push(`<b>${s.people}</b> people have answered at least ${s.min_person_answers} claims so far.`);
+      if (s.people > 1) facts.push(`<b>${s.people}</b> people have taken the woometer.`);
     }
     if (!claims.length) return facts;
 
     const believed = top(claims, (c) => c.share + c.all / 1e6);
-    if (believed.yes) facts.push(`The most believed claim: <b>${esc(label(believed.claim))}</b>, at ${pct(believed.share)}.`);
+    if (believed.yes) facts.push(`Most believed: <b>${esc(label(believed.claim))}</b> (${pct(believed.share)})`);
     const rejected = top(claims, (c) => 1 - c.share + c.all / 1e6);
-    facts.push(`The most trashed claim: <b>${esc(label(rejected.claim))}</b>. ${pct(1 - rejected.share)} said No.`);
+    facts.push(`Most trashed: <b>${esc(label(rejected.claim))}</b> (${pct(1 - rejected.share)} No)`);
     const split = top(claims.filter((c) => c.yes && c.no), (c) => -Math.abs(c.share - 0.5) + c.all / 1e6);
     if (split && split !== believed && split.share >= 0.2 && split.share <= 0.8) {
-      facts.push(`People disagree most about <b>${esc(label(split.claim))}</b>: ${pct(split.share)} believe it.`);
+      facts.push(`Most split: <b>${esc(label(split.claim))}</b> (${pct(split.share)} believe)`);
     }
     const unsure = top(claims.filter((c) => c.unsure), (c) => c.unsure / c.all);
-    if (unsure) facts.push(`The claim people are least sure about: <b>${esc(label(unsure.claim))}</b>. ${pct(unsure.unsure / unsure.all)} said Don't Know.`);
+    if (unsure) facts.push(`Least sure: <b>${esc(label(unsure.claim))}</b> (${pct(unsure.unsure / unsure.all)} Don't Know)`);
 
     // The category with the highest share of Yes answers.
     const cats = {};
@@ -75,7 +75,7 @@
       t.decided += c.yes + c.no;
     }
     const [catKey, cat] = Object.entries(cats).reduce((a, b) => (b[1].yes / b[1].decided > a[1].yes / a[1].decided ? b : a));
-    if (cat.yes) facts.push(`The most believed kind of claim: <b>${CATEGORIES[catKey].icon} ${esc(CATEGORIES[catKey].label)}</b>.`);
+    if (cat.yes) facts.push(`Most believed kind: <b>${CATEGORIES[catKey].icon} ${esc(CATEGORIES[catKey].short || CATEGORIES[catKey].label)}</b>`);
     return facts;
   }
 

@@ -41,6 +41,7 @@
     } catch {
       // Private mode or storage blocked: the page still works, it just won't remember.
     }
+    window.dispatchEvent(new Event("woometer:answers"));
   }
 
   // The woo score only counts Yes and No; Don't Know answers sit it out.

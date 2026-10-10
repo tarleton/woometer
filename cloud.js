@@ -1200,26 +1200,42 @@
     return { both: agree + differ, agree, differ, agreements, differences };
   }
 
-  // The friend's own woo meter at the top of the comparison: their cat, and a
-  // copy of your meter's dial that flips to a pie of their answers.
-  let friendDial = null;
-  function showFriendMeter(friend, theirs, s) {
-    $("friend-meter").hidden = !s.answered;
+  // Their meter and yours at the top of the comparison, cats in the middle.
+  // The gauges are copies of your meter's dial; a tap on either turns both
+  // over to pies of the answers, and they start on the gauges each time.
+  let pairDials = null;
+  function showPairMeter(friend, theirs, s) {
+    $("pair-meter").hidden = !s.answered;
     if (!s.answered) return;
-    if (!friendDial) {
-      friendDial = W.newDial("their");
-      $("friend-cat").after(friendDial.el);
+    if (!pairDials) {
+      pairDials = { them: W.newDial("their"), you: W.newDial("your") };
+      $("pm-them").prepend(pairDials.them.el);
+      $("pm-you").prepend(pairDials.you.el);
+      const both = () => {
+        const next = !(pairDials.them.flipped() || pairDials.you.flipped());
+        pairDials.them.turn(next);
+        pairDials.you.turn(next);
+      };
+      pairDials.them.onTap = pairDials.you.onTap = both;
     }
-    friendDial.unflip();
-    friendDial.show({ pct: s.pct, woo: s.woo.length, trash: s.trash, unsure: s.unsure });
-    const stage = Cat.stageFor(s.pct);
-    $("friend-cat-art").innerHTML = Cat.svg(stage);
-    $("friend-cat-name").textContent = Cat.name(stage);
-    const word = document.createElement("span");
-    word.className = "pct-word";
-    word.textContent = "woo";
-    $("friend-pct").replaceChildren(`${s.pct}% `, word);
-    $("friend-pct-label").textContent = friend.display_name || "Your friend";
+    const mine = W.getAnswers();
+    const sides = [
+      ["them", "friend", s],
+      ["you", "your", scoreOf(mine)],
+    ];
+    for (const [side, id, sc] of sides) {
+      pairDials[side].unflip();
+      pairDials[side].show({ pct: sc.pct, woo: sc.woo.length, trash: sc.trash, unsure: sc.unsure });
+      const stage = Cat.stageFor(sc.pct);
+      $(`${id}-cat-art`).innerHTML = Cat.svg(stage);
+      $(`${id}-cat-name`).textContent = Cat.name(stage);
+      $(`${id}-pct`).textContent = `${sc.pct}%`;
+    }
+    $("friend-who").textContent = friend.display_name || "Them";
+    // Before you've answered anything, only their side shows.
+    const youToo = sides[1][2].answered > 0;
+    $("pm-you").hidden = !youToo;
+    $("pm-you-cat").hidden = !youToo;
   }
 
   async function openCompare(friend) {
@@ -1234,7 +1250,7 @@
     $("differ-box").hidden = true;
     $("their-pile").hidden = true;
     $("compare-add").hidden = Boolean(friend.friend_id);
-    $("friend-meter").hidden = true;
+    $("pair-meter").hidden = true;
     dlg.showModal();
 
     const theirs = friend.friend_id ? await answersOf(friend.friend_id) : await answersForCode(friend.code);
@@ -1298,7 +1314,7 @@
     }
     $("compare-woo").replaceChildren(...scores);
     $("compare-woo").hidden = false;
-    showFriendMeter(friend, theirs, s);
+    showPairMeter(friend, theirs, s);
     if (s.woo.length) {
       $("their-pile-title").textContent = `${friend.display_name ? `${friend.display_name}'s` : "Their"} ✨ Believe It (${s.woo.length})`;
       $("their-pile-list").replaceChildren(

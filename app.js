@@ -325,17 +325,17 @@
       dial.setAttribute("aria-pressed", String(on));
       dial.setAttribute("aria-label", on ? "Show the woo meter" : `Show ${whose} answers as a pie chart`);
     }
-    dial.addEventListener("click", () => {
+    function turn(next) {
+      if (dial.disabled || next === dial.classList.contains("flipped")) return;
       const inner = dial.querySelector(".dial-inner");
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const next = !dial.classList.contains("flipped");
       inner.classList.remove("flipping");
       void inner.offsetWidth; // restart the animation
       inner.classList.add("flipping");
       // Swap faces while the card is edge-on.
       setTimeout(() => setFlipped(next), reduced ? 0 : 225);
       setTimeout(() => inner.classList.remove("flipping"), 520);
-    });
+    }
     setFlipped(false);
     // s: { pct, trash, woo, unsure } as counts.
     function show(s) {
@@ -362,7 +362,16 @@
       });
       pie.innerHTML = ring + legend;
     }
-    return { show, unflip: () => setFlipped(false) };
+    const api = {
+      show,
+      turn,
+      unflip: () => setFlipped(false),
+      flipped: () => dial.classList.contains("flipped"),
+      // Set to replace a tap's own flip, e.g. to turn two dials over together.
+      onTap: null,
+    };
+    dial.addEventListener("click", () => (api.onTap ? api.onTap() : turn(!api.flipped())));
+    return api;
   }
   const meterDial = makeDial($("dial"), "your");
 
@@ -722,14 +731,14 @@
     copyText,
     startOver,
     confirmDelete,
-    // A copy of the meter's dial for someone else's answers: { el, show(s), unflip() }.
+    // A copy of the meter's dial: { el, show(s), turn(on), unflip(), flipped(), onTap }.
     newDial(whose) {
       const el = $("dial").cloneNode(true);
       el.removeAttribute("id");
       el.querySelectorAll("[id]").forEach((n) => n.removeAttribute("id"));
       el.querySelector("defs").remove(); // the gauge keeps using the page's own colours
       el.classList.remove("flipped");
-      return { el, ...makeDial(el, whose) };
+      return Object.assign(makeDial(el, whose), { el });
     },
   };
 

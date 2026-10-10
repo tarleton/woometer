@@ -122,7 +122,7 @@
     renderList("unsure", unsure, (c) => `${pct(c.unsure / (c.total + c.unsure))} don't know`, empty && "Nobody here has picked Don't Know enough yet.");
 
     $("method-note").textContent =
-      `How these are counted: the woo reading is the share of Yes and No answers that were Yes, and ` +
+      `How these are counted: woo is the share of Yes and No answers that were Yes, and ` +
       `Don't Know answers don't count either way. A person is included once they've answered at least ` +
       `${s.min_person_answers} claims Yes or No, and a claim is listed once at least ` +
       `${s.min_claim_answers} people have answered it Yes or No.` +
@@ -185,7 +185,7 @@
         return span;
       })
     );
-    if (minePct !== null) $("spread-note").textContent = "How many people have each woo reading. Yours is in the highlighted bar.";
+    if (minePct !== null) $("spread-note").textContent = "How many people are at each woo %. Yours is in the highlighted bar.";
   }
 
   // Tapping a bar segment shows its label; tapping anywhere else hides it.

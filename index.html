@@ -11,14 +11,14 @@
   <meta property="og:site_name" content="woometer">
   <meta property="og:url" content="https://woometer.com/">
   <meta property="og:title" content="woometer: what do you believe?">
-  <meta property="og:description" content="Answer Yes or No to hundreds of pseudoscience, paranormal and religious claims, get your woo reading and cat, and compare with friends.">
+  <meta property="og:description" content="Answer Yes or No to hundreds of pseudoscience, paranormal and religious claims, see how woo you are, get your cat, and compare with friends.">
   <meta property="og:image" content="https://woometer.com/icons/og-image.png?v=2">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="The woometer logo above five cartoon cats, from a skeptic professor to a UFO pilot.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="woometer: what do you believe?">
-  <meta name="twitter:description" content="Answer Yes or No to hundreds of pseudoscience, paranormal and religious claims, get your woo reading and cat, and compare with friends.">
+  <meta name="twitter:description" content="Answer Yes or No to hundreds of pseudoscience, paranormal and religious claims, see how woo you are, get your cat, and compare with friends.">
   <meta name="twitter:image" content="https://woometer.com/icons/og-image.png?v=2">
   <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -37,7 +37,7 @@
     </div>
 
     <div class="top-actions">
-      <button type="button" id="share" class="top-btn" aria-label="Share my woo reading with a friend" title="Share your results with a friend"><span aria-hidden="true">🔗</span><span class="top-btn-label">Share</span></button>
+      <button type="button" id="share" class="top-btn" aria-label="Share my results with a friend" title="Share your results with a friend"><span aria-hidden="true">🔗</span><span class="top-btn-label">Share</span></button>
       <button type="button" id="friends-open" class="top-btn" aria-label="Friends" title="Friends" hidden><svg class="cat-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.2 9.5 L5 2.8 L9.6 6.2 Q12 5.5 14.4 6.2 L19 2.8 L19.8 9.5 Q21 12.5 20 15.5 Q18.4 21 12 21 Q5.6 21 4 15.5 Q3 12.5 4.2 9.5 Z" fill="#eda65c" stroke="#5a3a1e" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.1 5 L6.6 8 L8.4 6.8 Z M17.9 5 L17.4 8 L15.6 6.8 Z" fill="#f7c8a0"/><circle cx="9" cy="12.6" r="1.35" fill="#2a1a10"/><circle cx="15" cy="12.6" r="1.35" fill="#2a1a10"/><path d="M10.9 15.1 h2.2 l-1.1 1.2 z" fill="#d9707a"/><path d="M12 16.3 q-1 1.5 -2.5 0.8 M12 16.3 q1 1.5 2.5 0.8 M3 14 l4 .6 M3.4 16.6 l3.8 -.6 M21 14 l-4 .6 M20.6 16.6 l-3.8 -.6" fill="none" stroke="#5a3a1e" stroke-width="0.9" stroke-linecap="round"/></svg><span class="top-btn-label">Friends</span><b class="badge" id="friends-count" hidden></b></button>
       <button type="button" id="google-login" class="gsi" aria-label="Sign in with Google" hidden><svg class="g-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><svg class="person-logo" viewBox="0 0 24 24" aria-hidden="true" hidden><circle cx="12" cy="8" r="4.2"/><path d="M3.5 21c.9-4.6 4.3-7 8.5-7s7.6 2.4 8.5 7z"/></svg><span class="gsi-label">Sign in</span></button>
       <div class="account" id="account" hidden>
@@ -89,7 +89,7 @@
     </section>
 
     <aside class="bins">
-      <section class="meter" aria-label="Your woo reading" aria-live="polite">
+      <section class="meter" aria-label="How woo you are" aria-live="polite">
         <button type="button" class="cat" id="cat" aria-haspopup="dialog">
           <span class="cat-art" id="cat-art"></span>
           <span class="cat-label" id="cat-name"></span>
@@ -116,7 +116,7 @@
         </button>
         <div class="meter-read">
           <span id="pct" class="pct">0%</span>
-          <span class="pct-label">woo reading</span>
+          <span class="pct-label">woo</span>
           <span id="verdict" class="meter-verdict">Answer a few to get a reading</span>
         </div>
       </section>
@@ -142,7 +142,7 @@
       </section>
       <section class="bin unsure" id="unsure-bin">
         <h2><span aria-hidden="true">🤷</span> Don't Know <span class="count" id="unsure-count">0</span></h2>
-        <p class="bin-hint">These don't count toward your woo reading.</p>
+        <p class="bin-hint">These don't count toward your woo %.</p>
         <ul class="pile" id="unsure-pile"></ul>
       </section>
       <a class="fun-stat" id="fun-stat" href="stats">
@@ -226,7 +226,7 @@
       </label>
       <p class="share-preview" id="share-preview"></p>
       <button type="button" id="share-native" class="btn" autofocus hidden>Send to a friend</button>
-      <button type="button" id="share-copy" class="btn" autofocus>Copy my woo reading and link</button>
+      <button type="button" id="share-copy" class="btn" autofocus>Copy my woo and link</button>
       <button type="button" id="copy-friend-link" class="btn ghost">Copy just the link</button>
       <div class="detail-actions">
         <button class="btn ghost" value="close">Close</button>
@@ -282,7 +282,7 @@
   <dialog id="reset-dialog" class="delete-dialog">
     <form method="dialog">
       <h3>Are you sure you wish to delete all your answers?</h3>
-      <p>Every Yes, No and Don't Know you've given is deleted from woometer and this browser, and your woo reading goes back to zero. Friends will have nothing to compare with you until you answer again. This can't be undone.</p>
+      <p>Every Yes, No and Don't Know you've given is deleted from woometer and this browser, and you go back to 0% woo. Friends will have nothing to compare with you until you answer again. This can't be undone.</p>
       <div class="detail-actions">
         <button class="btn ghost" value="cancel">Cancel</button>
         <button type="button" class="btn danger countdown" id="reset-confirm">Delete</button>

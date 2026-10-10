@@ -115,7 +115,40 @@ button { font: inherit; cursor: pointer; }
   0% { transform: scale(0.7) rotate(-8deg); opacity: 0.3; }
   100% { transform: none; opacity: 1; }
 }
-.gauge { grid-area: gauge; justify-self: center; width: 140px; height: auto; }
+/* The gauge flips over to a pie chart when tapped. Both faces share one size. */
+.dial {
+  grid-area: gauge;
+  justify-self: center;
+  position: relative;
+  width: 140px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  perspective: 600px;
+}
+.dial:disabled { cursor: default; }
+.dial:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; border-radius: 10px; }
+.dial-inner {
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(.34, 1.56, .64, 1);
+}
+.dial.flipped .dial-inner { transform: rotateY(180deg); }
+.dial .face { grid-area: 1 / 1; display: block; width: 100%; height: auto; backface-visibility: hidden; }
+.dial .pie { transform: rotateY(180deg); }
+.pie-label { font-size: 21px; font-weight: 800; fill: var(--ink); dominant-baseline: middle; }
+.dial-hint {
+  position: absolute;
+  top: -4px;
+  right: -10px;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--muted);
+  transition: transform 0.3s, color 0.2s;
+}
+.dial:hover .dial-hint { color: var(--accent); transform: rotate(90deg); }
+.dial:disabled .dial-hint { display: none; }
 .needle-line { stroke: var(--ink); }
 .needle-hub { fill: var(--ink); }
 #needle {

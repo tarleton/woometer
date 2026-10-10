@@ -333,6 +333,10 @@
       if (profile.display_name) W.toast("Your name can't be blank: friends see it in their list.");
     });
     $("name-save").addEventListener("click", saveNameFromDialog);
+    $("name-google-btn").addEventListener("click", () => {
+      $("name-dialog").close();
+      signInWithGoogle();
+    });
     $("name-dialog").addEventListener("close", () => {
       if (afterName) afterName.resolve(false);
       afterName = null;
@@ -544,13 +548,15 @@
 
   // Your name goes with your link and into your friends' lists, so sharing a
   // link or adding a friend needs one. With a name, runs then() right away;
-  // without, asks for it first (filled in from Google when Google has it) and
-  // runs then() from the Save tap itself, so copying a link still works.
-  // Resolves to what then() returns, or false if they cancel.
+  // without, asks for it first and runs then() from the Save tap itself, so
+  // copying a link still works. Anyone not signed in can sign in with Google
+  // instead, which brings their Google name; a Google account without a name
+  // gets this box too. Resolves to what then() returns, or false if they cancel.
   function withName(then) {
     if (profile.display_name) return Promise.resolve(then());
     const meta = user.user_metadata || {};
     $("name-input").value = (meta.full_name || meta.name || "").trim().slice(0, 40);
+    $("name-google").hidden = !(user.is_anonymous && cfg.googleSignIn);
     return new Promise((resolve) => {
       afterName = { then, resolve };
       $("name-dialog").showModal();

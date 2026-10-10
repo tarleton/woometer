@@ -695,6 +695,9 @@ dialog a { color: var(--accent); }
   padding: 8px 10px;
 }
 .name-dialog input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.name-google { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 14px; }
+.name-or { font-size: 13px; color: var(--muted); }
+.name-google + input { margin-top: 6px; }
 .top-btn:focus-visible, .gsi:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
 /* The buttons float in the header's top-right corner. On wide screens the

@@ -304,38 +304,68 @@
     $("mini-unsure-count").textContent = s.unsure;
     showMiniUnsure(s.unsure > 0);
     $("mini-pct").textContent = `${s.pct}%`;
-    // -90deg is all the way left (0%), +90deg all the way right (100%).
-    $("needle").style.transform = `rotate(${-90 + s.pct * 1.8}deg)`;
     renderCat(Cat.stageFor(s.pct));
-    renderPie(s);
+    meterDial.show(s);
   }
 
   // Tapping the gauge flips it over to a pie chart of every answer given,
-  // Don't Know included. It always starts on the gauge.
-  const dial = $("dial");
+  // Don't Know included. It always starts on the gauge. The friend popup
+  // gets a copy of the same dial for a friend's answers (Woometer.newDial).
   const PIE_SLICES = [
     ["trash", "🗑️", "var(--trash)"],
     ["woo", "✨", "var(--woo)"],
     ["unsure", "🤷", "var(--unsure)"],
   ];
 
-  function setFlipped(on) {
-    dial.classList.toggle("flipped", on);
-    dial.setAttribute("aria-pressed", String(on));
-    dial.setAttribute("aria-label", on ? "Show the woo meter" : "Show your answers as a pie chart");
+  function makeDial(dial, whose) {
+    const needle = dial.querySelector(".needle");
+    const pie = dial.querySelector(".pie");
+    function setFlipped(on) {
+      dial.classList.toggle("flipped", on);
+      dial.setAttribute("aria-pressed", String(on));
+      dial.setAttribute("aria-label", on ? "Show the woo meter" : `Show ${whose} answers as a pie chart`);
+    }
+    dial.addEventListener("click", () => {
+      const inner = dial.querySelector(".dial-inner");
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const next = !dial.classList.contains("flipped");
+      inner.classList.remove("flipping");
+      void inner.offsetWidth; // restart the animation
+      inner.classList.add("flipping");
+      // Swap faces while the card is edge-on.
+      setTimeout(() => setFlipped(next), reduced ? 0 : 225);
+      setTimeout(() => inner.classList.remove("flipping"), 520);
+    });
+    setFlipped(false);
+    // s: { pct, trash, woo, unsure } as counts.
+    function show(s) {
+      // -90deg is all the way left (0%), +90deg all the way right (100%).
+      needle.style.transform = `rotate(${-90 + s.pct * 1.8}deg)`;
+      const counts = PIE_SLICES.map(([key]) => s[key]);
+      const total = counts.reduce((a, b) => a + b, 0);
+      dial.disabled = total === 0;
+      if (!total) {
+        setFlipped(false);
+        pie.innerHTML = "";
+        return;
+      }
+      const pcts = wholePercents(counts);
+      let ring = "";
+      let legend = "";
+      let offset = 0;
+      PIE_SLICES.forEach(([, emoji, color], i) => {
+        const share = (counts[i] / total) * 100;
+        if (share > 0) {
+          ring += `<circle cx="58" cy="58" r="34" fill="none" stroke="${color}" stroke-width="40" pathLength="100" stroke-dasharray="${share} ${100 - share}" stroke-dashoffset="${-offset}" transform="rotate(-90 58 58)"/>`;
+        }
+        offset += share;
+        legend += `<text x="118" y="${30 + i * 30}" class="pie-label"><tspan>${emoji}</tspan><tspan dx="6" fill="${color}">${pcts[i]}%</tspan></text>`;
+      });
+      pie.innerHTML = ring + legend;
+    }
+    return { show, unflip: () => setFlipped(false) };
   }
-
-  dial.addEventListener("click", () => {
-    const inner = dial.querySelector(".dial-inner");
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const next = !dial.classList.contains("flipped");
-    inner.classList.remove("flipping");
-    void inner.offsetWidth; // restart the animation
-    inner.classList.add("flipping");
-    // Swap faces while the card is edge-on.
-    setTimeout(() => setFlipped(next), reduced ? 0 : 225);
-    setTimeout(() => inner.classList.remove("flipping"), 520);
-  });
+  const meterDial = makeDial($("dial"), "your");
 
   // Whole-number percentages that add up to 100 (largest remainder).
   function wholePercents(counts) {
@@ -353,30 +383,6 @@
         }
       });
     return out;
-  }
-
-  function renderPie(s) {
-    const counts = PIE_SLICES.map(([key]) => s[key]);
-    const total = counts.reduce((a, b) => a + b, 0);
-    dial.disabled = total === 0;
-    if (!total) {
-      setFlipped(false);
-      $("pie").innerHTML = "";
-      return;
-    }
-    const pcts = wholePercents(counts);
-    let ring = "";
-    let legend = "";
-    let offset = 0;
-    PIE_SLICES.forEach(([, emoji, color], i) => {
-      const share = (counts[i] / total) * 100;
-      if (share > 0) {
-        ring += `<circle cx="58" cy="58" r="34" fill="none" stroke="${color}" stroke-width="40" pathLength="100" stroke-dasharray="${share} ${100 - share}" stroke-dashoffset="${-offset}" transform="rotate(-90 58 58)"/>`;
-      }
-      offset += share;
-      legend += `<text x="118" y="${30 + i * 30}" class="pie-label"><tspan>${emoji}</tspan><tspan dx="6" fill="${color}">${pcts[i]}%</tspan></text>`;
-    });
-    $("pie").innerHTML = ring + legend;
   }
 
   // The bottom bar's Don't Know count appears once there's something in it;
@@ -735,6 +741,15 @@
     copyText,
     startOver,
     confirmDelete,
+    // A copy of the meter's dial for someone else's answers: { el, show(s), unflip() }.
+    newDial(whose) {
+      const el = $("dial").cloneNode(true);
+      el.removeAttribute("id");
+      el.querySelectorAll("[id]").forEach((n) => n.removeAttribute("id"));
+      el.querySelector("defs").remove(); // the gauge keeps using the page's own colours
+      el.classList.remove("flipped");
+      return { el, ...makeDial(el, whose) };
+    },
   };
 
   renderFilters();

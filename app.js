@@ -313,7 +313,9 @@
   }
 
   // Tapping the gauge flips it over to a pie chart of every answer given,
-  // Don't Know included. It always starts on the gauge. The friend popup
+  // Don't Know included. Its labels are counts, not percentages: the woo score
+  // leaves Don't Know out, so a percentage of all answers would read as a
+  // second, different woo score. It always starts on the gauge. The friend popup
   // gets a copy of the same dial for a friend's answers (Woometer.newDial).
   const PIE_SLICES = [
     ["trash", "🗑️", "var(--trash)"],
@@ -353,7 +355,6 @@
         pie.innerHTML = "";
         return;
       }
-      const pcts = wholePercents(counts);
       let ring = "";
       let legend = "";
       let offset = 0;
@@ -363,31 +364,13 @@
           ring += `<circle cx="58" cy="58" r="34" fill="none" stroke="${color}" stroke-width="40" pathLength="100" stroke-dasharray="${share} ${100 - share}" stroke-dashoffset="${-offset}" transform="rotate(-90 58 58)"/>`;
         }
         offset += share;
-        legend += `<text x="118" y="${30 + i * 30}" class="pie-label"><tspan>${emoji}</tspan><tspan dx="6" fill="${color}">${pcts[i]}%</tspan></text>`;
+        legend += `<text x="118" y="${30 + i * 30}" class="pie-label"><tspan>${emoji}</tspan><tspan dx="6" fill="${color}">${counts[i]}</tspan></text>`;
       });
       pie.innerHTML = ring + legend;
     }
     return { show, unflip: () => setFlipped(false) };
   }
   const meterDial = makeDial($("dial"), "your");
-
-  // Whole-number percentages that add up to 100 (largest remainder).
-  function wholePercents(counts) {
-    const total = counts.reduce((a, b) => a + b, 0);
-    const raw = counts.map((c) => (c / total) * 100);
-    const out = raw.map(Math.floor);
-    let left = 100 - out.reduce((a, b) => a + b, 0);
-    raw
-      .map((r, i) => [r - Math.floor(r), i])
-      .sort((a, b) => b[0] - a[0])
-      .forEach(([, i]) => {
-        if (left > 0 && counts[i] > 0) {
-          out[i]++;
-          left--;
-        }
-      });
-    return out;
-  }
 
   // The bottom bar's Don't Know count appears once there's something in it;
   // on small phones the other two then drop their words to make room.

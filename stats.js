@@ -102,9 +102,16 @@
       .sort((a, b) => Math.abs(a.share - 0.5) - Math.abs(b.share - 0.5) || byMost(a, b))
       .slice(0, LIST_SIZE);
 
+    // Don't Know is its own question, so these may also be in the lists above.
+    const unsure = claims
+      .filter((c) => c.unsure > 0)
+      .sort((a, b) => b.unsure - a.unsure || b.unsure / (b.total + b.unsure) - a.unsure / (a.total + a.unsure))
+      .slice(0, LIST_SIZE);
+
     renderList("believed", believed);
     renderList("rejected", rejected);
     renderList("split", split);
+    renderList("unsure", unsure, (c) => `${pct(c.unsure / (c.total + c.unsure))} don't know`);
 
     $("method-note").textContent =
       `How these are counted: the woo score is the share of Yes and No answers that were Yes, and ` +
@@ -175,14 +182,33 @@
     if (part) part.classList.toggle("tip");
   });
 
-  function renderList(id, items) {
+  // Each list shows its top few, with a button for the rest.
+  const SHOW_FIRST = 5;
+
+  function renderList(id, items, describe = (c) => `${pct(c.share)} believe · ${pct(1 - c.share)} don't`) {
     $(`${id}-section`).hidden = items.length === 0;
-    $(id).replaceChildren(
-      ...items.map((c) => {
+    const list = $(id);
+    list.classList.remove("open");
+    list.nextElementSibling?.classList.contains("show-more") && list.nextElementSibling.remove();
+    if (items.length > SHOW_FIRST) {
+      const more = document.createElement("button");
+      more.type = "button";
+      more.className = "show-more";
+      more.textContent = `Show all ${items.length}`;
+      more.addEventListener("click", () => {
+        const open = list.classList.toggle("open");
+        more.textContent = open ? "Show fewer" : `Show all ${items.length}`;
+      });
+      list.after(more);
+    }
+    list.replaceChildren(
+      ...items.map((c, i) => {
         const li = document.createElement("li");
+        if (i >= SHOW_FIRST) li.className = "more";
         const name = document.createElement("span");
         name.className = "name";
         name.textContent = `${CATEGORIES[c.claim.category].icon} ${c.claim.name}`;
+        name.title = c.claim.name;
 
         // Each color shows its own count, so even a sliver is wide enough for its number.
         const bar = document.createElement("span");
@@ -206,7 +232,7 @@
 
         const meta = document.createElement("span");
         meta.className = "meta";
-        meta.textContent = `${pct(c.share)} believe · ${pct(1 - c.share)} don't`;
+        meta.textContent = describe(c);
 
         li.append(name, bar, meta);
         return li;

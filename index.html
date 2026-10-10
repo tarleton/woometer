@@ -236,6 +236,30 @@
     </form>
   </dialog>
 
+  <dialog id="name-dialog" class="delete-dialog name-dialog">
+    <form method="dialog">
+      <h3>What's your name?</h3>
+      <p>Friends see it in their list, so they know it's you.</p>
+      <input type="text" id="name-input" maxlength="40" autocomplete="name" placeholder="Your name" aria-label="Your name">
+      <div class="detail-actions">
+        <button class="btn ghost" value="cancel">Cancel</button>
+        <button type="submit" class="btn" id="name-save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="nickname-dialog" class="delete-dialog name-dialog">
+    <form method="dialog">
+      <h3 id="nickname-title">Rename your friend</h3>
+      <p id="nickname-hint">Only you see this name.</p>
+      <input type="text" id="nickname-input" maxlength="40" autocomplete="off" aria-label="Nickname">
+      <div class="detail-actions">
+        <button class="btn ghost" value="cancel">Cancel</button>
+        <button type="submit" class="btn" id="nickname-save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="signin-prompt" class="signin-prompt">
     <form method="dialog">
       <h3 id="signin-title">Sign in to add your friend</h3>

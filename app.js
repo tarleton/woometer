@@ -13,7 +13,7 @@
   const byId = Object.fromEntries(CLAIMS.map((c) => [c.id, c]));
 
   // answers: { [claimId]: "yes" | "no" | "unsure" }, in the order they were given.
-  // "unsure" is Don't Know: off the board, but not part of the woo score.
+  // "unsure" is Don't Know: off the board, and counted in the woo score like No.
   let answers = load();
   let activeCategory = "all";
   let query = "";
@@ -44,22 +44,17 @@
     window.dispatchEvent(new Event("woometer:answers"));
   }
 
-  // The woo score only counts Yes and No; Don't Know answers sit it out.
+  // The woo score is Yes out of every answer, Don't Know included (score.js).
   function score() {
-    const values = Object.values(answers);
-    const woo = values.filter((v) => v === "yes").length;
-    const trash = values.filter((v) => v === "no").length;
-    const unsure = values.filter((v) => v === "unsure").length;
-    const answered = woo + trash;
-    return { answered, woo, trash, unsure, pct: answered ? Math.round((woo / answered) * 100) : 0 };
+    return WooScore.of(Object.values(answers));
   }
 
   // Lead with what people reject: most visitors turn down most of the list.
-  function verdictFor(pct, answered) {
-    if (answered === 0) return "Answer a few to get a reading";
-    if (pct === 0) return "You reject all of it";
-    if (pct === 100) return "You believe all of it";
-    return `You reject ${100 - pct}% of it`;
+  function verdictFor(s) {
+    if (s.answered === 0) return "Answer a few to get a reading";
+    if (s.trash === s.answered) return "You reject all of it";
+    if (s.woo === s.answered) return "You believe all of it";
+    return `You reject ${s.rejectPct}% of it`;
   }
 
   // Rendering
@@ -299,7 +294,7 @@
   function renderMeter() {
     const s = score();
     $("pct").textContent = `${s.pct}%`;
-    $("verdict").textContent = verdictFor(s.pct, s.answered);
+    $("verdict").textContent = verdictFor(s);
     $("trash-count").textContent = s.trash;
     $("woo-count").textContent = s.woo;
     $("unsure-count").textContent = s.unsure;
@@ -313,9 +308,8 @@
   }
 
   // Tapping the gauge flips it over to a pie chart of every answer given,
-  // Don't Know included. Its labels are counts, not percentages: the woo score
-  // leaves Don't Know out, so a percentage of all answers would read as a
-  // second, different woo score. It always starts on the gauge. The friend popup
+  // Don't Know included, labelled with counts like the boxes below it. It
+  // always starts on the gauge. The friend popup
   // gets a copy of the same dial for a friend's answers (Woometer.newDial).
   const PIE_SLICES = [
     ["trash", "🗑️", "var(--trash)"],
@@ -577,7 +571,7 @@
     const personal = window.Woometer.shareUrl && window.Woometer.shareUrl();
     const link = personal || location.origin + location.pathname;
     return s.answered
-      ? `I'm ${s.pct}% woo on the woometer: I reject ${100 - s.pct}% of the ${s.answered === 1 ? "claim" : `${s.answered} claims`} I've answered. ${personal ? "See my results and compare with yours:" : "What do you believe?"} ${link}`
+      ? `I'm ${s.pct}% woo on the woometer: I reject ${s.rejectPct}% of the ${s.answered === 1 ? "claim" : `${s.answered} claims`} I've answered. ${personal ? "See my results and compare with yours:" : "What do you believe?"} ${link}`
       : `What do you believe? ${link}`;
   }
 

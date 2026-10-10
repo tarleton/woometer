@@ -887,7 +887,7 @@
     const s = theirs && scoreOf(theirs);
     $("invite-title").textContent =
       s && s.answered
-        ? `${who} is ${s.pct}% woo, rejecting ${100 - s.pct}% of the ${s.answered} claims they've answered.`
+        ? `${who} is ${s.pct}% woo, rejecting ${s.rejectPct}% of the ${s.answered} claims they've answered.`
         : `${who} shared their woometer with you.`;
     $("invite-text").textContent = "Answer some claims yourself to see where you agree and differ.";
     $("invite-compare").textContent = `See ${name ? `${name}'s` : "their"} answers`;
@@ -985,11 +985,11 @@
     if (await addFriend(code, name)) input.value = "";
   }
 
-  // Like the main score, only Yes and No count; Don't Know sits it out.
+  // The same woo score as the main meter (score.js), plus their Believe It claims.
   function scoreOf(answers) {
-    const answered = CLAIMS.filter((c) => answers[c.id] === "yes" || answers[c.id] === "no");
-    const woo = answered.filter((c) => answers[c.id] === "yes");
-    return { answered: answered.length, woo, pct: pct(woo.length, answered.length) };
+    const given = CLAIMS.filter((c) => answers[c.id]);
+    const s = WooScore.of(given.map((c) => answers[c.id]));
+    return { ...s, woo: given.filter((c) => answers[c.id] === "yes") };
   }
 
   // Anyone with a shared link can read that person's answers.
@@ -1211,8 +1211,7 @@
       $("friend-cat").after(friendDial.el);
     }
     friendDial.unflip();
-    const unsure = CLAIMS.filter((c) => theirs[c.id] === "unsure").length;
-    friendDial.show({ pct: s.pct, woo: s.woo.length, trash: s.answered - s.woo.length, unsure });
+    friendDial.show({ pct: s.pct, woo: s.woo.length, trash: s.trash, unsure: s.unsure });
     const stage = Cat.stageFor(s.pct);
     $("friend-cat-art").innerHTML = Cat.svg(stage);
     $("friend-cat-name").textContent = Cat.name(stage);

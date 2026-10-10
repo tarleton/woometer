@@ -29,9 +29,8 @@
     try {
       const saved = JSON.parse(localStorage.getItem("woometer.answers.v1")) || {};
       const values = Object.entries(saved).filter(([id]) => byId[id]).map(([, v]) => v);
-      const yes = values.filter((v) => v === "yes").length;
-      const decided = yes + values.filter((v) => v === "no").length;
-      return decided >= 10 ? yes / decided : null;
+      const s = WooScore.of(values);
+      return s.decided >= 10 ? s.fraction : null;
     } catch {
       return null;
     }

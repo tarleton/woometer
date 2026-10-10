@@ -302,7 +302,6 @@
     $("mini-trash-count").textContent = s.trash;
     $("mini-woo-count").textContent = s.woo;
     $("mini-unsure-count").textContent = s.unsure;
-    renderReset();
     showMiniUnsure(s.unsure > 0);
     $("mini-pct").textContent = `${s.pct}%`;
     // -90deg is all the way left (0%), +90deg all the way right (100%).
@@ -597,14 +596,6 @@
     }
   }
 
-  // Delete all answers is kept out of the way: in the account menu when signed
-  // in (cloud.js), otherwise at the very bottom of the page once there's
-  // something to delete.
-  function renderReset() {
-    const signedIn = window.Woometer && window.Woometer.signedIn;
-    $("reset-foot").hidden = signedIn || !Object.keys(answers).length;
-  }
-
   // Big deletes count down 3, 2, 1 before the button works, so a stray tap
   // can't wipe anything. Cancel works straight away.
   function confirmDelete(dialog) {
@@ -628,7 +619,14 @@
     }
     confirmDelete($("reset-dialog"));
   }
-  $("reset").addEventListener("click", startOver);
+  // Delete all answers is kept out of the way: in the account menu when signed
+  // in (cloud.js), otherwise linked from the Privacy page as ./?delete=answers.
+  const asked = new URL(location.href);
+  if (asked.searchParams.get("delete") === "answers") {
+    asked.searchParams.delete("delete");
+    history.replaceState(null, "", asked.pathname + asked.search + asked.hash);
+    startOver();
+  }
   $("reset-confirm").addEventListener("click", () => {
     $("reset-dialog").close();
     answers = {};
@@ -733,7 +731,6 @@
     copyText,
     startOver,
     confirmDelete,
-    renderReset,
   };
 
   renderFilters();

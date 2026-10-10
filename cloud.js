@@ -431,8 +431,6 @@
   function renderAccount() {
     renderSaveNote();
     const anon = user.is_anonymous;
-    W.signedIn = !anon;
-    W.renderReset();
     // The sign-in button stays hidden until the Google provider is set up in
     // Supabase (googleSignIn in config.js).
     $("google-login").hidden = !anon || !cfg.googleSignIn;

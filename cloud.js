@@ -344,6 +344,7 @@
       afterName = null;
     });
     $("nickname-save").addEventListener("click", saveNickname);
+    $("nickname-remove").addEventListener("click", removeFriend);
     // Enter saves (the form's first button is Cancel, which Enter would pick).
     $("name-input").addEventListener("keydown", (e) => e.key === "Enter" && saveNameFromDialog(e));
     $("nickname-input").addEventListener("keydown", (e) => e.key === "Enter" && saveNickname(e));
@@ -838,8 +839,8 @@
           rename.type = "button";
           rename.className = "rename";
           rename.textContent = "✎";
-          rename.title = "Rename (only you see it)";
-          rename.setAttribute("aria-label", `Rename ${friendName(f) || "this friend"}`);
+          rename.title = "Rename or remove (only you see the name)";
+          rename.setAttribute("aria-label", `Rename or remove ${friendName(f) || "this friend"}`);
           rename.addEventListener("click", () => openNickname(f));
           li.append(rename);
         }
@@ -863,7 +864,24 @@
       : "Only you see this name.";
     $("nickname-input").value = f.nickname || "";
     $("nickname-input").placeholder = f.display_name || "Their name";
+    $("nickname-remove").textContent = `Remove ${friendName(f) || "them"} from my friends`;
     $("nickname-dialog").showModal();
+  }
+
+  // Tucked away in the ✎ box, since people rarely want it.
+  async function removeFriend() {
+    const f = renaming;
+    if (!f) return;
+    if (!confirm(`Remove ${friendName(f) || "this friend"} from your friend list?`)) return;
+    const { error } = await db.from("friends").delete().eq("user_id", user.id).eq("friend_id", f.friend_id);
+    if (error) {
+      logError({ error });
+      W.toast("Couldn't remove them just now. Try again in a moment.");
+      return;
+    }
+    $("nickname-dialog").close();
+    renaming = null;
+    refreshFriends();
   }
 
   async function saveNickname(e) {
@@ -936,7 +954,6 @@
 
   async function openCompare(friend) {
     const dlg = $("compare");
-    const name = friend.display_name || "your friend";
     const them = friend.display_name || "Them";
     $("compare-name").textContent = friend.display_name || "Unnamed friend";
     $("overlap-lead").hidden = true;
@@ -949,7 +966,6 @@
 
     $("compare-score").textContent = "";
     $("their-pile").hidden = true;
-    $("compare-remove").hidden = !friend.friend_id;
     $("compare-add").hidden = Boolean(friend.friend_id);
 
     const theirs = friend.friend_id ? await answersOf(friend.friend_id) : await answersForCode(friend.code);
@@ -1022,12 +1038,5 @@
         if (await addFriend(friend.code, friend.display_name)) $("compare-add").hidden = true;
       };
     }
-
-    $("compare-remove").onclick = async () => {
-      if (!confirm(`Remove ${name} from your friend list?`)) return;
-      await db.from("friends").delete().eq("user_id", user.id).eq("friend_id", friend.friend_id);
-      dlg.close();
-      refreshFriends();
-    };
   }
 })();

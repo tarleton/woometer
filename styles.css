@@ -926,14 +926,15 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 
 .detail-stats { font-weight: 600; }
 
-/* Their meter and yours at the top of the comparison: gauge, the two cats
-   tucked into one bed, gauge. Phones put the bed above the two gauges. */
+/* Their meter and yours at the top of the comparison: gauge, the two cats,
+   gauge. Phones put the cats above the two gauges. Everything hangs from the
+   top so the gauges and the cats stay level. */
 .pair-meter {
   display: grid;
   grid-template-columns: auto auto auto;
-  grid-template-areas: "them-dial bed you-dial";
+  grid-template-areas: "them-dial cats you-dial";
   justify-content: center;
-  align-items: center;
+  align-items: start;
   gap: 4px 14px;
   margin: -4px 0 12px;
 }
@@ -941,28 +942,22 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 .pm-side.them { grid-area: them-dial; }
 .pm-side.you { grid-area: you-dial; }
 .pair-meter .dial { width: 124px; }
-.cat-bed {
-  grid-area: bed;
-  position: relative;
+.pm-cats {
+  grid-area: cats;
   display: grid;
-  grid-template-columns: 72px 72px;
+  grid-template-columns: 76px 76px;
   grid-template-areas: "them you" "them-name you-name";
-  justify-content: center;
-  column-gap: 2px;
-  min-width: 150px;
-  padding: 0 6px;
+  align-items: start;
+  column-gap: 4px;
 }
-.cat-bed .pm-cat { position: relative; z-index: 1; display: block; }
-.cat-bed .pm-cat.them { grid-area: them; }
-.cat-bed .pm-cat.you { grid-area: you; }
-.cat-bed .cat-art svg { width: 68px; margin: 0 auto; }
-.cat-bed .cat-art svg > circle:first-of-type { display: none; } /* no halo: the bed is their backdrop */
-.cat-bed .bed-back, .cat-bed .bed-front { position: absolute; left: 0; width: 100%; height: auto; pointer-events: none; }
-.cat-bed .bed-back { top: 16px; z-index: 0; }
-.cat-bed .bed-front { top: 50px; z-index: 2; }
-.cat-bed .cat-label { position: relative; z-index: 3; margin-top: 22px; text-align: center; }
-.cat-bed .cat-label.them { grid-area: them-name; }
-.cat-bed .cat-label.you { grid-area: you-name; }
+.pm-cats:has(#pm-you-cat[hidden]) { grid-template-columns: 76px; grid-template-areas: "them" "them-name"; }
+.pm-cat { display: block; }
+.pm-cat.them { grid-area: them; }
+.pm-cat.you { grid-area: you; }
+.pm-cats .cat-art svg { width: 64px; }
+.pm-cats .cat-label { text-align: center; }
+.pm-cats .cat-label.them { grid-area: them-name; }
+.pm-cats .cat-label.you { grid-area: you-name; }
 .pm-read { display: flex; flex-direction: column; align-items: center; margin: 2px 0 0; line-height: 1.2; text-align: center; }
 .pm-read b { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .pm-read .pct-word { font-size: 16px; }
@@ -970,13 +965,13 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 @media (max-width: 600px) {
   .pair-meter {
     grid-template-columns: 1fr 1fr;
-    grid-template-areas: "bed bed" "them-dial you-dial";
+    grid-template-areas: "cats cats" "them-dial you-dial";
     gap: 0 16px;
   }
-  .cat-bed { justify-self: center; }
+  .pm-cats { justify-self: center; }
   .pair-meter .dial { width: min(118px, 100%); margin-top: 8px; }
 }
-.compare-head { margin: 0; font-size: 20px; line-height: 1.25; }
+.compare-head { margin: 0; font-size: 20px; line-height: 1.25; text-align: center; }
 #agree-on { white-space: nowrap; }
 .compare-pct { color: var(--accent); font-weight: 800; font-variant-numeric: tabular-nums; }
 @media (max-width: 520px) {

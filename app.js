@@ -582,10 +582,10 @@
   // Share and reset
 
   // With accounts on, cloud.js opens the Share box (your name, then ways to
-  // send your personal link). Without them, Share copies the score straight away.
+  // send your personal link). Without them, Share copies the woo reading straight away.
   $("share").addEventListener("click", () => {
     if (window.Woometer.openShare) window.Woometer.openShare();
-    else copyText(shareText(), "Score copied. Paste it anywhere.", "Copy your score:");
+    else copyText(shareText(), "Woo reading copied. Paste it anywhere.", "Copy your woo reading:");
   });
 
   function shareText() {

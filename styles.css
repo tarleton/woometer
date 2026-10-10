@@ -444,7 +444,7 @@ button { font: inherit; cursor: pointer; }
 .bin.unsure .bin-hint { margin-bottom: 6px; }
 .bin.bump { transform: scale(1.04); }
 
-/* "Statistics": one rotating fact about everyone's answers (funstat.js). */
+/* "Statistics": one fact about everyone's answers (funstat.js). */
 .fun-stat {
   display: block;
   padding: 12px 14px;

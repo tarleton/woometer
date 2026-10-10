@@ -1,5 +1,5 @@
 // The "Statistics" box under the piles: one fun fact about everyone's answers,
-// a new one every 30 seconds, linking to the full /stats page. The facts come
+// a new one every minute, linking to the full /stats page. The facts come
 // from the same site_stats totals as /stats, so nobody's own answers are shown.
 // If the totals can't be loaded, the box still links to /stats.
 (function () {
@@ -8,7 +8,7 @@
   const text = document.getElementById("fun-stat-text");
   if (!box || !text || !cfg.supabaseUrl || !cfg.supabaseAnonKey) return;
 
-  const EVERY_MS = 30000;
+  const EVERY_MS = 60000;
   const byId = Object.fromEntries(CLAIMS.map((c) => [c.id, c]));
   const pct = (x) => `${Math.round(x * 100)}%`;
   const label = (claim) => `${CATEGORIES[claim.category].icon} ${claim.name}`;

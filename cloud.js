@@ -315,6 +315,11 @@
       $("friends-count").hidden = true;
       refreshFriends(true);
     });
+    // Your own link lives in the Share box; this saves hunting for Share up top.
+    $("friends-share").addEventListener("click", () => {
+      $("friends").close();
+      openShare();
+    });
     $("avatar").addEventListener("click", (e) => {
       e.stopPropagation();
       setMenu($("account-menu").hidden);
@@ -835,6 +840,7 @@
     if (error) return logError({ error });
     const list = $("friend-list");
     $("friend-empty").hidden = data.length > 0;
+    $("friend-hint").hidden = !data.length;
     showNewFriends(data.map((f) => f.friend_id), opening);
     const mine = W.getAnswers();
     const items = await Promise.all(

@@ -162,6 +162,13 @@
     if (minePct !== null) $("spread-note").textContent = "How many people have each woo score. Your score is in the highlighted bar.";
   }
 
+  // Tapping a bar segment shows its label; tapping anywhere else hides it.
+  document.addEventListener("click", (e) => {
+    const part = e.target.closest(".split [data-tip]");
+    document.querySelectorAll(".split .tip").forEach((el) => el !== part && el.classList.remove("tip"));
+    if (part) part.classList.toggle("tip");
+  });
+
   function renderList(id, items) {
     $(`${id}-section`).hidden = items.length === 0;
     $(id).replaceChildren(
@@ -174,21 +181,26 @@
         // Each color shows its own count, so even a sliver is wide enough for its number.
         const bar = document.createElement("span");
         bar.className = "split";
-        for (const [cls, n, label] of [["y", c.yes, "believe"], ["x", c.no, "don't"], ["u", c.unsure, "don't know"]]) {
+        const words = {
+          y: (n) => `${n} ${n === 1 ? "believes" : "believe"}`,
+          x: (n) => `${n} ${n === 1 ? "doesn't" : "don't"} believe`,
+          u: (n) => `${n} ${n === 1 ? "doesn't" : "don't"} know`,
+        };
+        for (const [cls, n] of [["y", c.yes], ["x", c.no], ["u", c.unsure]]) {
           if (!n) continue;
           const part = document.createElement("span");
           part.className = cls;
           part.style.flexGrow = n;
           part.textContent = n;
-          part.title = `${n} ${label}`;
+          // Spelled out on hover, or on tap on a phone.
+          part.dataset.tip = words[cls](n);
+          part.tabIndex = 0;
           bar.append(part);
         }
 
         const meta = document.createElement("span");
         meta.className = "meta";
-        // e.g. "20% believe · 80% don't · 2 don't know"
-        const unsure = c.unsure ? ` · ${c.unsure} don't know` : "";
-        meta.textContent = `${pct(c.share)} believe · ${pct(1 - c.share)} don't${unsure}`;
+        meta.textContent = `${pct(c.share)} believe · ${pct(1 - c.share)} don't`;
 
         li.append(name, bar, meta);
         return li;

@@ -452,11 +452,8 @@
         if (box.open) for (const other of lists) if (other !== box) other.open = false;
       });
     }
-    $("friends-open").addEventListener("click", () => {
-      $("friends").showModal();
-      $("friends-count").hidden = true;
-      refreshFriends(true);
-    });
+    $("friends-open").addEventListener("click", openFriends);
+    $("friends").addEventListener("close", () => clearInterval(friendsWatch));
     // Your own link lives in the Share box; this saves hunting for Share up top.
     $("friends-share").addEventListener("click", () => {
       $("friends").close();
@@ -966,7 +963,7 @@
       localStorage.removeItem(PENDING_FRIEND_KEY);
     } catch {}
     if (!pending || !pending.code || user.is_anonymous) return;
-    if (await addFriend(pending.code, pending.name)) $("friends").showModal();
+    if (await addFriend(pending.code, pending.name)) openFriends();
   }
 
   // Accepts a whole link (woometer.com/?f=CODE) or just the code.
@@ -1047,12 +1044,36 @@
     });
   }
 
+  // While Friends is open it checks now and then for anyone new, so someone
+  // adding you as you watch (say, sitting beside you as they sign in) shows
+  // up without closing and reopening it.
+  let friendsWatch = 0;
+  function openFriends() {
+    $("friends").showModal();
+    $("friends-count").hidden = true;
+    refreshFriends(true);
+    clearInterval(friendsWatch);
+    friendsWatch = setInterval(checkForNewFriends, 8000);
+  }
+
+  async function checkForNewFriends() {
+    if (!db || document.hidden) return;
+    const { data, error } = await db.rpc("my_friends");
+    if (!error && data && data.map((f) => f.friend_id).join() !== friendsListed) refreshFriends(true);
+  }
+
   // opening: true when the person just opened Friends, so everyone listed has
   // now been seen even if they close it before the list finishes loading.
+  // Only the latest refresh draws the list, so a slow older one can't put
+  // back a list from before someone was added.
+  let friendsListed = "";
+  let friendsRefresh = 0;
   async function refreshFriends(opening = false) {
     if (!db) return;
+    const run = ++friendsRefresh;
     const { data, error } = await db.rpc("my_friends");
     if (error) return logError({ error });
+    if (run !== friendsRefresh) return;
     const list = $("friend-list");
     $("friend-empty").hidden = data.length > 0;
     $("friend-hint").hidden = !data.length;
@@ -1102,7 +1123,9 @@
         return li;
       })
     );
+    if (run !== friendsRefresh) return;
     list.replaceChildren(...items);
+    friendsListed = data.map((f) => f.friend_id).join();
   }
 
   // The nickname you gave them, else the name they chose.

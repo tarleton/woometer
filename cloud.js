@@ -24,7 +24,6 @@
   // The friend someone was adding when they left to sign in.
   const PENDING_FRIEND_KEY = "woometer.pendingFriend.v1";
   // Friends already shown in this browser's Friends list, and whose account.
-  const FRIENDS_SEEN_KEY = "woometer.friendsSeen.v1";
   // Set just before the reload that follows "Delete my account", to say it worked.
   const DELETED_KEY = "woometer.accountDeleted";
   const TURNSTILE_JS = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
@@ -765,7 +764,6 @@
       localStorage.removeItem(LAST_USER_KEY);
       localStorage.removeItem(PENDING_FRIEND_KEY);
       localStorage.removeItem(SYNCED_KEY);
-      localStorage.removeItem(FRIENDS_SEEN_KEY);
     } catch {}
     location.replace(homeUrl());
   }
@@ -935,9 +933,6 @@
       return false;
     }
     rememberFriendCode(code);
-    // You added them yourself, so they don't count as new on the badge.
-    const seen = seenFriends();
-    if (seen) saveSeenFriends(seen.add(friendId));
     W.toast(`${name || "Your friend"} is now in your friends.` + (keepFriendsNote() ? ` ${$("friends-google").textContent} to keep them safe on any device.` : ""));
     refreshFriends();
     return true;
@@ -1048,9 +1043,11 @@
   // adding you as you watch (say, sitting beside you as they sign in) shows
   // up without closing and reopening it.
   let friendsWatch = 0;
+  let sawFriends = null;
   function openFriends() {
     $("friends").showModal();
     $("friends-count").hidden = true;
+    markFriendsSeen();
     refreshFriends(true);
     clearInterval(friendsWatch);
     friendsWatch = setInterval(checkForNewFriends, 8000);
@@ -1059,7 +1056,15 @@
   async function checkForNewFriends() {
     if (!db || document.hidden) return;
     const { data, error } = await db.rpc("my_friends");
-    if (!error && data && data.map((f) => f.friend_id).join() !== friendsListed) refreshFriends(true);
+    if (error || !data || data.map((f) => f.friend_id).join() === friendsListed) return;
+    markFriendsSeen();
+    refreshFriends(true);
+  }
+
+  // Tells the database you've looked at Friends, which clears the badge on
+  // every device.
+  function markFriendsSeen() {
+    if (db) sawFriends = Promise.resolve(db.rpc("saw_friends")).catch(() => {});
   }
 
   // opening: true when the person just opened Friends, so everyone listed has
@@ -1078,7 +1083,7 @@
     $("friend-empty").hidden = data.length > 0;
     $("friend-hint").hidden = !data.length;
     $("friends-keep").hidden = !(data.length && keepFriendsNote());
-    showNewFriends(data.map((f) => f.friend_id), opening);
+    showNewFriends(opening);
     const mine = W.getAnswers();
     const items = await Promise.all(
       data.map(async (f) => {
@@ -1178,34 +1183,20 @@
     refreshFriends();
   }
 
-  // The badge on the Friends button counts people who have added you since you
-  // last opened Friends in this browser (by tapping Add on your link). Opening
-  // Friends clears it.
-  function showNewFriends(ids, opening) {
-    let seen = seenFriends();
-    // The first time this account's friends are listed here, nobody is new.
-    if (!seen || opening || $("friends").open) {
-      seen = new Set(ids);
-      saveSeenFriends(seen);
+  // The badge on the Friends button counts people who have added you (by
+  // tapping Add on your link) since you last opened Friends, on any device.
+  // Friends you added yourself never count. Opening Friends clears it.
+  async function showNewFriends(opening) {
+    let fresh = 0;
+    if (!opening && !$("friends").open) {
+      await sawFriends;
+      const { data, error } = await db.rpc("new_friends");
+      // Before supabase/schema.sql has new_friends, show no badge rather than a wrong one.
+      if (!error && data) fresh = data.length;
     }
-    const fresh = ids.filter((id) => !seen.has(id)).length;
     $("friends-count").hidden = fresh === 0;
     $("friends-count").textContent = fresh;
     $("friends-open").setAttribute("aria-label", fresh ? `Friends, ${fresh} new` : "Friends");
-  }
-
-  function seenFriends() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(FRIENDS_SEEN_KEY));
-      if (saved && saved.user === user.id) return new Set(saved.ids);
-    } catch {}
-    return null;
-  }
-
-  function saveSeenFriends(ids) {
-    try {
-      localStorage.setItem(FRIENDS_SEEN_KEY, JSON.stringify({ user: user.id, ids: [...ids] }));
-    } catch {}
   }
 
   async function answersOf(friendId) {

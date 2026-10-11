@@ -54,6 +54,18 @@ create table if not exists public.friends (
 -- pair, so only you ever see it.
 alter table public.friends add column if not exists nickname text check (char_length(nickname) <= 40);
 
+-- Who tapped Add for the pair, so the Friends badge counts only people who
+-- added you, never friends you added yourself (say, on your phone). Rows from
+-- before this column are blank and never count as new.
+alter table public.friends add column if not exists added_by uuid;
+
+-- When each person last opened Friends, on any device, for the badge. Only
+-- the functions below touch it.
+create table if not exists public.friends_seen (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  seen_at timestamptz not null default now()
+);
+
 -- Where people visit from, for the site owner to look at in the database,
 -- and later for a world map on the stats page. One row per account per IP
 -- address, refreshed on every visit. The country, region and city are
@@ -119,6 +131,7 @@ alter table public.friends enable row level security;
 alter table public.visits enable row level security;
 alter table public.private_settings enable row level security;
 alter table public.ignored_ip_codes enable row level security;
+alter table public.friends_seen enable row level security;
 
 drop policy if exists "read own profile" on public.profiles;
 create policy "read own profile" on public.profiles
@@ -154,7 +167,7 @@ create policy "remove own friends" on public.friends
 -- Profiles are created and renamed only through the functions below.
 grant usage on schema public to anon, authenticated;
 revoke all on public.profiles, public.answers, public.friends from anon;
-revoke all on public.visits, public.private_settings, public.ignored_ip_codes from anon, authenticated;
+revoke all on public.visits, public.private_settings, public.ignored_ip_codes, public.friends_seen from anon, authenticated;
 revoke insert, update, delete on public.profiles from authenticated;
 revoke insert, update on public.friends from authenticated;
 grant select on public.profiles to authenticated;
@@ -255,7 +268,8 @@ begin
   end if;
   select id into other from profiles where share_code = code and btrim(display_name) <> '';
   if other is null or other = auth.uid() then return null; end if;
-  insert into friends (user_id, friend_id) values (auth.uid(), other), (other, auth.uid())
+  insert into friends (user_id, friend_id, added_by)
+  values (auth.uid(), other, auth.uid()), (other, auth.uid(), auth.uid())
   on conflict do nothing;
   return other;
 end $$;
@@ -280,6 +294,23 @@ returns void
 language sql security definer set search_path = public as $$
   update friends set nickname = nullif(left(btrim(new_nickname), 40), '')
   where user_id = auth.uid() and friend_id = friend;
+$$;
+
+-- The Friends badge: people who added you since you last opened Friends, on
+-- any device. Opening Friends calls saw_friends().
+create or replace function public.new_friends()
+returns setof uuid
+language sql stable security definer set search_path = public as $$
+  select f.friend_id from friends f
+  where f.user_id = auth.uid() and f.added_by = f.friend_id
+    and f.created_at > coalesce((select seen_at from friends_seen where user_id = auth.uid()), '-infinity');
+$$;
+
+create or replace function public.saw_friends()
+returns void
+language sql security definer set search_path = public as $$
+  insert into friends_seen (user_id, seen_at) values (auth.uid(), now())
+  on conflict (user_id) do update set seen_at = excluded.seen_at;
 $$;
 
 -- A friend's answers, only if they are in the caller's friend list.
@@ -497,10 +528,10 @@ grant execute on function public.map_stats() to anon, authenticated;
 
 revoke execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
   public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
-  public.delete_my_account() from public, anon;
+  public.new_friends(), public.saw_friends(), public.delete_my_account() from public, anon;
 grant execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
   public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
-  public.delete_my_account() to authenticated;
+  public.new_friends(), public.saw_friends(), public.delete_my_account() to authenticated;
 
 -- These only run inside the functions above, never called directly.
 revoke execute on function public.record_visit(), public.ip_code(text), public.left_out_of_stats(uuid) from public, anon, authenticated;

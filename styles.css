@@ -569,6 +569,10 @@ dialog {
   box-shadow: 0 20px 60px rgb(0 0 0 / 35%);
 }
 dialog::backdrop { background: rgb(20 10 30 / 50%); }
+/* A popup with another open on top is hidden, not closed (app.js), so it comes
+   back as it was. Faded rather than visibility: hidden so focus can return to it. */
+dialog.covered { opacity: 0; pointer-events: none; }
+dialog.covered::backdrop { background: transparent; }
 dialog h3 { margin: 4px 0 8px; font-size: 22px; }
 .detail-cat { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
 .detail-q { color: var(--muted); }

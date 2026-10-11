@@ -12,6 +12,21 @@
 
   const byId = Object.fromEntries(CLAIMS.map((c) => [c.id, c]));
 
+  // One popup at a time: a popup opened over another hides the one beneath
+  // (still open, and scrolled where it was) until the top one closes. Watching
+  // the open attribute catches every way a popup opens or closes, Esc included.
+  const popups = [];
+  new MutationObserver((changes) => {
+    for (const { target: d } of changes) {
+      if (!(d instanceof HTMLDialogElement)) continue;
+      const at = popups.indexOf(d);
+      if (at >= 0) popups.splice(at, 1);
+      if (d.open) popups.push(d);
+      else d.classList.remove("covered");
+    }
+    popups.forEach((d, i) => d.classList.toggle("covered", i < popups.length - 1));
+  }).observe(document.body, { attributes: true, attributeFilter: ["open"], subtree: true });
+
   // answers: { [claimId]: "yes" | "no" | "unsure" }, in the order they were given.
   // "unsure" is Don't Know: off the board, and counted in the woo score like No.
   let answers = load();

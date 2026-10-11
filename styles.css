@@ -441,7 +441,7 @@ button { font: inherit; cursor: pointer; }
 .bin.trash { background: var(--trash-soft); border-color: var(--trash); }
 .bin.woo { background: var(--woo-soft); border-color: var(--woo); }
 .bin.unsure { background: var(--unsure-soft); border-color: var(--unsure); padding: 10px 14px; }
-.bin.unsure h2 { font-size: 16px; }
+.bin.unsure h2 { font-size: 16px; margin-bottom: 8px; }
 .bin.bump { transform: scale(1.04); }
 
 /* "Statistics": one fact about everyone's answers (funstat.js). */

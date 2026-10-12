@@ -406,7 +406,8 @@ button { font: inherit; cursor: pointer; }
   border-radius: var(--radius);
   color: var(--muted);
 }
-.done .btn { margin-top: 2px; }
+/* A little bigger than other buttons: it's the natural next step once you're done. */
+.done .btn { margin-top: 6px; padding: 12px 24px; font-size: 17px; border-radius: 12px; }
 
 /* Bins */
 

@@ -29,7 +29,7 @@
 //   denver-airport, elixir-immortality, jfk-conspiracy, stolen-election-2020,
 //   climate-hoax, great-replacement, myers-briggs, carnivore-diet, chronic-lyme,
 //   king-tut-curse, bilderberg, aum-shinrikyo, branch-davidians, moses-torah,
-//   divine-emperor.
+//   divine-emperor, methodism.
 
 // `short` is the label on the filter buttons, when the full one is long.
 const CATEGORIES = {
@@ -402,14 +402,6 @@ const CLAIMS = [
     question: "Do you believe Christ's body is truly present 'in, with and under' the bread and wine of communion?",
     verdict: "Like transubstantiation, the claim is defined so that it can't be observed or tested.",
     link: "https://en.wikipedia.org/wiki/Sacramental_union",
-  },
-  {
-    id: "methodism",
-    name: "Perfect Love in This Life",
-    category: "christianity",
-    question: "Do you believe the Holy Spirit can make you perfect in love in this life, as John Wesley taught?",
-    verdict: "A supernatural claim with no testable evidence behind it.",
-    link: "https://en.wikipedia.org/wiki/Christian_perfection",
   },
   {
     id: "young-earth",

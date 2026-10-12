@@ -1039,7 +1039,9 @@
       $("my-name-row").hidden = !user.is_anonymous;
       $("share-preview").textContent = W.shareText();
       // Phones can hand the message straight to Messages, WhatsApp and so on.
-      const canSend = typeof navigator.share === "function";
+      // Computers just copy: Windows' share box offers to email through
+      // Outlook even when it isn't set up, then says it was sent.
+      const canSend = typeof navigator.share === "function" && matchMedia("(pointer: coarse)").matches;
       $("share-native").hidden = !canSend;
       $("share-copy").classList.toggle("ghost", canSend);
       $("share-dialog").showModal();

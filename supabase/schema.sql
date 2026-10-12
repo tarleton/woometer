@@ -257,6 +257,18 @@ language sql stable security definer set search_path = public as $$
       or exists (select 1 from visits v join ignored_ip_codes i using (ip_code) where v.user_id = uid);
 $$;
 
+-- The same accounts as a list, for the stats functions below. Looking the list
+-- up once is much faster than asking left_out_of_stats about every answer,
+-- which matters for "N% of people agree" after every tap once lots of people
+-- have answered.
+create or replace function public.left_out_users()
+returns setof uuid
+language sql stable security definer set search_path = public as $$
+  select id from profiles where is_tester
+  union
+  select v.user_id from visits v join ignored_ip_codes i using (ip_code);
+$$;
+
 -- Returns the caller's profile, creating it on first visit.
 create or replace function public.ensure_profile()
 returns table (display_name text, share_code text)
@@ -382,7 +394,7 @@ language sql stable security definer set search_path = public as $$
          count(*) filter (where a.answer = 'unsure')
   from answers a
   where (only_ids is null or a.claim_id = any (only_ids))
-    and not left_out_of_stats(a.user_id)
+    and a.user_id not in (select left_out_users())
   group by a.claim_id;
 $$;
 
@@ -411,7 +423,7 @@ language sql stable security definer set search_path = public as $$
   with real_answers as (
     select a.user_id, a.claim_id, a.answer
     from answers a
-    where not left_out_of_stats(a.user_id)
+    where a.user_id not in (select left_out_users())
   ),
   people as (
     select count(*) filter (where answer = 'yes')::numeric / count(*) as score
@@ -522,7 +534,7 @@ language sql stable security definer set search_path = public as $$
     from home h
     join country_continents cc on cc.code = h.code
     where exists (select 1 from answers a where a.user_id = h.user_id)
-      and not left_out_of_stats(h.user_id)
+      and h.user_id not in (select left_out_users())
   ),
   people as (
     select p.continent,
@@ -603,4 +615,4 @@ grant execute on function public.ensure_profile(), public.set_display_name(text)
 
 -- These only run inside the functions above, never called directly.
 revoke execute on function public.record_visit(), public.ip_code(text), public.left_out_of_stats(uuid),
-  public.check_answers() from public, anon, authenticated;
+  public.left_out_users(), public.check_answers() from public, anon, authenticated;

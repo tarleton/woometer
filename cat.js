@@ -46,7 +46,7 @@ const Cat = (function () {
     ["Dungeon Master", "grayTabby", "#e07a5a", "open", "grin", ["d20"]],
     ["The Wizard", "mainecoon", "#e0b84a", "open", "smile", ["wizardHat", "staff"]],
     ["Pyramid Power", "abyssinian", "#8fc46a", "open", "open", ["pyramidHat"]],
-    ["Tinfoil Tabby", "silverTabby", "#5aa0d8", "open", "grin", ["tinfoil"]],
+    ["Signal Seeker", "silverTabby", "#5aa0d8", "open", "grin", ["tinfoil"]],
     ["Alien Contactee", "lilac", "#7ad86a", "open", "open", ["antennae", "sparkles"]],
     ["UFO Pilot", "cowcat", "#5ac8e8", "open", "open", ["ufo", "sparkles"]],
   ];

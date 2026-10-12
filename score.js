@@ -10,6 +10,6 @@ window.WooScore = {
     const answered = woo + trash + unsure;
     const share = (n) => (answered ? Math.round((n / answered) * 100) : 0);
     // decided: Yes and No answers only, for the "at least 10" stats rule.
-    return { answered, decided: woo + trash, woo, trash, unsure, pct: share(woo), rejectPct: share(trash), fraction: answered ? woo / answered : 0 };
+    return { answered, decided: woo + trash, woo, trash, unsure, pct: share(woo), fraction: answered ? woo / answered : 0 };
   },
 };

@@ -63,13 +63,6 @@
     return WooScore.of(Object.values(answers));
   }
 
-  // Lead with what people reject: most visitors turn down most of the list.
-  function verdictFor(s) {
-    if (s.answered === 0) return "Answer a few to see your woo";
-    if (s.trash === s.answered) return "You reject all of it";
-    if (s.woo === s.answered) return "You believe all of it";
-    return `You reject ${s.rejectPct}% of it`;
-  }
 
   // Rendering
 
@@ -308,7 +301,8 @@
   function renderMeter() {
     const s = score();
     $("pct").textContent = `${s.pct}%`;
-    $("verdict").textContent = verdictFor(s);
+    // Just "19% woo" once there are answers; the line below only invites a first answer.
+    $("verdict").hidden = s.answered > 0;
     $("trash-count").textContent = s.trash;
     $("woo-count").textContent = s.woo;
     $("unsure-count").textContent = s.unsure;
@@ -600,7 +594,7 @@
     const personal = window.Woometer.shareUrl && window.Woometer.shareUrl();
     const link = personal || location.origin + location.pathname;
     return s.answered
-      ? `I'm ${s.pct}% woo on the woometer: I reject ${s.rejectPct}% of the ${s.answered === 1 ? "claim" : `${s.answered} claims`} I've answered. ${personal ? "See my results and compare with yours:" : "What do you believe?"} ${link}`
+      ? `I'm ${s.pct}% woo on the woometer. ${personal ? "See my results and compare with yours:" : "What do you believe?"} ${link}`
       : `What do you believe? ${link}`;
   }
 

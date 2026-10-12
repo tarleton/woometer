@@ -2083,7 +2083,7 @@ const CLAIMS = [
     name: "Serpent in Eden",
     category: "religion",
     question: "Do you believe a talking serpent tempted Eve in the Garden of Eden?",
-    verdict: "No archaeological trace of Eden has been found,. A serpent stealing a plant of immortality also appears in the older Mesopotamian Epic of Gilgamesh.",
+    verdict: "No archaeological trace of Eden has been found. A serpent stealing a plant of immortality also appears in the older Mesopotamian Epic of Gilgamesh.",
     link: "https://en.wikipedia.org/wiki/Garden_of_Eden",
   },
   {

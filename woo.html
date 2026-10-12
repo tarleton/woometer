@@ -7,26 +7,23 @@
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#2a1a45">
   <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2">
 </head>
 <body>
   <script>
     // woometer.com/woo: a hidden playground. It shows the real home page, fetched
     // fresh so it always matches, over the psychedelic field from woo.js, with a
-    // header slider to pretend any share of claims is answered and a starry
-    // footer as tall as the header.
+    // header slider to pretend any share of claims is answered.
     (async () => {
       const HEAD = `
   <meta name="robots" content="noindex">
   <style>
-    body { background: transparent; display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
-    body > .layout { flex: 1; width: 100%; }
+    body { background: transparent; }
     .woo-field { position: fixed; inset: 0; z-index: -1; background: #0d0a14; pointer-events: none; }
     .woo-field canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-    /* The footer matches the header: same height, its own drifting stars. */
-    body .foot { margin-top: 0; padding: 0 16px; position: relative; z-index: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; border-top: 1px solid var(--line); background: var(--surface); }
-    .foot p { margin: 0; position: relative; }
-    .foot > .sky { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+    /* Soft dark backing so the words that sit straight on the field stay easy to read. */
+    .progress, .show-answered { padding: 3px 10px; border-radius: 999px; background: rgb(13 10 20 / 72%); box-shadow: 0 0 12px 6px rgb(13 10 20 / 55%); color: var(--ink); }
+    .done { background: rgb(13 10 20 / 80%); box-shadow: 0 0 18px 8px rgb(13 10 20 / 55%); color: var(--ink); }
     /* The reveal slider: pretend you've answered this share of the claims. */
     .reveal { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; flex: 1 1 220px; max-width: 360px; }
     .reveal input { flex: 1; min-width: 0; accent-color: var(--accent); }
@@ -41,15 +38,7 @@
     </label>
     <div class="top-actions">`;
       const TAIL = `
-  <script src="woo.js?v=4"><\/script>
-  <script>
-    // Keep the footer exactly as tall as the header, however the header wraps.
-    (() => {
-      const header = document.querySelector("header.top");
-      const footer = document.querySelector("footer.foot");
-      new ResizeObserver(() => (footer.style.height = header.getBoundingClientRect().height + "px")).observe(header);
-    })();
-  <\/script>
+  <script src="woo.js?v=5"><\/script>
 </body>`;
       try {
         const reply = await fetch("./", { cache: "no-cache" });
@@ -58,7 +47,6 @@
           .replace("</head>", `${HEAD}</head>`)
           .replace("<body>", `<body>\n  <div class="woo-field" aria-hidden="true"><canvas id="field"></canvas></div>`)
           .replace(`<div class="top-actions">`, SLIDER)
-          .replace(`<footer class="foot">`, `<footer class="foot" data-sky>`)
           .replace("</body>", TAIL);
         document.open();
         document.write(html);

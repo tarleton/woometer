@@ -55,17 +55,24 @@
 
     // The lace: a kaleidoscopic fold of the plane, repeated. Each pass leaves
     // a thin glowing line along its creases; more passes, finer lace.
-    vec3 lace(vec2 q, float depth, float passes) {
+    vec3 lace(vec2 q, float depth, float passes, float fw) {
       vec3 col = vec3(0.0);
       vec2 z = q;
       vec2 c = vec2(0.86 + 0.05 * sin(t * 0.011), 0.52 + 0.05 * cos(t * 0.009));
-      for (int i = 0; i < 10; i++) {
+      for (int i = 0; i < 8; i++) {
         if (float(i) >= passes) break;
-        z = abs(z) / clamp(dot(z, z), 0.12, 6.0) - c;
+        // Each fold also stretches the pixel's footprint by the same amount.
+        float k = clamp(dot(z, z), 0.12, 6.0);
+        z = abs(z) / k - c;
+        fw /= k;
+        // Lines never get thinner than a pixel can show: where the pattern is
+        // finer than the screen (towards the heart, and in the deepest
+        // passes) they widen and dim into a soft haze instead of static.
+        float w = max(0.03, fw * 1.5);
         float crease = min(abs(z.x), abs(z.y));
-        float line = exp(-crease * 38.0);
-        float ring = exp(-abs(length(z) - 0.7) * 30.0);
-        col += rainbow(float(i) * 0.13 + depth * 0.22 + t * 0.004) * (line * 0.7 + ring * 0.45) * (1.0 - float(i) * 0.06);
+        float line = exp(-crease / w) * (0.03 / w);
+        float ring = exp(-abs(length(z) - 0.7) / (w * 1.3)) * (0.03 / w);
+        col += rainbow(float(i) * 0.13 + depth * 0.22 + t * 0.004) * (line * 0.7 + ring * 0.25) * (1.0 - float(i) * 0.1);
       }
       return col;
     }
@@ -84,21 +91,28 @@
       // so the pattern keeps unfolding from the centre outward.
       float depth = log(r + 0.0001) - t * 0.012;
       vec2 q = vec2((fract(depth * 0.55) - 0.5) * 2.4, fa * 2.6);
-      float passes = 3.0 + floor(rev * 7.0 + 0.001);
-      vec3 col = lace(q, depth, passes) * (0.04 + 1.0 * pow(rev, 1.4));
+      // How much of the lace one pixel covers: the closer to the heart, the
+      // more the pattern is squeezed into each pixel.
+      float fw = 1.4 / (max(r, 0.001) * min(res.x, res.y));
+      float passes = 3.0 + floor(rev * 5.0 + 0.001);
+      vec3 col = lace(q, depth, passes, fw) * (0.04 + 1.0 * pow(rev, 1.4));
 
       // A finer second veil turning the other way, only once things open up.
       float fb = abs(mod(a - t * 0.005, s) - 0.5 * s);
       vec2 q2 = vec2((fract(depth * 0.55 + 0.5) - 0.5) * 2.4, fb * 2.6) * 1.25;
-      col += smoothstep(0.35, 1.0, rev) * 0.5 * lace(q2, depth + 0.5, passes - 1.0);
+      col += smoothstep(0.35, 1.0, rev) * 0.5 * lace(q2, depth + 0.5, passes - 1.0, fw * 1.25);
 
-      // Quiet near the very centre, a little softer in the far corners.
-      col *= smoothstep(0.02, 0.2, r) * (1.0 - 0.5 * smoothstep(0.7, 1.3, r));
+      // The lace fades into a calm, dark heart, and is a little softer in the
+      // far corners.
+      col *= smoothstep(0.03, 0.22, r) * (1.0 - 0.5 * smoothstep(0.7, 1.3, r));
 
-      // The breathing light at the heart: a small orb, not a flood.
+      // At the heart: one small, breathing point of white light with a thin
+      // halo, and fine rays reaching out between the mirrored segments.
       float breath = 0.5 + 0.5 * sin(t * TAU / 9.0);
-      col += rainbow(t * 0.008 + 0.6) * exp(-r * 18.0) * (0.25 + 0.35 * breath) * (0.3 + rev);
-      col += vec3(1.0, 0.92, 1.0) * exp(-r * 60.0) * rev;
+      float rays = pow(abs(cos(fa * seg * 0.5 + 1.5708)), 40.0) * exp(-r * 6.0) * smoothstep(0.01, 0.06, r);
+      col += rainbow(t * 0.01 + r * 2.0) * rays * 0.25 * rev;
+      col += vec3(0.8, 0.7, 1.0) * exp(-abs(r - 0.035) * 140.0) * (0.1 + 0.15 * breath) * rev;
+      col += vec3(1.0, 0.96, 1.0) * exp(-r * 140.0) * (0.35 + 0.25 * breath) * (0.4 + 0.6 * rev);
 
       // Near full reveal, a third eye glows open above the heart.
       float eyeOpen = smoothstep(0.8, 1.0, rev);

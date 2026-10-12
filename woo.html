@@ -48,14 +48,14 @@
   </footer>
   <script src="claims.js"></script>
   <script src="sounds.js"></script>
-  <script src="sky.js"></script>
-  <script src="woo.js"></script>
+  <script src="sky.js?v=2"></script>
+  <script src="woo.js?v=3"></script>
   <script>
     // Keep the footer exactly as tall as the header, however the header wraps.
     (() => {
       const header = document.querySelector("header.top");
       const footer = document.querySelector("footer.foot");
-      new ResizeObserver(() => (footer.style.height = `${header.offsetHeight}px`)).observe(header);
+      new ResizeObserver(() => (footer.style.height = `${header.getBoundingClientRect().height}px`)).observe(header);
     })();
   </script>
 </body>

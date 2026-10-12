@@ -750,6 +750,11 @@ dialog a { color: var(--accent); }
 .account-email { font-size: 13px; color: var(--muted); word-break: break-all; }
 .account-providers { font-size: 13px; color: var(--muted); }
 .account-providers:empty { display: none; }
+/* The name friends see, with a ✎ to change it (it isn't tied to Google). */
+.account-shown { margin-top: 8px !important; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.account-shown b { color: var(--ink); font-weight: 600; }
+.rename-me { border: 0; background: none; padding: 0 4px; font: inherit; font-size: 15px; color: var(--muted); cursor: pointer; }
+.rename-me:hover { color: var(--ink); }
 .account-menu > .fbsi, .account-menu > .fbsi[hidden] + .account-links { margin-top: 12px; }
 .account-menu .btn { width: 100%; }
 .account-menu .fbsi { width: 100%; justify-content: center; }
@@ -878,6 +883,7 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
   padding: 7px 10px;
 }
 .name-row input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.name-row input[aria-invalid="true"] { border-color: var(--danger); }
 
 
 .friend-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }

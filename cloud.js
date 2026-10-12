@@ -53,6 +53,8 @@
   // there is one (see withName).
   let nameSaving = Promise.resolve();
   let afterName = null;
+  // That box's own wording; changeName swaps in its own while you change it.
+  const NAME_HINT = $("name-hint").textContent;
   // What the account holds, as far as this browser knows: { [claimId]: answer }.
   let synced = {};
   // True while signing out or deleting the account on purpose, so the spare
@@ -477,6 +479,10 @@
       setMenu(false);
       W.confirmDelete($("delete-dialog"));
     });
+    $("change-name").addEventListener("click", () => {
+      setMenu(false);
+      changeName();
+    });
     $("delete-confirm").addEventListener("click", deleteAccount);
     $("copy-friend-link").addEventListener("click", copyFriendLink);
     $("share-copy").addEventListener("click", copyShareText);
@@ -488,10 +494,15 @@
         addFriendFromInput();
       }
     });
+    // A blank name isn't saved; the share buttons ask for one instead, and
+    // closing puts the saved name back.
     $("my-name").addEventListener("change", (e) => {
-      if (e.target.value.trim()) return setName(e.target.value);
-      e.target.value = profile.display_name || "";
-      if (profile.display_name) W.toast("Your name can't be blank: friends see it in their list.");
+      if (e.target.value.trim()) setName(e.target.value);
+    });
+    $("my-name").addEventListener("input", (e) => e.target.removeAttribute("aria-invalid"));
+    $("share-dialog").addEventListener("close", () => {
+      if (!$("my-name").value.trim()) $("my-name").value = profile.display_name || "";
+      $("my-name").removeAttribute("aria-invalid");
     });
     $("name-save").addEventListener("click", saveNameFromDialog);
     for (const [id, go] of [["name-google-btn", signInWithGoogle], ["name-facebook-btn", signInWithFacebook]]) {
@@ -622,6 +633,8 @@
     }
     $("account-name").textContent = name;
     $("account-email").textContent = user.email || "";
+    $("account-shown-name").textContent = profile.display_name || "";
+    $("account-shown-name").parentElement.hidden = !profile.display_name;
     // Google and Facebook are two ways into the same account, so one Sign out covers both.
     const has = providersOf(user);
     const ways = Object.keys(PROVIDER_NAMES).filter((p) => has.includes(p) && cfg[`${p}SignIn`]).map((p) => PROVIDER_NAMES[p]);
@@ -809,6 +822,8 @@
   // friend is the friend being added, if any, so signing in can finish adding them.
   function withName(then, friend) {
     if (profile.display_name) return Promise.resolve(then());
+    $("name-title").textContent = "What's your name?";
+    $("name-hint").textContent = NAME_HINT;
     const meta = user.user_metadata || {};
     $("name-input").value = (meta.full_name || meta.name || "").trim().slice(0, 40);
     const both = cfg.googleSignIn && cfg.facebookSignIn;
@@ -820,6 +835,16 @@
       afterName = { then, resolve, friend };
       $("name-dialog").showModal();
     });
+  }
+
+  // From the account menu: the same box, for changing the name friends see.
+  function changeName() {
+    afterName = null;
+    $("name-title").textContent = "Name your friends see";
+    $("name-hint").textContent = `Not tied to ${providersOf(user).includes("google") ? "Google" : "Facebook"}, so a nickname is fine. Only people you send your link to, or add as a friend, see it.`;
+    $("name-google").hidden = true;
+    $("name-input").value = profile.display_name || "";
+    $("name-dialog").showModal();
   }
 
   function saveNameFromDialog(e) {
@@ -834,6 +859,8 @@
     profile.display_name = name;
     $("my-name").value = name;
     nameSaving = setName(name);
+    $("account-shown-name").textContent = name;
+    $("account-shown-name").parentElement.hidden = false;
     $("name-dialog").close();
     if (pending) pending.resolve(pending.then());
   }
@@ -1009,6 +1036,7 @@
   function openShare() {
     withName(() => {
       $("my-name").value = profile.display_name || "";
+      $("my-name-row").hidden = !user.is_anonymous;
       $("share-preview").textContent = W.shareText();
       // Phones can hand the message straight to Messages, WhatsApp and so on.
       const canSend = typeof navigator.share === "function";
@@ -1018,13 +1046,24 @@
     });
   }
 
+  // Share buttons stop here while the name box is blank, since the link shows it.
+  function shareNameReady() {
+    if ($("my-name").value.trim()) return true;
+    $("my-name").setAttribute("aria-invalid", "true");
+    $("my-name").focus();
+    W.toast("Add a name first: friends see it with your link.");
+    return false;
+  }
+
   async function copyShareText() {
+    if (!shareNameReady()) return;
     if (await W.copyText(W.shareText(), "Woo and link copied. Paste it anywhere.", "Copy your woo and link:")) {
       $("share-dialog").close();
     }
   }
 
   async function sendShareText() {
+    if (!shareNameReady()) return;
     try {
       await navigator.share({ text: W.shareText() });
       $("share-dialog").close();
@@ -1034,6 +1073,7 @@
   }
 
   function copyFriendLink() {
+    if (!shareNameReady()) return;
     withName(async () => {
       if (await W.copyText(friendLink(), "Link copied.", "Copy your link:")) $("share-dialog").close();
     });

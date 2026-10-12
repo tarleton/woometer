@@ -219,9 +219,10 @@
       <h3><span aria-hidden="true">🔗</span> Share with a friend</h3>
       <p class="bin-hint">Your link shows your results to the person you send it to, and you can both see how much you agree.</p>
       <p class="share-safe">Nothing is posted or sent automatically. You pick who gets your link.</p>
-      <label class="name-row">Your name
-        <input type="text" id="my-name" maxlength="40" autocomplete="given-name" placeholder="So they know it's you">
+      <label class="name-row">Name your friends see
+        <input type="text" id="my-name" maxlength="40" autocomplete="given-name" placeholder="So they know it's you" aria-describedby="my-name-note">
       </label>
+      <p class="name-note" id="my-name-note" hidden></p>
       <p class="share-preview" id="share-preview"></p>
       <button type="button" id="share-native" class="btn" autofocus hidden>Send to a friend</button>
       <button type="button" id="share-copy" class="btn" autofocus>Copy my woo and link</button>

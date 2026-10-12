@@ -1009,6 +1009,10 @@
   function openShare() {
     withName(() => {
       $("my-name").value = profile.display_name || "";
+      // Signed in, this could look like the account's own name, so say it isn't.
+      const via = providersOf(user).includes("google") ? "Google" : "Facebook";
+      $("my-name-note").textContent = `Not tied to ${via}, so a nickname is fine.`;
+      $("my-name-note").hidden = user.is_anonymous;
       $("share-preview").textContent = W.shareText();
       // Phones can hand the message straight to Messages, WhatsApp and so on.
       const canSend = typeof navigator.share === "function";

@@ -878,6 +878,8 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
   padding: 7px 10px;
 }
 .name-row input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+/* Under the share name when signed in: it isn't tied to the Google account. */
+.name-note { margin: -6px 0 0; font-size: 13px; color: var(--muted); }
 
 
 .friend-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }

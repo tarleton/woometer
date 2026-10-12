@@ -210,6 +210,7 @@
     $("show-answered-label").hidden = done === 0;
     $("show-answered").checked = showAnswered;
     $("done").hidden = open.length > 0;
+    $("done-share").hidden = !!query || done < total;
     $("done").querySelector("p").textContent = query
       ? "No claims match your search."
       : `${done === total ? "That's every claim on the list." : "Nothing left in this category."} Tick “Show answered” to look over your answers or change them.`;
@@ -583,10 +584,13 @@
 
   // With accounts on, cloud.js opens the Share box (your name, then ways to
   // send your personal link). Without them, Share copies your woo straight away.
-  $("share").addEventListener("click", () => {
+  function share() {
     if (window.Woometer.openShare) window.Woometer.openShare();
     else copyText(shareText(), "Copied. Paste it anywhere.", "Copy your woo:");
-  });
+  }
+  $("share").addEventListener("click", share);
+  // Under "That's every claim on the list.", once you've answered them all.
+  $("done-share").addEventListener("click", share);
 
   function shareText() {
     const s = score();

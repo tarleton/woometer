@@ -123,6 +123,16 @@ create table if not exists public.ignored_ip_codes (
   created_at timestamptz not null default now()
 );
 
+-- The numbers behind /stats and the Statistics box, worked out at most once a
+-- minute and kept here, so lots of page loads at once (or a script calling
+-- site_stats over and over) can't wear out the database. Only site_stats and
+-- map_stats touch it.
+create table if not exists public.stats_cache (
+  name text primary key,
+  value json not null,
+  made_at timestamptz not null default now()
+);
+
 -- Row-level security
 
 alter table public.profiles enable row level security;
@@ -132,6 +142,7 @@ alter table public.visits enable row level security;
 alter table public.private_settings enable row level security;
 alter table public.ignored_ip_codes enable row level security;
 alter table public.friends_seen enable row level security;
+alter table public.stats_cache enable row level security;
 
 drop policy if exists "read own profile" on public.profiles;
 create policy "read own profile" on public.profiles
@@ -167,7 +178,7 @@ create policy "remove own friends" on public.friends
 -- Profiles are created and renamed only through the functions below.
 grant usage on schema public to anon, authenticated;
 revoke all on public.profiles, public.answers, public.friends from anon;
-revoke all on public.visits, public.private_settings, public.ignored_ip_codes, public.friends_seen from anon, authenticated;
+revoke all on public.visits, public.private_settings, public.ignored_ip_codes, public.friends_seen, public.stats_cache from anon, authenticated;
 revoke insert, update, delete on public.profiles from authenticated;
 revoke insert, update on public.friends from authenticated;
 grant select on public.profiles to authenticated;
@@ -213,6 +224,29 @@ begin
 exception when others then
   return;
 end $$;
+
+-- Runs after answers are saved from the site. It caps each account at 1,000
+-- answers (there are a few hundred claims, plus retired ones), so one account
+-- can't fill the database with made-up claims. And it notes the visitor's IP
+-- if the account has none yet, so answers saved by a script that never loads
+-- the page can still be put on the spam list. The SQL editor skips both.
+create or replace function public.check_answers()
+returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then return null; end if;
+  if (select count(*) from answers where user_id = auth.uid()) > 1000 then
+    raise exception 'too many answers';
+  end if;
+  if not exists (select 1 from visits where user_id = auth.uid()) then
+    perform record_visit();
+  end if;
+  return null;
+end $$;
+
+create or replace trigger check_answers
+  after insert on public.answers
+  for each statement execute function public.check_answers();
 
 -- True for accounts kept out of the stats: testers, and anyone who has
 -- visited from a network listed in ignored_ip_codes.
@@ -369,8 +403,9 @@ end $$;
 -- included, like the site's meter (score.js). Only totals, never who answered what. Test accounts and ignored spam are left out.
 -- To keep the numbers meaningful, a person counts toward the average once they
 -- have 10 Yes or No answers, and a claim is listed once it has 5. Anyone can
--- read it, even before the site has signed them in anonymously.
-create or replace function public.site_stats()
+-- read it, even before the site has signed them in anonymously, through
+-- site_stats() just below, which keeps the result for a minute.
+create or replace function public.site_stats_fresh()
 returns json
 language sql stable security definer set search_path = public as $$
   with real_answers as (
@@ -410,6 +445,22 @@ language sql stable security definer set search_path = public as $$
   );
 $$;
 
+create or replace function public.site_stats()
+returns json
+language plpgsql security definer set search_path = public as $$
+declare
+  result json;
+begin
+  select value into result from stats_cache where name = 'site' and made_at > now() - interval '1 minute';
+  if result is null then
+    result := site_stats_fresh();
+    insert into stats_cache (name, value, made_at) values ('site', result, now())
+    on conflict (name) do update set value = excluded.value, made_at = excluded.made_at;
+  end if;
+  return result;
+end $$;
+
+revoke execute on function public.site_stats_fresh() from public, anon, authenticated;
 revoke execute on function public.site_stats() from public;
 grant execute on function public.site_stats() to anon, authenticated;
 
@@ -456,7 +507,8 @@ on conflict (code) do update set continent = excluded.continent;
 -- cities or who answered what, and testers and ignored networks are left out.
 -- A continent shows its average and claims once at least 3 people there have
 -- 10 Yes or No answers; claims need 5 Yes or No answers there, like site_stats.
-create or replace function public.map_stats()
+-- Read through map_stats() below, which keeps the result for a minute.
+create or replace function public.map_stats_fresh()
 returns json
 language sql stable security definer set search_path = public as $$
   with home as (
@@ -523,6 +575,22 @@ language sql stable security definer set search_path = public as $$
   );
 $$;
 
+create or replace function public.map_stats()
+returns json
+language plpgsql security definer set search_path = public as $$
+declare
+  result json;
+begin
+  select value into result from stats_cache where name = 'map' and made_at > now() - interval '1 minute';
+  if result is null then
+    result := map_stats_fresh();
+    insert into stats_cache (name, value, made_at) values ('map', result, now())
+    on conflict (name) do update set value = excluded.value, made_at = excluded.made_at;
+  end if;
+  return result;
+end $$;
+
+revoke execute on function public.map_stats_fresh() from public, anon, authenticated;
 revoke execute on function public.map_stats() from public;
 grant execute on function public.map_stats() to anon, authenticated;
 
@@ -534,4 +602,5 @@ grant execute on function public.ensure_profile(), public.set_display_name(text)
   public.new_friends(), public.saw_friends(), public.delete_my_account() to authenticated;
 
 -- These only run inside the functions above, never called directly.
-revoke execute on function public.record_visit(), public.ip_code(text), public.left_out_of_stats(uuid) from public, anon, authenticated;
+revoke execute on function public.record_visit(), public.ip_code(text), public.left_out_of_stats(uuid),
+  public.check_answers() from public, anon, authenticated;

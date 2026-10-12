@@ -44,7 +44,7 @@ const CATEGORIES = {
   christianity: { label: "Christianity", icon: "✝️" },
   worldreligion: { label: "World Religions", icon: "🕉️" },
   newreligion: { label: "New Religious Movements", short: "New Religions", icon: "🛐" },
-  magic: { label: "Witchcraft & Folk Magic", short: "Folk Magic", icon: "🧙" },
+  magic: { label: "Witchcraft & Magic", short: "Magic", icon: "🧙" },
 };
 
 const CLAIMS = [
@@ -2796,7 +2796,7 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/Sathya_Sai_Baba",
   },
 
-  // Witchcraft & Folk Magic (added)
+  // Witchcraft & Magic (added)
   {
     id: "love-spells",
     name: "Love Spells",

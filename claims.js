@@ -2960,4 +2960,29 @@ const CLAIMS = [
     verdict: "Susto is a widely recognized folk illness in Latin America. Doctors who study it find its symptoms, like fatigue, poor sleep and low appetite, overlap with anxiety, depression or untreated physical illness. No soul loss has ever been shown.",
     link: "https://en.wikipedia.org/wiki/Susto",
   },
+  // Pre-launch gap fill (added)
+  {
+    id: "human-design",
+    name: "Human Design",
+    category: "newage",
+    question: "Do you believe your birth time and place reveal your energy type and how you should make decisions, as Human Design teaches?",
+    verdict: "Human Design was created in 1987 by Ra Uru Hu, who said a mysterious voice revealed it to him. It blends astrology, the I Ching, Kabbalah and chakras. No study shows the chart's 'types' describe people better than chance.",
+    link: "https://en.wikipedia.org/wiki/Human_Design",
+  },
+  {
+    id: "santa-muerte",
+    name: "Santa Muerte",
+    category: "magic",
+    question: "Do you believe Santa Muerte, the folk saint of death, grants favors to those who pray to her?",
+    verdict: "Devotion to Santa Muerte has grown to millions of followers in Mexico and the US in recent decades, even though the Catholic Church condemns it. There's no evidence that offerings or prayers to her change anyone's luck.",
+    link: "https://en.wikipedia.org/wiki/Santa_Muerte",
+  },
+  {
+    id: "egg-cleansing",
+    name: "Egg Cleansing (Limpia)",
+    category: "medicine",
+    question: "Do you believe rubbing a raw egg over your body can draw out bad energy and illness?",
+    verdict: "In a limpia, a healer rubs an egg over the body, then cracks it into water and reads the shapes as the illness drawn out. Those shapes are simply what raw egg does in water, and no study shows the egg removes anything.",
+    link: "https://en.wikipedia.org/wiki/Curanderismo",
+  },
 ];

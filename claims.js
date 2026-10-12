@@ -42,7 +42,10 @@ const CATEGORIES = {
   fringe: { label: "Fringe Science", icon: "🧪" },
   popsych: { label: "Pop Psychology", short: "Pop Psych", icon: "🧠" },
   christianity: { label: "Christianity", icon: "✝️" },
-  worldreligion: { label: "World Religions", icon: "🕉️" },
+  judaism: { label: "Judaism", icon: "✡️" },
+  islam: { label: "Islam", icon: "☪️" },
+  dharmic: { label: "Hindu, Buddhist & Sikh", short: "Hindu & Buddhist", icon: "🕉️" },
+  worldreligion: { label: "More Faiths", icon: "🌍" },
   newreligion: { label: "New Religious Movements", short: "New Religions", icon: "🛐" },
   magic: { label: "Witchcraft & Magic", short: "Magic", icon: "🧙" },
 };
@@ -2384,11 +2387,11 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/144,000",
   },
 
-  // World Religions (added)
+  // Islam, Hindu/Buddhist/Sikh and more faiths (added)
   {
     id: "quran-gabriel",
     name: "Quran from Gabriel",
-    category: "worldreligion",
+    category: "islam",
     question: "Do you believe the Quran was revealed word for word to Muhammad by God through the angel Gabriel?",
     verdict: "There is no evidence for angelic revelation. Islamic tradition itself records the text being compiled into a standard edition under Caliph Uthman around 650 CE, and early manuscripts such as the Sana'a palimpsest show variant readings.",
     link: "https://en.wikipedia.org/wiki/Quran",
@@ -2396,7 +2399,7 @@ const CLAIMS = [
   {
     id: "night-journey",
     name: "The Night Journey",
-    category: "worldreligion",
+    category: "islam",
     question: "Do you believe Muhammad rode a winged steed from Mecca to Jerusalem and up to heaven in a single night?",
     verdict: "There is no evidence for the journey beyond the religious texts. Even early Muslim commentators disagreed over whether it was a physical trip or a vision.",
     link: "https://en.wikipedia.org/wiki/Isra_and_Mi%27raj",
@@ -2404,7 +2407,7 @@ const CLAIMS = [
   {
     id: "moon-splitting",
     name: "Splitting of the Moon",
-    category: "worldreligion",
+    category: "islam",
     question: "Do you believe Muhammad miraculously split the Moon in two?",
     verdict: "No astronomical records from anywhere else in the world note the Moon splitting. The 'crack' in viral photos is Rima Ariadaeus, a lunar valley formed by geological forces long before humans existed.",
     link: "https://en.wikipedia.org/wiki/Splitting_of_the_Moon",
@@ -2412,7 +2415,7 @@ const CLAIMS = [
   {
     id: "jinn",
     name: "Jinn",
-    category: "worldreligion",
+    category: "islam",
     question: "Do you believe in jinn, invisible beings made of smokeless fire who live among us?",
     verdict: "There is no evidence that jinn exist. Belief in jinn predates Islam in pre-Islamic Arabia, and symptoms blamed on jinn possession match recognized conditions such as epilepsy and psychosis.",
     link: "https://en.wikipedia.org/wiki/Jinn",
@@ -2420,7 +2423,7 @@ const CLAIMS = [
   {
     id: "quran-science",
     name: "Science in the Quran",
-    category: "worldreligion",
+    category: "islam",
     question: "Do you believe the Quran contains scientific facts no one could have known in the 7th century?",
     verdict: "These readings are made after the science is known. The Quran's stages of embryo development closely match ideas already written by the Greek physician Galen in the 2nd century.",
     link: "https://en.wikipedia.org/wiki/Quran_and_science",
@@ -2428,7 +2431,7 @@ const CLAIMS = [
   {
     id: "hidden-imam",
     name: "The Hidden Imam",
-    category: "worldreligion",
+    category: "islam",
     question: "Do you believe the Twelfth Imam, born in 869, is still alive in hiding?",
     verdict: "There is no evidence he is alive. After his father died in 874, the father's brother Ja'far denied any son existed, and the Shia community split into rival factions.",
     link: "https://en.wikipedia.org/wiki/Muhammad_al-Mahdi",
@@ -2436,7 +2439,7 @@ const CLAIMS = [
   {
     id: "sufi-saints",
     name: "Sufi Saint Miracles",
-    category: "worldreligion",
+    category: "islam",
     question: "Do you believe Sufi saints can work miracles?",
     verdict: "There is no documented, verified miracle by a saint or at a shrine. Many Muslim scholars themselves reject tomb blessings as an innovation not found in early Islam.",
     link: "https://en.wikipedia.org/wiki/Sufism",
@@ -2444,7 +2447,7 @@ const CLAIMS = [
   {
     id: "jewish-messiah",
     name: "The Coming Messiah",
-    category: "worldreligion",
+    category: "judaism",
     question: "Do you believe the Hebrew prophets correctly foretold a coming Messiah descended from King David?",
     verdict: "There is no evidence for this prophecy. History has seen many failed messiah claimants; Sabbatai Zevi drew huge followings in 1665 and converted to Islam a year later.",
     link: "https://en.wikipedia.org/wiki/Jewish_messianism",
@@ -2452,7 +2455,7 @@ const CLAIMS = [
   {
     id: "red-string",
     name: "Kabbalah Red String",
-    category: "worldreligion",
+    category: "judaism",
     question: "Do you believe wearing a Kabbalah red string bracelet protects you from the evil eye?",
     verdict: "No study shows a red string affects luck or harm. The custom was popularized worldwide by the Kabbalah Centre and celebrities in the 2000s.",
     link: "https://en.wikipedia.org/wiki/Kabbalah_Centre",
@@ -2460,7 +2463,7 @@ const CLAIMS = [
   {
     id: "karma",
     name: "Karma",
-    category: "worldreligion",
+    category: "dharmic",
     question: "Do you believe in karma, that the universe pays you back for your good and bad deeds?",
     verdict: "There is no evidence of a cosmic force balancing deeds; good and bad events befall people regardless of how they behave.",
     link: "https://en.wikipedia.org/wiki/Karma",
@@ -2468,7 +2471,7 @@ const CLAIMS = [
   {
     id: "ganges-sins",
     name: "Ganges Washes Sins",
-    category: "worldreligion",
+    category: "dharmic",
     question: "Do you believe bathing in the Ganges river washes away your sins?",
     verdict: "There is no evidence water can remove moral wrongdoing.",
     link: "https://en.wikipedia.org/wiki/Ganges",
@@ -2476,7 +2479,7 @@ const CLAIMS = [
   {
     id: "kundli-matching",
     name: "Horoscope Matching",
-    category: "worldreligion",
+    category: "dharmic",
     question: "Do you believe matching Vedic horoscopes (kundli) before marriage can predict whether a couple will be happy?",
     verdict: "Astrology fails controlled tests. In a study led by astrophysicist Jayant Narlikar, Indian astrologers could not tell the birth charts of gifted children from those of children with intellectual disabilities better than chance.",
     link: "https://en.wikipedia.org/wiki/Hindu_astrology",
@@ -2484,7 +2487,7 @@ const CLAIMS = [
   {
     id: "milk-miracle",
     name: "Ganesha Drinks Milk",
-    category: "worldreligion",
+    category: "dharmic",
     question: "Do you believe statues of Ganesha miraculously drank milk offered by worshippers in 1995?",
     verdict: "Scientists explained it as capillary action: the porous stone drew milk in and let it run down the statue. Adding food colouring showed the milk coating the statue's surface.",
     link: "https://en.wikipedia.org/wiki/Hindu_milk_miracle",
@@ -2492,7 +2495,7 @@ const CLAIMS = [
   {
     id: "ram-setu",
     name: "Ram Setu",
-    category: "worldreligion",
+    category: "dharmic",
     question: "Do you believe the chain of shoals between India and Sri Lanka is a bridge built by Lord Rama's army?",
     verdict: "Geologists describe Adam's Bridge as natural limestone shoals and sandbars formed by sediment and sea-level changes. No construction has been shown.",
     link: "https://en.wikipedia.org/wiki/Adam%27s_Bridge",
@@ -2500,7 +2503,7 @@ const CLAIMS = [
   {
     id: "cow-urine",
     name: "Cow Urine Cures",
-    category: "worldreligion",
+    category: "dharmic",
     question: "Do you believe drinking cow urine can cure diseases?",
     verdict: "No clinical trial shows cow urine treats cancer, COVID-19 or other disease. Doctors warned against it during the pandemic, and raw urine can carry bacteria that infect humans.",
     link: "https://en.wikipedia.org/wiki/Cow_urine",
@@ -2508,7 +2511,7 @@ const CLAIMS = [
   {
     id: "nirvana",
     name: "Nirvana",
-    category: "worldreligion",
+    category: "dharmic",
     question: "Do you believe in nirvana, an enlightenment that frees you from being reborn ever again?",
     verdict: "Meditation has measurable effects on stress and attention, but there is no evidence of rebirth or of a state that ends it. Neither can be observed or tested.",
     link: "https://en.wikipedia.org/wiki/Nirvana",
@@ -2516,7 +2519,7 @@ const CLAIMS = [
   {
     id: "pure-land",
     name: "Pure Land Rebirth",
-    category: "worldreligion",
+    category: "dharmic",
     question: "Do you believe chanting the name of Amitabha Buddha leads to rebirth in his Pure Land paradise?",
     verdict: "There is no evidence for the Pure Land or rebirth there. The idea comes from Mahayana sutras written centuries after the Buddha's death.",
     link: "https://en.wikipedia.org/wiki/Pure_Land_Buddhism",
@@ -2524,7 +2527,7 @@ const CLAIMS = [
   {
     id: "tulku",
     name: "Reincarnated Lamas",
-    category: "worldreligion",
+    category: "dharmic",
     question: "Do you believe lamas like the Dalai Lama are reborn and can be identified as children?",
     verdict: "There is no evidence any child is a former lama reborn. The process is open to politics: rival candidates were both proclaimed the 17th Karmapa in the 1990s, and China claims the right to pick the next Dalai Lama.",
     link: "https://en.wikipedia.org/wiki/Tulku",
@@ -2532,7 +2535,7 @@ const CLAIMS = [
   {
     id: "guru-granth",
     name: "Living Guru Scripture",
-    category: "worldreligion",
+    category: "dharmic",
     question: "Do you believe the Guru Granth Sahib is the eternal living Guru carrying the word of God?",
     verdict: "There is no evidence of divine authorship. Guru Arjan compiled its first version in 1604, and it includes hymns by Hindu and Muslim poets, such as Kabir and Farid, alongside the Sikh Gurus.",
     link: "https://en.wikipedia.org/wiki/Guru_Granth_Sahib",
@@ -2540,7 +2543,7 @@ const CLAIMS = [
   {
     id: "jain-karma",
     name: "Karmic Particles",
-    category: "worldreligion",
+    category: "dharmic",
     question: "Do you believe karma is made of fine physical particles that stick to your soul?",
     verdict: "Jain teaching describes karma as actual matter, but no such particles have ever been detected, and physics has found nothing that clings to people based on their actions.",
     link: "https://en.wikipedia.org/wiki/Karma_in_Jainism",
@@ -2620,7 +2623,7 @@ const CLAIMS = [
   {
     id: "spirit-rapping",
     name: "Séance Spirit Rapping",
-    category: "worldreligion",
+    category: "divination",
     question: "Do you believe spirits of the dead communicate through knocks and raps at séances?",
     verdict: "Spiritualism began with the Fox sisters' 'spirit raps' in 1848. In 1888 Margaret Fox publicly confessed the sounds were made by cracking her toe joints, and demonstrated it on stage.",
     link: "https://en.wikipedia.org/wiki/Spiritualism",
@@ -2628,7 +2631,7 @@ const CLAIMS = [
   {
     id: "ascended-masters",
     name: "Ascended Masters",
-    category: "worldreligion",
+    category: "newage",
     question: "Do you believe enlightened Ascended Masters secretly guide humanity?",
     verdict: "There is no evidence they exist. The idea comes from Theosophy founder Helena Blavatsky, whose letters from the 'Mahatmas' were judged to be fraudulent by the Society for Psychical Research's 1885 Hodgson Report.",
     link: "https://en.wikipedia.org/wiki/Ascended_master",
@@ -2841,7 +2844,7 @@ const CLAIMS = [
   {
     id: "reincarnation-rebirth",
     name: "Reincarnation",
-    category: "worldreligion",
+    category: "dharmic",
     question: "Do you believe in reincarnation, that a person's soul is reborn into a new body after death?",
     verdict: "There's no evidence. Psychiatrist Ian Stevenson's famous cases of children 'remembering' past lives came mostly from cultures that already believed in rebirth, and were often recorded after families had already found a match. No way for memories to survive death is known.",
     link: "https://en.wikipedia.org/wiki/Reincarnation",

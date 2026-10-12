@@ -65,7 +65,7 @@
 
   // Lead with what people reject: most visitors turn down most of the list.
   function verdictFor(s) {
-    if (s.answered === 0) return "Answer a few to get a reading";
+    if (s.answered === 0) return "Answer a few to see your woo";
     if (s.trash === s.answered) return "You reject all of it";
     if (s.woo === s.answered) return "You believe all of it";
     return `You reject ${s.rejectPct}% of it`;

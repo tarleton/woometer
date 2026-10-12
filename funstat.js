@@ -58,7 +58,7 @@
     const believed = top(claims, (c) => c.yes + c.share / 2 - c.unsure / 1e6);
     if (believed.yes) facts.push(`Most believed: <b>${esc(label(believed.claim))}</b> (${pct(believed.share)})`);
     const rejected = top(claims, (c) => c.no + (1 - c.share) / 2 - c.unsure / 1e6);
-    facts.push(`Most trashed: <b>${esc(label(rejected.claim))}</b> (${pct(1 - rejected.share)} No)`);
+    facts.push(`Most rejected: <b>${esc(label(rejected.claim))}</b> (${pct(1 - rejected.share)} No)`);
     const split = top(claims.filter((c) => c.yes && c.no), (c) => -Math.abs(c.share - 0.5) + c.all / 1e6);
     if (split && split !== believed && split.share >= 0.2 && split.share <= 0.8) {
       facts.push(`Most split: <b>${esc(label(split.claim))}</b> (${pct(split.share)} believe)`);

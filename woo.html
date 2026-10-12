@@ -16,7 +16,10 @@
     .top a.home { color: inherit; text-decoration: none; }
     .field { position: relative; flex: 1; min-height: 420px; overflow: hidden; background: #0d0a14; }
     .field canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-    .foot { margin-top: 0; }
+    /* The footer matches the header: same height, its own drifting stars. */
+    body .foot { margin-top: 0; position: relative; z-index: 0; display: flex; align-items: center; justify-content: center; padding: 0 16px; border-top: 1px solid var(--line); background: var(--surface); }
+    .foot p { margin: 0; position: relative; }
+    .foot > .sky { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
     /* The reveal slider: pretend you've answered this share of the claims. */
     .reveal { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; flex: 1 1 260px; max-width: 420px; }
     .reveal input { flex: 1; min-width: 0; accent-color: var(--accent); }
@@ -40,12 +43,20 @@
 
   <main class="field" aria-hidden="true"><canvas id="field"></canvas></main>
 
-  <footer class="foot">
+  <footer class="foot" data-sky>
     <p><a href="about" class="foot-link">About</a> · <a href="privacy" class="foot-link">Privacy</a> · <a href="terms" class="foot-link">Terms</a></p>
   </footer>
   <script src="claims.js"></script>
   <script src="sounds.js"></script>
   <script src="sky.js"></script>
   <script src="woo.js"></script>
+  <script>
+    // Keep the footer exactly as tall as the header, however the header wraps.
+    (() => {
+      const header = document.querySelector("header.top");
+      const footer = document.querySelector("footer.foot");
+      new ResizeObserver(() => (footer.style.height = `${header.offsetHeight}px`)).observe(header);
+    })();
+  </script>
 </body>
 </html>

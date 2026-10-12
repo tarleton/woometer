@@ -4,14 +4,18 @@
 // glow fades in and stars start to twinkle, more of them the more you answer.
 // Each star's place comes from its claim's id, so the sky is the same on every
 // page and every reload. Nothing here is labelled; it's there to be noticed.
-(() => {
+// A page can ask for a second, mirrored sky in its footer with
+// <footer class="foot" data-sky>: the same stars, scattered differently and
+// drifting the other way.
+function paintSky(host, variant) {
   const STORAGE_KEY = "woometer.answers.v1";
   const GROUPS = 24; // constellations the stars gather into
   const DRIFT = 2.5; // pixels per second
   const FRAME_MS = 50; // about 20 frames a second is plenty for this pace
 
-  const header = document.querySelector("header.top");
-  if (!header) return;
+  const header = host;
+  const SEED = variant.seed;
+  const DIR = variant.dir;
   const canvas = document.createElement("canvas");
   canvas.className = "sky";
   canvas.setAttribute("aria-hidden", "true");
@@ -21,7 +25,7 @@
 
   // A small, stable hash so a claim id always lands on the same spot.
   function hash(text, seed) {
-    let h = 2166136261 ^ seed;
+    let h = 2166136261 ^ (seed + SEED);
     for (let i = 0; i < text.length; i++) {
       h = Math.imul(h ^ text.charCodeAt(i), 16777619);
     }
@@ -111,7 +115,7 @@
     // The sky is at least 1000px wide so phones see a slice of it drifting by.
     const skyWidth = Math.max(width, 1000);
     // Drift by the wall clock, so the sky carries on where it was on the next page.
-    const shift = moving ? (Date.now() / 1000) * DRIFT : 0;
+    const shift = moving ? DIR * (Date.now() / 1000) * DRIFT : 0;
     const px = (s) => (((s.x * skyWidth + shift) % skyWidth) + skyWidth) % skyWidth;
 
     // Galaxy glow: fades in between 100 and 250 answers.
@@ -189,4 +193,11 @@
   refresh(false);
   resize();
   schedule();
-})();
+}
+
+{
+  const header = document.querySelector("header.top");
+  if (header) paintSky(header, { seed: 0, dir: 1 });
+  const footer = document.querySelector("footer.foot[data-sky]");
+  if (footer) paintSky(footer, { seed: 7919, dir: -1 });
+}

@@ -54,7 +54,7 @@ const CLAIMS = [
     category: "divination",
     question: "Do you believe the positions of the planets when you were born shape your personality?",
     verdict: "Controlled tests, including a double-blind study published in Nature (Carlson, 1985), found astrologers do no better than chance at matching birth charts to personalities.",
-    link: "https://en.wikipedia.org/wiki/Astrology_and_science",
+    link: "https://en.wikipedia.org/wiki/Astrology",
   },
   {
     id: "mediums",
@@ -276,7 +276,7 @@ const CLAIMS = [
     category: "paranormal",
     question: "Do you believe aliens abduct people and experiment on them?",
     verdict: "Abduction stories fit sleep paralysis, hypnagogic dreams and memories created under hypnosis. No physical evidence has ever been produced.",
-    link: "https://en.wikipedia.org/wiki/Alien_abduction_claimants",
+    link: "https://en.wikipedia.org/wiki/Alien_abduction",
   },
   {
     id: "ancient-aliens",
@@ -292,7 +292,7 @@ const CLAIMS = [
     category: "paranormal",
     question: "Do you believe the government is hiding crashed alien spacecraft?",
     verdict: "Roswell was a Project Mogul balloon. Decades of investigations have turned up no alien hardware or bodies.",
-    link: "https://en.wikipedia.org/wiki/Roswell_incident",
+    link: "https://en.wikipedia.org/wiki/UFO_conspiracy_theories",
   },
   {
     id: "ghosts",
@@ -376,7 +376,7 @@ const CLAIMS = [
     category: "religion",
     question: "Do you believe Joseph Smith translated the Book of Mormon from golden plates by the power of God?",
     verdict: "No plates were ever produced for inspection. Archaeology and DNA studies find no trace of the Book of Mormon's Israelite civilizations in the Americas.",
-    link: "https://en.wikipedia.org/wiki/Archaeology_and_the_Book_of_Mormon",
+    link: "https://en.wikipedia.org/wiki/Golden_plates",
   },
   {
     id: "scientology",
@@ -399,7 +399,7 @@ const CLAIMS = [
     name: "Christ Present in Communion",
     category: "religion",
     question: "Do you believe Christ's body is truly present 'in, with and under' the bread and wine of communion?",
-    verdict: "Like transubstantiation, the claim is defined so that it can't be observed or tested.",
+    verdict: "Like transubstantiation, the claim isn't something that can be observed or tested.",
     link: "https://en.wikipedia.org/wiki/Sacramental_union",
   },
   {
@@ -416,14 +416,14 @@ const CLAIMS = [
     category: "religion",
     question: "Do you believe a worldwide flood once covered every mountain, as in the story of Noah?",
     verdict: "There is no global flood layer in the geological record, and an ark couldn't hold, feed or ventilate millions of species.",
-    link: "https://en.wikipedia.org/wiki/Flood_geology",
+    link: "https://en.wikipedia.org/wiki/Genesis_flood_narrative",
   },
   {
     id: "jehovahs-witnesses",
     name: "Living in the Last Days",
     category: "religion",
     question: "Do you believe Bible prophecy shows we are living in the last days, as Jehovah's Witnesses teach?",
-    verdict: "The movement has predicted or strongly implied the end for 1914, 1925 and 1975. It didn't come.",
+    verdict: "The movement has predicted or strongly implied the end for 1914, 1925 and 1975, and the end did not arrive.",
     link: "https://en.wikipedia.org/wiki/Eschatology_of_Jehovah%27s_Witnesses",
   },
   {
@@ -439,7 +439,7 @@ const CLAIMS = [
     name: "Prosperity Gospel",
     category: "religion",
     question: "Do you believe God rewards those who give money to a preacher's ministry with wealth?",
-    verdict: "No study shows giving to a ministry makes donors wealthier. Several preachers have bought private jets with donations.",
+    verdict: "No study shows giving to a ministry makes donors wealthier.",
     link: "https://en.wikipedia.org/wiki/Prosperity_theology",
   },
   {
@@ -474,7 +474,7 @@ const CLAIMS = [
     category: "divination",
     question: "Do you believe trained people can see distant places or hidden targets with their minds (remote viewing)?",
     verdict: "The US government funded remote-viewing research from the 1970s until 1995 (later called the Stargate Project). A 1995 CIA-commissioned review concluded it had never produced information useful for intelligence operations, and the program was shut down.",
-    link: "https://en.wikipedia.org/wiki/Stargate_Project",
+    link: "https://en.wikipedia.org/wiki/Remote_viewing",
   },
   {
     id: "prophetic-dreams",
@@ -522,7 +522,7 @@ const CLAIMS = [
     category: "divination",
     question: "Do you believe a hanging pendulum can answer questions by swinging 'yes' or 'no'?",
     verdict: "The swing comes from the ideomotor effect: tiny unconscious hand movements, described by William Carpenter in 1852. Pendulums stop giving correct answers when the user cannot know the answer.",
-    link: "https://en.wikipedia.org/wiki/Ideomotor_phenomenon",
+    link: "https://en.wikipedia.org/wiki/Dowsing",
   },
   {
     id: "rune-casting",
@@ -554,7 +554,7 @@ const CLAIMS = [
     category: "divination",
     question: "Do you believe repeating numbers like 11:11 or 444 are messages from angels?",
     verdict: "Once primed to notice a pattern, you spot it more often, a bias called the frequency illusion, while ignoring all the non-matching times. A clock shows 11:11 twice a day, as often as any other time.",
-    link: "https://en.wikipedia.org/wiki/Frequency_illusion",
+    link: "https://en.wikipedia.org/wiki/Angel_number",
   },
   {
     id: "spoon-bending",
@@ -562,7 +562,7 @@ const CLAIMS = [
     category: "divination",
     question: "Do you believe some people, like Uri Geller, can bend spoons with their minds?",
     verdict: "On The Tonight Show in 1973, with props prepared on magician James Randi's advice, Geller failed to perform. Magicians reproduce spoon bending with ordinary sleight of hand.",
-    link: "https://en.wikipedia.org/wiki/Uri_Geller",
+    link: "https://en.wikipedia.org/wiki/Spoon_bending",
   },
   {
     id: "psychic-hotlines",
@@ -586,7 +586,7 @@ const CLAIMS = [
     category: "divination",
     question: "Do you believe pet psychics can talk telepathically with your animals?",
     verdict: "No controlled test has shown it. The famous horse Clever Hans seemed to answer questions until Oskar Pfungst showed in 1907 that it was reading people's unconscious cues, a trap that also catches human 'communicators'.",
-    link: "https://en.wikipedia.org/wiki/Clever_Hans",
+    link: "https://en.wikipedia.org/wiki/Pet_psychic",
   },
   {
     id: "mercury-retrograde",
@@ -1118,7 +1118,7 @@ const CLAIMS = [
     category: "health",
     question: "Do you believe drinking colloidal silver kills infections?",
     verdict: "No good evidence shows it treats any illness when swallowed, and the FDA has said it is not safe or effective for any disease. Long-term use can cause argyria, a permanent blue-gray skin color.",
-    link: "https://en.wikipedia.org/wiki/Argyria",
+    link: "https://en.wikipedia.org/wiki/Medical_uses_of_silver",
   },
   {
     id: "black-salve",
@@ -1232,7 +1232,7 @@ const CLAIMS = [
     category: "newage",
     question: "Do you believe in twin flames, one soul split into two people who are destined to find each other?",
     verdict: "There is no evidence for it; the image echoes the myth told in Plato's Symposium. The idea has also been used by groups such as Twin Flames Universe, the subject of the 2023 docuseries 'Escaping Twin Flames'.",
-    link: "https://en.wikipedia.org/wiki/Soulmate",
+    link: "https://en.wikipedia.org/wiki/Twin_flame",
   },
   {
     id: "kundalini",
@@ -1248,7 +1248,7 @@ const CLAIMS = [
     category: "newage",
     question: "Do you believe your pineal gland is a 'third eye' that can be opened by decalcifying it?",
     verdict: "The pineal gland makes melatonin to regulate sleep. Calcification is common with age, and there is no evidence that 'decalcifying' it by avoiding fluoride or using supplements gives any spiritual or psychic ability.",
-    link: "https://en.wikipedia.org/wiki/Pineal_gland",
+    link: "https://en.wikipedia.org/wiki/Third_eye",
   },
   {
     id: "ley-lines",
@@ -1442,7 +1442,7 @@ const CLAIMS = [
     category: "paranormal",
     question: "Do you believe the dark shadow people some see at night are real supernatural entities?",
     verdict: "Sightings of a dark figure in the room are a classic feature of sleep paralysis and hypnagogic hallucinations, and are also reported with sleep deprivation and stimulant use. Nothing has ever been recorded on camera.",
-    link: "https://en.wikipedia.org/wiki/Sleep_paralysis",
+    link: "https://en.wikipedia.org/wiki/Shadow_person",
   },
   {
     id: "nde-afterlife",
@@ -1892,7 +1892,7 @@ const CLAIMS = [
     category: "religion",
     question: "Do you believe the Holy Spirit gives believers today miraculous gifts like prophecy and healing?",
     verdict: "No controlled study has shown supernatural prophecy or healing. Modern Pentecostalism began with Charles Parham in 1901 and the 1906 Azusa Street Revival, whose early members believed tongues were real foreign languages; missionaries who went abroad found they were not.",
-    link: "https://en.wikipedia.org/wiki/Pentecostalism",
+    link: "https://en.wikipedia.org/wiki/Cessationism_versus_continuationism",
   },
   {
     id: "speaking-in-tongues",
@@ -1908,7 +1908,7 @@ const CLAIMS = [
     category: "religion",
     question: "Do you believe speaking in tongues is the evidence that someone has been baptized in the Holy Spirit?",
     verdict: "Glossolalia is a learnable behavior: in a 1980s study, psychologist Nicholas Spanos found most volunteers could speak fluent 'tongues' after brief training. The Assemblies of God lists this 'initial evidence' doctrine among its official fundamental truths.",
-    link: "https://en.wikipedia.org/wiki/Assemblies_of_God",
+    link: "https://en.wikipedia.org/wiki/Baptism_with_the_Holy_Spirit",
   },
   {
     id: "slain-in-the-spirit",
@@ -1923,7 +1923,7 @@ const CLAIMS = [
     name: "Holy Laughter",
     category: "religion",
     question: "Do you believe the 'holy laughter' of the 1994 Toronto Blessing revival was caused by the Holy Spirit?",
-    verdict: "Laughter is socially contagious, as the 1962 Tanganyika laughter epidemic showed. The revival began in January 1994 at the Toronto Airport Vineyard church, and the Vineyard movement itself cut ties with that church in 1995.",
+    verdict: "Laughter is socially contagious, as the 1962 Tanganyika laughter epidemic showed. The revival began in January 1994 at the Toronto Airport Vineyard church, and the Vineyard movement cut ties with that church in 1995.",
     link: "https://en.wikipedia.org/wiki/Toronto_Blessing",
   },
   {
@@ -1947,7 +1947,7 @@ const CLAIMS = [
     name: "Apostolic Succession",
     category: "religion",
     question: "Do you believe bishops hold spiritual authority passed down in an unbroken line from Jesus's apostles?",
-    verdict: "No reliable records link the earliest bishop lists to the apostles. Churches disagree: in 1896 Pope Leo XIII declared Anglican ordinations 'absolutely null and utterly void.'",
+    verdict: "No reliable records link the earliest bishop lists to the apostles.",
     link: "https://en.wikipedia.org/wiki/Apostolic_succession",
   },
   {
@@ -1955,7 +1955,7 @@ const CLAIMS = [
     name: "Holy Fire",
     category: "religion",
     question: "Do you believe a miraculous flame lights itself every Orthodox Easter in Jerusalem's Church of the Holy Sepulchre?",
-    verdict: "The flame emerges from inside the tomb chamber, out of public view, so it has never been independently observed or tested. Pope Gregory IX denounced the ceremony as a fraud in 1238.",
+    verdict: "The flame emerges from inside the tomb chamber, out of public view, so it has never been independently observed or tested.",
     link: "https://en.wikipedia.org/wiki/Holy_Fire",
   },
   {
@@ -1971,7 +1971,7 @@ const CLAIMS = [
     name: "Ellen White's Visions",
     category: "religion",
     question: "Do you believe Seventh-day Adventist founder Ellen G. White's visions were true prophecies from God?",
-    verdict: "Researchers, including Adventist pastor Walter Rea in The White Lie (1982), documented extensive copying from other authors in her writings.",
+    verdict: "Researchers, including Adventist pastor Walter Rea, found extensive copying from other authors in her writings.",
     link: "https://en.wikipedia.org/wiki/Ellen_G._White",
   },
   {
@@ -2004,7 +2004,7 @@ const CLAIMS = [
     category: "religion",
     question: "Do you believe you must be baptized by full immersion for your sins to be forgiven?",
     verdict: "There is no evidence baptism changes anything spiritually. Churches of Christ grew out of the 19th-century American Restoration Movement, and other denominations read the same verses as symbolic.",
-    link: "https://en.wikipedia.org/wiki/Churches_of_Christ",
+    link: "https://en.wikipedia.org/wiki/Baptismal_regeneration",
   },
   {
     id: "entire-sanctification",
@@ -2036,7 +2036,7 @@ const CLAIMS = [
     category: "religion",
     question: "Do you believe the dead lie unconscious until a future bodily resurrection?",
     verdict: "There is no evidence of any future resurrection. Christadelphians were founded by John Thomas in the 1840s; neuroscience finds no sign that consciousness continues in any form after brain death.",
-    link: "https://en.wikipedia.org/wiki/Christadelphians",
+    link: "https://en.wikipedia.org/wiki/Christian_mortalism",
   },
   {
     id: "iglesia-ni-cristo",
@@ -2203,15 +2203,15 @@ const CLAIMS = [
     name: "Prayer Heals the Sick",
     category: "religion",
     question: "Do you believe praying for sick people helps them recover?",
-    verdict: "The 2006 STEP study of 1,802 heart bypass patients found prayer by strangers made no difference; patients who knew they were being prayed for actually had slightly more complications (59% vs 52%).",
-    link: "https://en.wikipedia.org/wiki/Studies_on_intercessory_prayer",
+    verdict: "The 2006 STEP study of 1,802 heart bypass patients found prayer by strangers made no difference; patients who knew they were being prayed for had slightly more complications (59% vs 52%).",
+    link: "https://en.wikipedia.org/wiki/Intercessory_prayer",
   },
   {
     id: "marian-apparitions",
     name: "Fatima and Lourdes",
     category: "religion",
     question: "Do you believe the Virgin Mary appeared to children at places like Fatima and Lourdes?",
-    verdict: "Only the visionaries saw Mary, and Fatima's 1917 'dancing sun' was recorded by no observatory. Of many millions of Lourdes pilgrims, the Church recognizes only about 70 cures as miraculous.",
+    verdict: "Only the visionaries saw Mary, and Fatima's 1917 'dancing sun' was recorded by no observatory. Of many millions of Lourdes pilgrims, the Church recognizes about 70 cures as miraculous.",
     link: "https://en.wikipedia.org/wiki/Marian_apparition",
   },
   {
@@ -2243,7 +2243,7 @@ const CLAIMS = [
     name: "Holy Relics",
     category: "religion",
     question: "Do you believe the bones and belongings of saints have miraculous healing power?",
-    verdict: "No relic has shown healing effects under testing. Medieval churches displayed several different heads of John the Baptist.",
+    verdict: "No relic has shown healing effects under testing.",
     link: "https://en.wikipedia.org/wiki/Relic",
   },
   {
@@ -2283,7 +2283,7 @@ const CLAIMS = [
     name: "Purgatory",
     category: "religion",
     question: "Do you believe souls go to purgatory to be purified before entering heaven?",
-    verdict: "There is no evidence. The doctrine was formally defined at the councils of Lyon (1274) and Florence, and the selling of indulgences to shorten purgatory helped spark Luther's 1517 Ninety-five Theses.",
+    verdict: "There is no evidence. The doctrine was formally defined at the councils of Lyon (1274) and Florence.",
     link: "https://en.wikipedia.org/wiki/Purgatory",
   },
   {
@@ -2347,8 +2347,8 @@ const CLAIMS = [
     name: "Lamanite DNA",
     category: "religion",
     question: "Do you believe Native Americans descend from Israelites who sailed to America, as the Book of Mormon says?",
-    verdict: "DNA studies show Native Americans descend from East Asian populations who crossed from Siberia; no Israelite ancestry has been found. The church has since changed its introduction from 'principal ancestors' to 'among the ancestors.'",
-    link: "https://en.wikipedia.org/wiki/Genetics_and_the_Book_of_Mormon",
+    verdict: "DNA studies show Native Americans descend from East Asian populations who crossed from Siberia; no Israelite ancestry has been found.",
+    link: "https://en.wikipedia.org/wiki/Lamanite",
   },
   {
     id: "eden-in-missouri",
@@ -2389,7 +2389,7 @@ const CLAIMS = [
     name: "Quran from Gabriel",
     category: "religion",
     question: "Do you believe the Quran was revealed word for word to Muhammad by God through the angel Gabriel?",
-    verdict: "There is no evidence for angelic revelation. Islamic tradition itself records the text being compiled into a standard edition under Caliph Uthman around 650 CE, and early manuscripts such as the Sana'a palimpsest show variant readings.",
+    verdict: "There is no evidence for angelic revelation. Islamic tradition records the text being compiled into a standard edition under Caliph Uthman around 650 CE, and early manuscripts such as the Sana'a palimpsest show variant readings.",
     link: "https://en.wikipedia.org/wiki/Quran",
   },
   {
@@ -2397,7 +2397,7 @@ const CLAIMS = [
     name: "The Night Journey",
     category: "religion",
     question: "Do you believe Muhammad rode a winged steed from Mecca to Jerusalem and up to heaven in a single night?",
-    verdict: "There is no evidence for the journey beyond the religious texts. Even early Muslim commentators disagreed over whether it was a physical trip or a vision.",
+    verdict: "There is no evidence for the journey beyond the religious texts. Early Muslim commentators disagreed over whether it was a physical trip or a vision.",
     link: "https://en.wikipedia.org/wiki/Isra_and_Mi%27raj",
   },
   {
@@ -2421,7 +2421,7 @@ const CLAIMS = [
     name: "Science in the Quran",
     category: "religion",
     question: "Do you believe the Quran contains scientific facts no one could have known in the 7th century?",
-    verdict: "These readings are made after the science is known. The Quran's stages of embryo development closely match ideas already written by the Greek physician Galen in the 2nd century.",
+    verdict: "These readings are usually made after a discovery. The Quran's stages of embryo development closely match ideas already written by the Greek physician Galen in the 2nd century.",
     link: "https://en.wikipedia.org/wiki/Quran_and_science",
   },
   {
@@ -2437,7 +2437,7 @@ const CLAIMS = [
     name: "Sufi Saint Miracles",
     category: "religion",
     question: "Do you believe Sufi saints can work miracles?",
-    verdict: "There is no documented, verified miracle by a saint or at a shrine. Many Muslim scholars themselves reject tomb blessings as an innovation not found in early Islam.",
+    verdict: "There is no documented, verified miracle by a saint or at a shrine.",
     link: "https://en.wikipedia.org/wiki/Sufism",
   },
   {
@@ -2445,7 +2445,7 @@ const CLAIMS = [
     name: "The Coming Messiah",
     category: "religion",
     question: "Do you believe the Hebrew prophets correctly foretold a coming Messiah descended from King David?",
-    verdict: "There is no evidence for this prophecy. History has seen many failed messiah claimants; Sabbatai Zevi drew huge followings in 1665 and converted to Islam a year later.",
+    verdict: "There is no evidence for this prophecy, and no way to test a prophecy about the future.",
     link: "https://en.wikipedia.org/wiki/Jewish_messianism",
   },
   {
@@ -2454,7 +2454,7 @@ const CLAIMS = [
     category: "religion",
     question: "Do you believe wearing a Kabbalah red string bracelet protects you from the evil eye?",
     verdict: "No study shows a red string affects luck or harm. The custom was popularized worldwide by the Kabbalah Centre and celebrities in the 2000s.",
-    link: "https://en.wikipedia.org/wiki/Kabbalah_Centre",
+    link: "https://en.wikipedia.org/wiki/Red_string_(Kabbalah)",
   },
   {
     id: "karma",
@@ -2525,7 +2525,7 @@ const CLAIMS = [
     name: "Reincarnated Lamas",
     category: "religion",
     question: "Do you believe lamas like the Dalai Lama are reborn and can be identified as children?",
-    verdict: "There is no evidence any child is a former lama reborn. The process is open to politics: rival candidates were both proclaimed the 17th Karmapa in the 1990s, and China claims the right to pick the next Dalai Lama.",
+    verdict: "There is no evidence any child is a former lama reborn.",
     link: "https://en.wikipedia.org/wiki/Tulku",
   },
   {
@@ -2557,7 +2557,7 @@ const CLAIMS = [
     name: "Kami Spirits",
     category: "religion",
     question: "Do you believe spirits called kami dwell in mountains, trees, rivers and shrines?",
-    verdict: "There is no evidence kami exist. Shinto was organized into a state religion only in the 1800s, when the government separated it from Buddhism.",
+    verdict: "There is no evidence kami exist. Shinto was organized into a state religion in the 1800s, when the government separated it from Buddhism.",
     link: "https://en.wikipedia.org/wiki/Kami",
   },
   {
@@ -2834,7 +2834,7 @@ const CLAIMS = [
     category: "magic",
     question: "Do you believe mirrors should be covered after a death so the person's soul doesn't get trapped in the glass?",
     verdict: "There's no evidence a soul could be caught in a mirror. Covering mirrors is a mourning custom in several cultures, and many who keep it explain it as setting aside vanity while grieving rather than as protection.",
-    link: "https://en.wikipedia.org/wiki/Superstition",
+    link: "https://en.wikipedia.org/wiki/Mourning",
   },
   // Gap fill (added)
   {
@@ -2875,7 +2875,7 @@ const CLAIMS = [
     category: "religion",
     question: "Do you believe Bible prophecy can reveal the date the world will end?",
     verdict: "Every predicted date has passed. William Miller's followers expected Christ's return in 1844, and radio host Harold Camping predicted the Rapture for May 21, 2011, then the end for October 21, 2011. Jesus himself is quoted saying no one knows the day or hour.",
-    link: "https://en.wikipedia.org/wiki/List_of_dates_predicted_for_apocalyptic_events",
+    link: "https://en.wikipedia.org/wiki/Christian_eschatology",
   },
   {
     id: "holy-water",

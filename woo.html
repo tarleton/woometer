@@ -5,57 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>woometer</title>
   <meta name="robots" content="noindex">
-  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
-  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="theme-color" content="#2a1a45">
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
   <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <script>
+    // woometer.com/woo: a hidden playground. It shows the real home page, fetched
+    // fresh so it always matches, over the psychedelic field from woo.js, with a
+    // header slider to pretend any share of claims is answered and a starry
+    // footer as tall as the header.
+    (async () => {
+      const HEAD = `
+  <meta name="robots" content="noindex">
   <style>
-    /* A quiet playground page: just the header, a field, and the footer. */
-    body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
-    .top a.home { color: inherit; text-decoration: none; }
-    .field { position: relative; flex: 1; min-height: 420px; overflow: hidden; background: #0d0a14; }
-    .field canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    body { background: transparent; display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+    body > .layout { flex: 1; width: 100%; }
+    .woo-field { position: fixed; inset: 0; z-index: -1; background: #0d0a14; pointer-events: none; }
+    .woo-field canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
     /* The footer matches the header: same height, its own drifting stars. */
-    body .foot { margin-top: 0; position: relative; z-index: 0; display: flex; align-items: center; justify-content: center; padding: 0 16px; border-top: 1px solid var(--line); background: var(--surface); }
+    body .foot { margin-top: 0; padding: 0 16px; position: relative; z-index: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; border-top: 1px solid var(--line); background: var(--surface); }
     .foot p { margin: 0; position: relative; }
     .foot > .sky { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
     /* The reveal slider: pretend you've answered this share of the claims. */
-    .reveal { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; flex: 1 1 260px; max-width: 420px; }
+    .reveal { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; flex: 1 1 220px; max-width: 360px; }
     .reveal input { flex: 1; min-width: 0; accent-color: var(--accent); }
     .reveal output { min-width: 4.5ch; text-align: right; color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 700; }
   </style>
-</head>
-<body>
-  <header class="top">
-    <div class="brand">
-      <div class="brand-row">
-        <a class="home" href="./" aria-label="Back to woometer"><h1 class="logo" aria-label="woometer"><span class="logo-woo" aria-hidden="true">w<svg class="eye eye-l" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 16.5C1.5 8.5 9 2.5 18 2.5 18.5 10.5 11 17.5 2.5 16.5z"/><ellipse class="glint" cx="13" cy="6.5" rx="2" ry="1.3" transform="rotate(-35 13 6.5)"/></svg><svg class="eye eye-r" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 16.5C1.5 8.5 9 2.5 18 2.5 18.5 10.5 11 17.5 2.5 16.5z"/><ellipse class="glint" cx="13" cy="6.5" rx="2" ry="1.3" transform="rotate(-35 13 6.5)"/></svg></span><span class="logo-meter" aria-hidden="true">meter</span></h1></a>
-        <p class="tagline">what do you believe?</p>
-      </div>
-    </div>
+`;
+      const SLIDER = `
     <label class="reveal">
       <span class="reveal-label">Answered</span>
       <input type="range" id="reveal" min="0" max="100" step="0.5" value="0" aria-label="Pretend share of claims answered">
       <output id="reveal-out" for="reveal">0%</output>
     </label>
-  </header>
-
-  <main class="field" aria-hidden="true"><canvas id="field"></canvas></main>
-
-  <footer class="foot" data-sky>
-    <p><a href="about" class="foot-link">About</a> · <a href="privacy" class="foot-link">Privacy</a> · <a href="terms" class="foot-link">Terms</a></p>
-  </footer>
-  <script src="claims.js"></script>
-  <script src="sounds.js"></script>
-  <script src="sky.js?v=2"></script>
-  <script src="woo.js?v=3"></script>
+    <div class="top-actions">`;
+      const TAIL = `
+  <script src="woo.js?v=4"><\/script>
   <script>
     // Keep the footer exactly as tall as the header, however the header wraps.
     (() => {
       const header = document.querySelector("header.top");
       const footer = document.querySelector("footer.foot");
-      new ResizeObserver(() => (footer.style.height = `${header.getBoundingClientRect().height}px`)).observe(header);
+      new ResizeObserver(() => (footer.style.height = header.getBoundingClientRect().height + "px")).observe(header);
+    })();
+  <\/script>
+</body>`;
+      try {
+        const reply = await fetch("./", { cache: "no-cache" });
+        if (!reply.ok) throw new Error(reply.status);
+        const html = (await reply.text())
+          .replace("</head>", `${HEAD}</head>`)
+          .replace("<body>", `<body>\n  <div class="woo-field" aria-hidden="true"><canvas id="field"></canvas></div>`)
+          .replace(`<div class="top-actions">`, SLIDER)
+          .replace(`<footer class="foot">`, `<footer class="foot" data-sky>`)
+          .replace("</body>", TAIL);
+        document.open();
+        document.write(html);
+        document.close();
+      } catch {
+        document.body.insertAdjacentHTML("beforeend", `<p style="text-align:center;padding:40px;color:var(--muted)">The playground couldn't load. <a href="./" style="color:inherit">Go to woometer</a></p>`);
+      }
     })();
   </script>
 </body>

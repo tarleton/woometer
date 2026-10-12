@@ -15,26 +15,33 @@
   let reveal = 0;
   const slider = document.getElementById("reveal");
   const readout = document.getElementById("reveal-out");
-  try {
-    const saved = JSON.parse(localStorage.getItem("woometer.answers.v1")) || {};
-    const ids = new Set(CLAIMS.map((c) => c.id));
-    reveal = Object.keys(saved).filter((id) => ids.has(id)).length / CLAIMS.length;
-  } catch {
-    // No saved answers: start from nothing.
+  function answeredPct() {
+    try {
+      const saved = JSON.parse(localStorage.getItem("woometer.answers.v1")) || {};
+      const ids = new Set(CLAIMS.map((c) => c.id));
+      return Math.round((Object.keys(saved).filter((id) => ids.has(id)).length / CLAIMS.length) * 200) / 2;
+    } catch {
+      return 0; // no saved answers: start from nothing
+    }
   }
   let render = () => {};
+  let pretending = false;
   function setReveal(pct, fromSlider) {
     reveal = pct / 100;
     readout.textContent = `${pct % 1 ? pct.toFixed(1) : pct}%`;
     if (!fromSlider) slider.value = pct;
     if (fromSlider) {
+      pretending = true;
       const n = Math.round(reveal * CLAIMS.length);
       window.dispatchEvent(new CustomEvent("woometer:sky-preview", { detail: { ids: CLAIMS.slice(0, n).map((c) => c.id) } }));
     }
     if (still.matches) render();
   }
-  setReveal(Math.round(reveal * 200) / 2, false);
+  setReveal(answeredPct(), false);
   slider.addEventListener("input", () => setReveal(Number(slider.value), true));
+  // Answering real claims on the page opens the field further, until the
+  // slider takes over.
+  window.addEventListener("woometer:answers", () => { if (!pretending) setReveal(answeredPct(), false); });
 
   const gl = canvas.getContext("webgl", { antialias: false });
   if (!gl) return; // the dark field stays as it is

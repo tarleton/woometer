@@ -488,10 +488,15 @@
         addFriendFromInput();
       }
     });
+    // A blank name isn't saved; the share buttons ask for one instead, and
+    // closing puts the saved name back.
     $("my-name").addEventListener("change", (e) => {
-      if (e.target.value.trim()) return setName(e.target.value);
-      e.target.value = profile.display_name || "";
-      if (profile.display_name) W.toast("Your name can't be blank: friends see it in their list.");
+      if (e.target.value.trim()) setName(e.target.value);
+    });
+    $("my-name").addEventListener("input", (e) => e.target.removeAttribute("aria-invalid"));
+    $("share-dialog").addEventListener("close", () => {
+      if (!$("my-name").value.trim()) $("my-name").value = profile.display_name || "";
+      $("my-name").removeAttribute("aria-invalid");
     });
     $("name-save").addEventListener("click", saveNameFromDialog);
     for (const [id, go] of [["name-google-btn", signInWithGoogle], ["name-facebook-btn", signInWithFacebook]]) {
@@ -1022,13 +1027,24 @@
     });
   }
 
+  // Share buttons stop here while the name box is blank, since the link shows it.
+  function shareNameReady() {
+    if ($("my-name").value.trim()) return true;
+    $("my-name").setAttribute("aria-invalid", "true");
+    $("my-name").focus();
+    W.toast("Add a name first: friends see it with your link.");
+    return false;
+  }
+
   async function copyShareText() {
+    if (!shareNameReady()) return;
     if (await W.copyText(W.shareText(), "Woo and link copied. Paste it anywhere.", "Copy your woo and link:")) {
       $("share-dialog").close();
     }
   }
 
   async function sendShareText() {
+    if (!shareNameReady()) return;
     try {
       await navigator.share({ text: W.shareText() });
       $("share-dialog").close();
@@ -1038,6 +1054,7 @@
   }
 
   function copyFriendLink() {
+    if (!shareNameReady()) return;
     withName(async () => {
       if (await W.copyText(friendLink(), "Link copied.", "Copy your link:")) $("share-dialog").close();
     });

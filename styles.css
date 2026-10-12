@@ -590,7 +590,28 @@ dialog a { color: var(--accent); }
 .captcha { position: fixed; right: 16px; bottom: 16px; z-index: 30; }
 @media (max-width: 860px) { .captcha { bottom: calc(76px + env(safe-area-inset-bottom)); } }
 
-.foot { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 16px 40px; }
+/* Every page: the footer sits at the bottom of the screen on short pages, at
+   the end of the content on long ones. It's at least as tall as the header
+   (sky.js keeps them matched) and has its own drifting stars. */
+body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+body > main { width: 100%; flex: 1 0 auto; }
+.foot {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+.foot p { margin: 0; position: relative; }
+.foot > .sky { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
 .foot-link { color: inherit; }
 
 .toast {
@@ -642,7 +663,8 @@ dialog a { color: var(--accent); }
   .mini-pct { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 20px; font-variant-numeric: tabular-nums; }
   .mini-cat { cursor: pointer; border-radius: 6px; }
   .mini-cat svg { display: block; width: 34px; height: auto; }
-  .foot { padding-bottom: 90px; }
+  /* Clear of the bottom bar on the home page. */
+  .minibar ~ .foot { margin-bottom: calc(66px + env(safe-area-inset-bottom)); }
   .toast { bottom: calc(76px + env(safe-area-inset-bottom)); }
 }
 

@@ -4,9 +4,8 @@
 // glow fades in and stars start to twinkle, more of them the more you answer.
 // Each star's place comes from its claim's id, so the sky is the same on every
 // page and every reload. Nothing here is labelled; it's there to be noticed.
-// A page can ask for a second, mirrored sky in its footer with
-// <footer class="foot" data-sky>: the same stars, scattered differently and
-// drifting the other way.
+// The footer gets a second, mirrored sky: the same stars, scattered
+// differently and drifting the other way.
 function paintSky(host, variant) {
   const STORAGE_KEY = "woometer.answers.v1";
   const GROUPS = 24; // constellations the stars gather into
@@ -198,6 +197,10 @@ function paintSky(host, variant) {
 {
   const header = document.querySelector("header.top");
   if (header) paintSky(header, { seed: 0, dir: 1 });
-  const footer = document.querySelector("footer.foot[data-sky]");
+  const footer = document.querySelector("footer.foot");
   if (footer) paintSky(footer, { seed: 7919, dir: -1 });
+  // The footer is at least as tall as the header, however the header wraps.
+  if (header && footer) {
+    new ResizeObserver(() => (footer.style.minHeight = `${header.getBoundingClientRect().height}px`)).observe(header);
+  }
 }

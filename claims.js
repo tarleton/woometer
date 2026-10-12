@@ -41,11 +41,7 @@ const CATEGORIES = {
   conspiracy: { label: "Conspiracies", icon: "🛸" },
   fringe: { label: "Fringe Science", icon: "🧪" },
   popsych: { label: "Pop Psychology", short: "Pop Psych", icon: "🧠" },
-  christianity: { label: "Christianity", icon: "✝️" },
-  judaism: { label: "Judaism", icon: "✡️" },
-  islam: { label: "Islam", icon: "☪️" },
-  dharmic: { label: "Hindu, Buddhist & Sikh", short: "Hindu & Buddhist", icon: "🕉️" },
-  worldreligion: { label: "More Faiths", icon: "🌍" },
+  religion: { label: "Religion", icon: "🙏" },
   newreligion: { label: "New Religious Movements", short: "New Religions", icon: "🛐" },
   magic: { label: "Witchcraft & Magic", short: "Magic", icon: "🧙" },
 };
@@ -377,7 +373,7 @@ const CLAIMS = [
   {
     id: "mormonism",
     name: "Golden Plates",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Joseph Smith translated the Book of Mormon from golden plates by the power of God?",
     verdict: "No plates were ever produced for inspection. Archaeology and DNA studies find no trace of the Book of Mormon's Israelite civilizations in the Americas.",
     link: "https://en.wikipedia.org/wiki/Archaeology_and_the_Book_of_Mormon",
@@ -393,7 +389,7 @@ const CLAIMS = [
   {
     id: "catholicism",
     name: "Bread and Wine Become Christ",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe the bread and wine truly become the body and blood of Christ during Mass?",
     verdict: "After consecration, the bread and wine remain chemically bread and wine; the doctrine says only their unobservable 'substance' changes.",
     link: "https://en.wikipedia.org/wiki/Transubstantiation",
@@ -401,7 +397,7 @@ const CLAIMS = [
   {
     id: "lutheranism",
     name: "Christ Present in Communion",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Christ's body is truly present 'in, with and under' the bread and wine of communion?",
     verdict: "Like transubstantiation, the claim is defined so that it can't be observed or tested.",
     link: "https://en.wikipedia.org/wiki/Sacramental_union",
@@ -409,7 +405,7 @@ const CLAIMS = [
   {
     id: "young-earth",
     name: "Young Earth Creationism",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe the Earth is less than 10,000 years old?",
     verdict: "Radiometric dating, ice cores, tree rings and starlight from billions of light-years away all show a universe billions of years old.",
     link: "https://en.wikipedia.org/wiki/Young_Earth_creationism",
@@ -417,7 +413,7 @@ const CLAIMS = [
   {
     id: "noahs-flood",
     name: "Noah's Flood",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe a worldwide flood once covered every mountain, as in the story of Noah?",
     verdict: "There is no global flood layer in the geological record, and an ark couldn't hold, feed or ventilate millions of species.",
     link: "https://en.wikipedia.org/wiki/Flood_geology",
@@ -425,7 +421,7 @@ const CLAIMS = [
   {
     id: "jehovahs-witnesses",
     name: "Living in the Last Days",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Bible prophecy shows we are living in the last days, as Jehovah's Witnesses teach?",
     verdict: "The movement has predicted or strongly implied the end for 1914, 1925 and 1975. It didn't come.",
     link: "https://en.wikipedia.org/wiki/Eschatology_of_Jehovah%27s_Witnesses",
@@ -433,7 +429,7 @@ const CLAIMS = [
   {
     id: "christian-science",
     name: "Christian Science",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe prayer, not medicine, is the true way to heal illness, as Christian Science teaches?",
     verdict: "Studies of Christian Scientist graduates found higher death rates than comparable groups, and children have died from untreated, treatable illnesses.",
     link: "https://en.wikipedia.org/wiki/Christian_Science",
@@ -441,7 +437,7 @@ const CLAIMS = [
   {
     id: "prosperity-gospel",
     name: "Prosperity Gospel",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe God rewards those who give money to a preacher's ministry with wealth?",
     verdict: "No study shows giving to a ministry makes donors wealthier. Several preachers have bought private jets with donations.",
     link: "https://en.wikipedia.org/wiki/Prosperity_theology",
@@ -449,7 +445,7 @@ const CLAIMS = [
   {
     id: "rapture",
     name: "The Rapture",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Bible prophecy foretells the Rapture, when believers are taken up to heaven before the end times?",
     verdict: "The idea dates from John Nelson Darby in the 1830s, and every date predicted for it so far has passed.",
     link: "https://en.wikipedia.org/wiki/Rapture",
@@ -457,7 +453,7 @@ const CLAIMS = [
   {
     id: "exorcism",
     name: "Demonic Possession",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe demons can possess people?",
     verdict: "Reported possessions match known conditions like epilepsy, schizophrenia and dissociative disorders. Exorcisms have killed people.",
     link: "https://en.wikipedia.org/wiki/Spirit_possession",
@@ -1877,7 +1873,7 @@ const CLAIMS = [
   {
     id: "born-again",
     name: "Born Again",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe you must be personally 'born again' to be saved?",
     verdict: "There is no evidence of any afterlife judgment. The phrase comes from John 3:3, and the emphasis on a required personal conversion experience became a hallmark of evangelical teaching with the 18th-century Great Awakening revivals.",
     link: "https://en.wikipedia.org/wiki/Born_again",
@@ -1885,7 +1881,7 @@ const CLAIMS = [
   {
     id: "once-saved-always-saved",
     name: "Once Saved, Always Saved",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe that once you are truly saved, you can never lose your salvation?",
     verdict: "There is no way to test salvation. This teaching, common among Baptists, rests on readings of verses like John 10:28, while Catholic, Orthodox and Methodist churches read the same Bible and reject it.",
     link: "https://en.wikipedia.org/wiki/Eternal_security",
@@ -1893,7 +1889,7 @@ const CLAIMS = [
   {
     id: "pentecostal-gifts",
     name: "Miraculous Gifts Today",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe the Holy Spirit gives believers today miraculous gifts like prophecy and healing?",
     verdict: "No controlled study has shown supernatural prophecy or healing. Modern Pentecostalism began with Charles Parham in 1901 and the 1906 Azusa Street Revival, whose early members believed tongues were real foreign languages; missionaries who went abroad found they were not.",
     link: "https://en.wikipedia.org/wiki/Pentecostalism",
@@ -1901,7 +1897,7 @@ const CLAIMS = [
   {
     id: "speaking-in-tongues",
     name: "Speaking in Tongues",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe speaking in tongues is a real language given by the Holy Spirit?",
     verdict: "Linguists who have recorded glossolalia (notably William Samarin) found it has no consistent vocabulary or grammar; it is built from sounds of the speaker's own language, and no 'tongue' has been identified as a real unlearned language.",
     link: "https://en.wikipedia.org/wiki/Glossolalia",
@@ -1909,7 +1905,7 @@ const CLAIMS = [
   {
     id: "assemblies-of-god",
     name: "Tongues as Proof of the Spirit",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe speaking in tongues is the evidence that someone has been baptized in the Holy Spirit?",
     verdict: "Glossolalia is a learnable behavior: in a 1980s study, psychologist Nicholas Spanos found most volunteers could speak fluent 'tongues' after brief training. The Assemblies of God lists this 'initial evidence' doctrine among its official fundamental truths.",
     link: "https://en.wikipedia.org/wiki/Assemblies_of_God",
@@ -1917,7 +1913,7 @@ const CLAIMS = [
   {
     id: "slain-in-the-spirit",
     name: "Slain in the Spirit",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe the power of the Holy Spirit makes people fall down when a preacher touches them?",
     verdict: "Similar collapses happened at 18th-century Mesmerism sessions and occur in non-Christian rituals; researchers attribute them to suggestion and group expectation.",
     link: "https://en.wikipedia.org/wiki/Slain_in_the_Spirit",
@@ -1925,7 +1921,7 @@ const CLAIMS = [
   {
     id: "holy-laughter",
     name: "Holy Laughter",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe the 'holy laughter' of the 1994 Toronto Blessing revival was caused by the Holy Spirit?",
     verdict: "Laughter is socially contagious, as the 1962 Tanganyika laughter epidemic showed. The revival began in January 1994 at the Toronto Airport Vineyard church, and the Vineyard movement itself cut ties with that church in 1995.",
     link: "https://en.wikipedia.org/wiki/Toronto_Blessing",
@@ -1933,7 +1929,7 @@ const CLAIMS = [
   {
     id: "god-speaks-to-me",
     name: "God Speaks to Me",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe God speaks to you personally, guiding your everyday decisions?",
     verdict: "Anthropologist Tanya Luhrmann's research (When God Talks Back, 2012) found evangelicals learn to experience God's voice through practiced prayer, and people prone to absorption report it more; there is no evidence the messages come from outside the mind.",
     link: "https://en.wikipedia.org/wiki/Evangelicalism",
@@ -1941,7 +1937,7 @@ const CLAIMS = [
   {
     id: "predestination",
     name: "Predestination",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe God decided before the world began exactly who will be saved?",
     verdict: "There is no evidence for it, and no way to test it. Its strongest form, double predestination, was taught by John Calvin in the 1500s and affirmed for Reformed churches at the Synod of Dort in 1618-19.",
     link: "https://en.wikipedia.org/wiki/Predestination",
@@ -1949,7 +1945,7 @@ const CLAIMS = [
   {
     id: "apostolic-succession",
     name: "Apostolic Succession",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe bishops hold spiritual authority passed down in an unbroken line from Jesus's apostles?",
     verdict: "No reliable records link the earliest bishop lists to the apostles. Churches disagree: in 1896 Pope Leo XIII declared Anglican ordinations 'absolutely null and utterly void.'",
     link: "https://en.wikipedia.org/wiki/Apostolic_succession",
@@ -1957,7 +1953,7 @@ const CLAIMS = [
   {
     id: "holy-fire",
     name: "Holy Fire",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe a miraculous flame lights itself every Orthodox Easter in Jerusalem's Church of the Holy Sepulchre?",
     verdict: "The flame emerges from inside the tomb chamber, out of public view, so it has never been independently observed or tested. Pope Gregory IX denounced the ceremony as a fraud in 1238.",
     link: "https://en.wikipedia.org/wiki/Holy_Fire",
@@ -1965,7 +1961,7 @@ const CLAIMS = [
   {
     id: "investigative-judgment",
     name: "Investigative Judgment",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Jesus began a heavenly 'investigative judgment' of believers' lives in 1844, as Seventh-day Adventists teach?",
     verdict: "There is no evidence. The Adventist doctrine was developed to explain the Great Disappointment, when William Miller's prediction that Jesus would return on October 22, 1844 failed.",
     link: "https://en.wikipedia.org/wiki/Investigative_judgment",
@@ -1973,7 +1969,7 @@ const CLAIMS = [
   {
     id: "ellen-white",
     name: "Ellen White's Visions",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Seventh-day Adventist founder Ellen G. White's visions were true prophecies from God?",
     verdict: "Researchers, including Adventist pastor Walter Rea in The White Lie (1982), documented extensive copying from other authors in her writings.",
     link: "https://en.wikipedia.org/wiki/Ellen_G._White",
@@ -1981,7 +1977,7 @@ const CLAIMS = [
   {
     id: "sunday-mark-of-beast",
     name: "Sunday Law",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Bible prophecy foretells enforced Sunday worship as the 'mark of the beast', as Seventh-day Adventists teach?",
     verdict: "There is no evidence. Ellen White predicted a coming national Sunday law in The Great Controversy; well over a century later no such law has appeared.",
     link: "https://en.wikipedia.org/wiki/Number_of_the_beast",
@@ -1989,7 +1985,7 @@ const CLAIMS = [
   {
     id: "amish-separation",
     name: "Amish & Mennonite Ways",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe God wants the faithful to live apart from the modern world, as the Amish do?",
     verdict: "There is no way to test it. Amish rules (the Ordnung) are set by each local church district, differ between communities, and change over time; many now use propane, solar panels and phones.",
     link: "https://en.wikipedia.org/wiki/Amish",
@@ -1997,7 +1993,7 @@ const CLAIMS = [
   {
     id: "inner-light",
     name: "Quaker Inner Light",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe God speaks directly to people through an 'Inner Light' during silent worship?",
     verdict: "There is no evidence for an outside source. The idea comes from George Fox, who founded the Quakers in 1650s England; the nickname 'Quaker' is usually traced to worshippers trembling before God.",
     link: "https://en.wikipedia.org/wiki/Inner_light",
@@ -2005,7 +2001,7 @@ const CLAIMS = [
   {
     id: "baptism-saves",
     name: "Baptism Saves",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe you must be baptized by full immersion for your sins to be forgiven?",
     verdict: "There is no evidence baptism changes anything spiritually. Churches of Christ grew out of the 19th-century American Restoration Movement, and other denominations read the same verses as symbolic.",
     link: "https://en.wikipedia.org/wiki/Churches_of_Christ",
@@ -2013,7 +2009,7 @@ const CLAIMS = [
   {
     id: "entire-sanctification",
     name: "Entire Sanctification",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe God can make a Christian's heart entirely free of sin in this life?",
     verdict: "There is no evidence anyone has reached sinless perfection. The teaching comes from John Wesley, who never claimed to have attained it himself.",
     link: "https://en.wikipedia.org/wiki/Christian_perfection",
@@ -2021,7 +2017,7 @@ const CLAIMS = [
   {
     id: "oneness-pentecostal",
     name: "Jesus-Name Baptism",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe you must be baptized 'in Jesus's name' only to be saved?",
     verdict: "There is no evidence either formula matters. The Oneness teaching arose at a 1913 camp meeting in Arroyo Seco, California, while the Didache (c. 100 AD), one of the earliest Christian manuals, uses the Father, Son and Holy Spirit formula.",
     link: "https://en.wikipedia.org/wiki/Oneness_Pentecostalism",
@@ -2029,7 +2025,7 @@ const CLAIMS = [
   {
     id: "snake-handling",
     name: "Snake Handling",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe believers with true faith can handle venomous snakes without being harmed?",
     verdict: "Dozens of handlers have died from bites, including movement founder George Went Hensley in 1955 and pastor Jamie Coots in 2014. The practice rests on Mark 16:18, a verse missing from the earliest manuscripts of Mark.",
     link: "https://en.wikipedia.org/wiki/Snake_handling_in_religion",
@@ -2037,7 +2033,7 @@ const CLAIMS = [
   {
     id: "soul-sleep",
     name: "Soul Sleep",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe the dead lie unconscious until a future bodily resurrection?",
     verdict: "There is no evidence of any future resurrection. Christadelphians were founded by John Thomas in the 1840s; neuroscience finds no sign that consciousness continues in any form after brain death.",
     link: "https://en.wikipedia.org/wiki/Christadelphians",
@@ -2045,7 +2041,7 @@ const CLAIMS = [
   {
     id: "iglesia-ni-cristo",
     name: "Manalo as Last Messenger",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Felix Manalo was God's last messenger, sent to restore the true church?",
     verdict: "There is no evidence. The church points to its registration in the Philippines on July 27, 1914, the eve of World War I, as fulfilled prophecy, but the Bible verses it cites never name Manalo or the Philippines.",
     link: "https://en.wikipedia.org/wiki/Iglesia_ni_Cristo",
@@ -2053,7 +2049,7 @@ const CLAIMS = [
   {
     id: "virgin-birth",
     name: "Virgin Birth",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Jesus was born to a virgin, with no human father?",
     verdict: "Only Matthew and Luke mention it; Paul and Mark, the earliest writers, do not. Matthew quotes Isaiah 7:14, where the Hebrew word 'almah' means young woman; 'virgin' comes from a Greek translation.",
     link: "https://en.wikipedia.org/wiki/Virgin_birth_of_Jesus",
@@ -2061,7 +2057,7 @@ const CLAIMS = [
   {
     id: "resurrection",
     name: "The Resurrection",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Jesus physically rose from the dead three days after his crucifixion?",
     verdict: "There is no contemporary record outside Christian writings. The earliest gospel, Mark, ends in its oldest manuscripts at 16:8 with an empty tomb and no appearances of the risen Jesus; those were added later.",
     link: "https://en.wikipedia.org/wiki/Resurrection_of_Jesus",
@@ -2069,7 +2065,7 @@ const CLAIMS = [
   {
     id: "walking-on-water",
     name: "Walking on Water",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Jesus literally walked on the surface of the Sea of Galilee?",
     verdict: "There is no evidence. The story appears only in gospels written decades after Jesus's death.",
     link: "https://en.wikipedia.org/wiki/Jesus_walking_on_water",
@@ -2077,7 +2073,7 @@ const CLAIMS = [
   {
     id: "water-into-wine",
     name: "Water Into Wine",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Jesus miraculously turned water into wine at a wedding in Cana?",
     verdict: "There is no evidence. The story appears only in John, the last gospel written (around 90-110 AD), and similar wine miracles were told of the Greek god Dionysus.",
     link: "https://en.wikipedia.org/wiki/Marriage_at_Cana",
@@ -2085,7 +2081,7 @@ const CLAIMS = [
   {
     id: "garden-of-eden",
     name: "Serpent in Eden",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe a talking serpent tempted Eve in the Garden of Eden?",
     verdict: "No archaeological trace of Eden has been found,. A serpent stealing a plant of immortality also appears in the older Mesopotamian Epic of Gilgamesh.",
     link: "https://en.wikipedia.org/wiki/Garden_of_Eden",
@@ -2093,7 +2089,7 @@ const CLAIMS = [
   {
     id: "adam-and-eve",
     name: "Adam and Eve",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Adam and Eve were literally the first two humans, ancestors of everyone alive?",
     verdict: "Human genetic diversity shows our ancestral population never dropped to two people, staying at least in the thousands. Modern humans emerged in Africa around 300,000 years ago.",
     link: "https://en.wikipedia.org/wiki/Adam_and_Eve",
@@ -2101,7 +2097,7 @@ const CLAIMS = [
   {
     id: "original-sin",
     name: "Original Sin",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe every person is born with sin inherited from Adam and Eve's disobedience?",
     verdict: "There is no evidence, and the doctrine depends on a literal Adam that genetics rules out. It was formulated largely by Augustine of Hippo around 400 AD.",
     link: "https://en.wikipedia.org/wiki/Original_sin",
@@ -2109,7 +2105,7 @@ const CLAIMS = [
   {
     id: "tower-of-babel",
     name: "Tower of Babel",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe God created the world's languages by confusing the builders of the Tower of Babel?",
     verdict: "Linguistics shows languages split gradually from shared ancestors over thousands of years, as with the Indo-European family. The story was likely inspired by Babylon's great ziggurat, Etemenanki.",
     link: "https://en.wikipedia.org/wiki/Tower_of_Babel",
@@ -2117,7 +2113,7 @@ const CLAIMS = [
   {
     id: "methuselah",
     name: "969-Year-Old Methuselah",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Methuselah and others in Genesis really lived for over 900 years?",
     verdict: "No evidence supports it. The oldest verified human, Jeanne Calment, died at 122, and ancient Sumerian king lists similarly assign early rulers reigns of thousands of years.",
     link: "https://en.wikipedia.org/wiki/Methuselah",
@@ -2125,7 +2121,7 @@ const CLAIMS = [
   {
     id: "exodus",
     name: "The Exodus",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe the Israelites fled Egypt in a mass Exodus and wandered in the Sinai for 40 years?",
     verdict: "Excavations in Sinai have found no trace of such a migration, and Egyptian records never mention it. Most archaeologists conclude the early Israelites emerged from within the Canaanite population.",
     link: "https://en.wikipedia.org/wiki/The_Exodus",
@@ -2133,7 +2129,7 @@ const CLAIMS = [
   {
     id: "red-sea-parting",
     name: "Parting the Red Sea",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe God parted the Red Sea so the Israelites could cross on dry ground?",
     verdict: "There is no evidence. The Hebrew 'Yam Suph' means 'Sea of Reeds,' and claims by Ron Wyatt to have found Egyptian chariot wheels underwater have never been verified by archaeologists.",
     link: "https://en.wikipedia.org/wiki/Crossing_the_Red_Sea",
@@ -2141,7 +2137,7 @@ const CLAIMS = [
   {
     id: "jonah",
     name: "Jonah and the Whale",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Jonah survived three days inside a great fish?",
     verdict: "No human is known to have survived being swallowed by a whale. The often-cited 1891 story of sailor James Bartley was investigated and found to be false.",
     link: "https://en.wikipedia.org/wiki/Jonah",
@@ -2149,7 +2145,7 @@ const CLAIMS = [
   {
     id: "sun-stood-still",
     name: "Sun Stood Still",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe God made the sun stand still for a whole day so Joshua could win a battle?",
     verdict: "Halting Earth's rotation would cause global catastrophe, and no other ancient culture recorded it. The popular story that NASA computers found a 'missing day' is an urban legend.",
     link: "https://en.wikipedia.org/wiki/Book_of_Joshua",
@@ -2157,7 +2153,7 @@ const CLAIMS = [
   {
     id: "sodom-and-gomorrah",
     name: "Sodom and Gomorrah",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe God destroyed Sodom and Gomorrah with fire from heaven?",
     verdict: "There is no evidence of divine destruction, and archaeologists have not securely identified either city. The story is set near the Dead Sea, whose salt formations likely inspired the tale of Lot's wife.",
     link: "https://en.wikipedia.org/wiki/Sodom_and_Gomorrah",
@@ -2165,7 +2161,7 @@ const CLAIMS = [
   {
     id: "star-of-bethlehem",
     name: "Star of Bethlehem",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe a miraculous star guided wise men to the baby Jesus?",
     verdict: "Only Matthew mentions it. Proposed natural explanations, such as a comet or a planetary conjunction, cannot account for a star that moved ahead of travelers and stopped over a single house.",
     link: "https://en.wikipedia.org/wiki/Star_of_Bethlehem",
@@ -2173,7 +2169,7 @@ const CLAIMS = [
   {
     id: "hell",
     name: "Hell",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe in hell, a literal place where unbelievers suffer forever after death?",
     verdict: "There is no evidence. The Hebrew Bible describes Sheol, a shadowy grave for everyone; the fiery hell developed later, and 'Gehenna' was the name of a real valley outside Jerusalem.",
     link: "https://en.wikipedia.org/wiki/Hell",
@@ -2181,7 +2177,7 @@ const CLAIMS = [
   {
     id: "satan",
     name: "Satan",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Satan is a real being who tempts people and causes evil?",
     verdict: "There is no evidence. In the Hebrew Bible, as in Job, 'the satan' is an accuser working in God's court; the figure of Satan as God's arch-enemy developed centuries later.",
     link: "https://en.wikipedia.org/wiki/Satan",
@@ -2189,7 +2185,7 @@ const CLAIMS = [
   {
     id: "guardian-angels",
     name: "Guardian Angels",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe each person has a guardian angel watching over them?",
     verdict: "There is no evidence. The belief rests on a few verses such as Matthew 18:10 and was developed mostly in later church tradition.",
     link: "https://en.wikipedia.org/wiki/Guardian_angel",
@@ -2197,7 +2193,7 @@ const CLAIMS = [
   {
     id: "heaven",
     name: "Heaven",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe heaven is a real place where people go after they die?",
     verdict: "There is no evidence consciousness survives brain death. The 2014 AWARE study placed hidden images in resuscitation rooms to test out-of-body claims, and no cardiac arrest patient reported seeing one.",
     link: "https://en.wikipedia.org/wiki/Heaven",
@@ -2205,7 +2201,7 @@ const CLAIMS = [
   {
     id: "intercessory-prayer",
     name: "Prayer Heals the Sick",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe praying for sick people helps them recover?",
     verdict: "The 2006 STEP study of 1,802 heart bypass patients found prayer by strangers made no difference; patients who knew they were being prayed for actually had slightly more complications (59% vs 52%).",
     link: "https://en.wikipedia.org/wiki/Studies_on_intercessory_prayer",
@@ -2213,7 +2209,7 @@ const CLAIMS = [
   {
     id: "marian-apparitions",
     name: "Fatima and Lourdes",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe the Virgin Mary appeared to children at places like Fatima and Lourdes?",
     verdict: "Only the visionaries saw Mary, and Fatima's 1917 'dancing sun' was recorded by no observatory. Of many millions of Lourdes pilgrims, the Church recognizes only about 70 cures as miraculous.",
     link: "https://en.wikipedia.org/wiki/Marian_apparition",
@@ -2221,7 +2217,7 @@ const CLAIMS = [
   {
     id: "weeping-statues",
     name: "Weeping Statues",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe statues of Mary or Jesus sometimes miraculously weep tears or blood?",
     verdict: "Investigated cases have repeatedly turned out to be hoaxes or simple effects. Italian chemist Luigi Garlaschelli made a statue 'weep' using porous plaster with a glazed surface.",
     link: "https://en.wikipedia.org/wiki/Weeping_statue",
@@ -2229,7 +2225,7 @@ const CLAIMS = [
   {
     id: "shroud-of-turin",
     name: "Shroud of Turin",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe the Shroud of Turin is the actual burial cloth of Jesus?",
     verdict: "In 1988, three independent labs (Oxford, Zurich and Arizona) radiocarbon-dated the linen to 1260-1390 AD. A bishop's memo from 1389 already called it a painting.",
     link: "https://en.wikipedia.org/wiki/Shroud_of_Turin",
@@ -2237,7 +2233,7 @@ const CLAIMS = [
   {
     id: "stigmata",
     name: "Stigmata",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe some holy people miraculously develop the wounds of Christ's crucifixion?",
     verdict: "No case was reported before Francis of Assisi in 1224, and the wounds usually appear in the palms as in church art, though crucifixion nails likely went through the wrists. Several stigmatics were caught inflicting their own wounds.",
     link: "https://en.wikipedia.org/wiki/Stigmata",
@@ -2245,7 +2241,7 @@ const CLAIMS = [
   {
     id: "holy-relics",
     name: "Holy Relics",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe the bones and belongings of saints have miraculous healing power?",
     verdict: "No relic has shown healing effects under testing. Medieval churches displayed several different heads of John the Baptist.",
     link: "https://en.wikipedia.org/wiki/Relic",
@@ -2253,7 +2249,7 @@ const CLAIMS = [
   {
     id: "incorruptible-saints",
     name: "Incorruptible Saints",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe the bodies of some saints miraculously never decay?",
     verdict: "Many 'incorrupt' saints were embalmed, mummified by dry conditions, or covered with wax; St. Bernadette's displayed face and hands are wax masks.",
     link: "https://en.wikipedia.org/wiki/Incorruptibility",
@@ -2261,7 +2257,7 @@ const CLAIMS = [
   {
     id: "eucharistic-miracles",
     name: "Bleeding Communion Bread",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe communion wafers sometimes miraculously bleed or turn into real flesh?",
     verdict: "Red spots on bread can be produced by the bacterium Serratia marcescens, which researchers think likely explains many historical reports of 'bleeding' hosts.",
     link: "https://en.wikipedia.org/wiki/Eucharistic_miracle",
@@ -2269,7 +2265,7 @@ const CLAIMS = [
   {
     id: "papal-infallibility",
     name: "Papal Infallibility",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe God protects the Pope from error when he formally defines a teaching?",
     verdict: "There is no evidence. It was declared dogma only in 1870 at the First Vatican Council, and has been formally used just once since, for the 1950 dogma of Mary's Assumption.",
     link: "https://en.wikipedia.org/wiki/Papal_infallibility",
@@ -2277,7 +2273,7 @@ const CLAIMS = [
   {
     id: "assumption-of-mary",
     name: "Assumption of Mary",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Mary was taken bodily up into heaven at the end of her life?",
     verdict: "The Bible never mentions it; the earliest accounts appear in apocryphal texts from around the 4th-5th centuries. It became official Catholic dogma only in 1950.",
     link: "https://en.wikipedia.org/wiki/Assumption_of_Mary",
@@ -2285,7 +2281,7 @@ const CLAIMS = [
   {
     id: "purgatory",
     name: "Purgatory",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe souls go to purgatory to be purified before entering heaven?",
     verdict: "There is no evidence. The doctrine was formally defined at the councils of Lyon (1274) and Florence, and the selling of indulgences to shorten purgatory helped spark Luther's 1517 Ninety-five Theses.",
     link: "https://en.wikipedia.org/wiki/Purgatory",
@@ -2293,7 +2289,7 @@ const CLAIMS = [
   {
     id: "saints-miracles",
     name: "Miracles of Saints",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe saints in heaven perform miracles when people pray to them?",
     verdict: "Canonization miracles are usually recoveries judged medically 'unexplained.' Mother Teresa's first approved miracle, Monica Besra's cured abdominal tumor, was attributed by Besra's own doctors to medical treatment.",
     link: "https://en.wikipedia.org/wiki/Canonization",
@@ -2301,7 +2297,7 @@ const CLAIMS = [
   {
     id: "ark-of-the-covenant",
     name: "Ark of the Covenant",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe the biblical Ark of the Covenant is kept in a church in Aksum, Ethiopia?",
     verdict: "There is no way to check: the Ethiopian Orthodox Church says only one guardian monk may ever see it, and no outsider or scientist has examined the object.",
     link: "https://en.wikipedia.org/wiki/Ark_of_the_Covenant",
@@ -2309,7 +2305,7 @@ const CLAIMS = [
   {
     id: "revelation-prophecy",
     name: "Book of Revelation",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe the Book of Revelation predicts real future events like the Antichrist?",
     verdict: "Most scholars read it as written about the Roman Empire around 95 AD. The number 666 likely encodes 'Nero Caesar' in Hebrew letters, and some early manuscripts read 616, which matches the Latin form of the name.",
     link: "https://en.wikipedia.org/wiki/Book_of_Revelation",
@@ -2317,7 +2313,7 @@ const CLAIMS = [
   {
     id: "second-coming-soon",
     name: "Second Coming",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Bible prophecy shows Jesus will return to Earth within our lifetime?",
     verdict: "Jesus's first followers expected his return within their own generation (Mark 9:1). Dates set by William Miller (1844), Harold Camping (2011) and many others have all passed.",
     link: "https://en.wikipedia.org/wiki/Second_Coming",
@@ -2325,7 +2321,7 @@ const CLAIMS = [
   {
     id: "bible-code",
     name: "Bible Code",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe hidden prophecies are encoded in the Bible's text, findable by skipping letters?",
     verdict: "A 1994 paper claiming such codes was refuted in 1999 by Brendan McKay and colleagues, who got similar results from War and Peace. McKay also found 'predicted' assassinations hidden in Moby Dick.",
     link: "https://en.wikipedia.org/wiki/Bible_code",
@@ -2333,7 +2329,7 @@ const CLAIMS = [
   {
     id: "biblical-inerrancy",
     name: "Bible Has No Errors",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe the Bible is completely without error in everything it says?",
     verdict: "Scholars point to passages that are hard to reconcile, such as two different genealogies of Jesus in Matthew and Luke and two accounts of Judas's death. No original manuscripts survive, and thousands of copies differ.",
     link: "https://en.wikipedia.org/wiki/Biblical_inerrancy",
@@ -2341,7 +2337,7 @@ const CLAIMS = [
   {
     id: "book-of-abraham",
     name: "Book of Abraham",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Joseph Smith correctly translated Egyptian papyri written by the prophet Abraham?",
     verdict: "The papyri resurfaced in 1966 at the Metropolitan Museum of Art. Egyptologists identify them as ordinary Egyptian funerary texts, including a Book of Breathings for a man named Hor, with nothing about Abraham.",
     link: "https://en.wikipedia.org/wiki/Book_of_Abraham",
@@ -2349,7 +2345,7 @@ const CLAIMS = [
   {
     id: "lamanites-dna",
     name: "Lamanite DNA",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Native Americans descend from Israelites who sailed to America, as the Book of Mormon says?",
     verdict: "DNA studies show Native Americans descend from East Asian populations who crossed from Siberia; no Israelite ancestry has been found. The church has since changed its introduction from 'principal ancestors' to 'among the ancestors.'",
     link: "https://en.wikipedia.org/wiki/Genetics_and_the_Book_of_Mormon",
@@ -2357,7 +2353,7 @@ const CLAIMS = [
   {
     id: "eden-in-missouri",
     name: "Eden in Missouri",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe the Garden of Eden was located in Jackson County, Missouri?",
     verdict: "Joseph Smith taught it, but there is no evidence; humans evolved in Africa and reached the Americas only within the last few tens of thousands of years.",
     link: "https://en.wikipedia.org/wiki/Adam-ondi-Ahman",
@@ -2365,7 +2361,7 @@ const CLAIMS = [
   {
     id: "kolob",
     name: "Kolob",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe there is a star or planet called Kolob nearest to the throne of God?",
     verdict: "Astronomers have identified no such object. Kolob comes from the Book of Abraham, whose source papyri turned out to be ordinary Egyptian funerary documents.",
     link: "https://en.wikipedia.org/wiki/Kolob",
@@ -2373,7 +2369,7 @@ const CLAIMS = [
   {
     id: "blood-transfusion-ban",
     name: "Blood Transfusion Ban",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe accepting a blood transfusion is a sin against God, even to save your life?",
     verdict: "Jehovah's Witnesses introduced the ban in 1945 based on verses forbidding eating blood, written long before transfusions existed. Refusals have led to documented preventable deaths, and the rules have since shifted to allow some blood fractions.",
     link: "https://en.wikipedia.org/wiki/Jehovah%27s_Witnesses_and_blood_transfusions",
@@ -2381,17 +2377,17 @@ const CLAIMS = [
   {
     id: "only-144000",
     name: "Only 144,000",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe only 144,000 faithful people go to heaven to rule with Christ?",
     verdict: "There is no evidence. The number comes from Revelation 7, which describes 12,000 from each of the twelve tribes of Israel; Jehovah's Witness leader Joseph Rutherford set the current two-class teaching in 1935.",
     link: "https://en.wikipedia.org/wiki/144,000",
   },
 
-  // Islam, Hindu/Buddhist/Sikh and more faiths (added)
+  // More religions (added)
   {
     id: "quran-gabriel",
     name: "Quran from Gabriel",
-    category: "islam",
+    category: "religion",
     question: "Do you believe the Quran was revealed word for word to Muhammad by God through the angel Gabriel?",
     verdict: "There is no evidence for angelic revelation. Islamic tradition itself records the text being compiled into a standard edition under Caliph Uthman around 650 CE, and early manuscripts such as the Sana'a palimpsest show variant readings.",
     link: "https://en.wikipedia.org/wiki/Quran",
@@ -2399,7 +2395,7 @@ const CLAIMS = [
   {
     id: "night-journey",
     name: "The Night Journey",
-    category: "islam",
+    category: "religion",
     question: "Do you believe Muhammad rode a winged steed from Mecca to Jerusalem and up to heaven in a single night?",
     verdict: "There is no evidence for the journey beyond the religious texts. Even early Muslim commentators disagreed over whether it was a physical trip or a vision.",
     link: "https://en.wikipedia.org/wiki/Isra_and_Mi%27raj",
@@ -2407,7 +2403,7 @@ const CLAIMS = [
   {
     id: "moon-splitting",
     name: "Splitting of the Moon",
-    category: "islam",
+    category: "religion",
     question: "Do you believe Muhammad miraculously split the Moon in two?",
     verdict: "No astronomical records from anywhere else in the world note the Moon splitting. The 'crack' in viral photos is Rima Ariadaeus, a lunar valley formed by geological forces long before humans existed.",
     link: "https://en.wikipedia.org/wiki/Splitting_of_the_Moon",
@@ -2415,7 +2411,7 @@ const CLAIMS = [
   {
     id: "jinn",
     name: "Jinn",
-    category: "islam",
+    category: "religion",
     question: "Do you believe in jinn, invisible beings made of smokeless fire who live among us?",
     verdict: "There is no evidence that jinn exist. Belief in jinn predates Islam in pre-Islamic Arabia, and symptoms blamed on jinn possession match recognized conditions such as epilepsy and psychosis.",
     link: "https://en.wikipedia.org/wiki/Jinn",
@@ -2423,7 +2419,7 @@ const CLAIMS = [
   {
     id: "quran-science",
     name: "Science in the Quran",
-    category: "islam",
+    category: "religion",
     question: "Do you believe the Quran contains scientific facts no one could have known in the 7th century?",
     verdict: "These readings are made after the science is known. The Quran's stages of embryo development closely match ideas already written by the Greek physician Galen in the 2nd century.",
     link: "https://en.wikipedia.org/wiki/Quran_and_science",
@@ -2431,7 +2427,7 @@ const CLAIMS = [
   {
     id: "hidden-imam",
     name: "The Hidden Imam",
-    category: "islam",
+    category: "religion",
     question: "Do you believe the Twelfth Imam, born in 869, is still alive in hiding?",
     verdict: "There is no evidence he is alive. After his father died in 874, the father's brother Ja'far denied any son existed, and the Shia community split into rival factions.",
     link: "https://en.wikipedia.org/wiki/Muhammad_al-Mahdi",
@@ -2439,7 +2435,7 @@ const CLAIMS = [
   {
     id: "sufi-saints",
     name: "Sufi Saint Miracles",
-    category: "islam",
+    category: "religion",
     question: "Do you believe Sufi saints can work miracles?",
     verdict: "There is no documented, verified miracle by a saint or at a shrine. Many Muslim scholars themselves reject tomb blessings as an innovation not found in early Islam.",
     link: "https://en.wikipedia.org/wiki/Sufism",
@@ -2447,7 +2443,7 @@ const CLAIMS = [
   {
     id: "jewish-messiah",
     name: "The Coming Messiah",
-    category: "judaism",
+    category: "religion",
     question: "Do you believe the Hebrew prophets correctly foretold a coming Messiah descended from King David?",
     verdict: "There is no evidence for this prophecy. History has seen many failed messiah claimants; Sabbatai Zevi drew huge followings in 1665 and converted to Islam a year later.",
     link: "https://en.wikipedia.org/wiki/Jewish_messianism",
@@ -2455,7 +2451,7 @@ const CLAIMS = [
   {
     id: "red-string",
     name: "Kabbalah Red String",
-    category: "judaism",
+    category: "religion",
     question: "Do you believe wearing a Kabbalah red string bracelet protects you from the evil eye?",
     verdict: "No study shows a red string affects luck or harm. The custom was popularized worldwide by the Kabbalah Centre and celebrities in the 2000s.",
     link: "https://en.wikipedia.org/wiki/Kabbalah_Centre",
@@ -2463,7 +2459,7 @@ const CLAIMS = [
   {
     id: "karma",
     name: "Karma",
-    category: "dharmic",
+    category: "religion",
     question: "Do you believe in karma, that the universe pays you back for your good and bad deeds?",
     verdict: "There is no evidence of a cosmic force balancing deeds; good and bad events befall people regardless of how they behave.",
     link: "https://en.wikipedia.org/wiki/Karma",
@@ -2471,7 +2467,7 @@ const CLAIMS = [
   {
     id: "ganges-sins",
     name: "Ganges Washes Sins",
-    category: "dharmic",
+    category: "religion",
     question: "Do you believe bathing in the Ganges river washes away your sins?",
     verdict: "There is no evidence water can remove moral wrongdoing.",
     link: "https://en.wikipedia.org/wiki/Ganges",
@@ -2479,7 +2475,7 @@ const CLAIMS = [
   {
     id: "kundli-matching",
     name: "Horoscope Matching",
-    category: "dharmic",
+    category: "religion",
     question: "Do you believe matching Vedic horoscopes (kundli) before marriage can predict whether a couple will be happy?",
     verdict: "Astrology fails controlled tests. In a study led by astrophysicist Jayant Narlikar, Indian astrologers could not tell the birth charts of gifted children from those of children with intellectual disabilities better than chance.",
     link: "https://en.wikipedia.org/wiki/Hindu_astrology",
@@ -2487,7 +2483,7 @@ const CLAIMS = [
   {
     id: "milk-miracle",
     name: "Ganesha Drinks Milk",
-    category: "dharmic",
+    category: "religion",
     question: "Do you believe statues of Ganesha miraculously drank milk offered by worshippers in 1995?",
     verdict: "Scientists explained it as capillary action: the porous stone drew milk in and let it run down the statue. Adding food colouring showed the milk coating the statue's surface.",
     link: "https://en.wikipedia.org/wiki/Hindu_milk_miracle",
@@ -2495,7 +2491,7 @@ const CLAIMS = [
   {
     id: "ram-setu",
     name: "Ram Setu",
-    category: "dharmic",
+    category: "religion",
     question: "Do you believe the chain of shoals between India and Sri Lanka is a bridge built by Lord Rama's army?",
     verdict: "Geologists describe Adam's Bridge as natural limestone shoals and sandbars formed by sediment and sea-level changes. No construction has been shown.",
     link: "https://en.wikipedia.org/wiki/Adam%27s_Bridge",
@@ -2503,7 +2499,7 @@ const CLAIMS = [
   {
     id: "cow-urine",
     name: "Cow Urine Cures",
-    category: "dharmic",
+    category: "religion",
     question: "Do you believe drinking cow urine can cure diseases?",
     verdict: "No clinical trial shows cow urine treats cancer, COVID-19 or other disease. Doctors warned against it during the pandemic, and raw urine can carry bacteria that infect humans.",
     link: "https://en.wikipedia.org/wiki/Cow_urine",
@@ -2511,7 +2507,7 @@ const CLAIMS = [
   {
     id: "nirvana",
     name: "Nirvana",
-    category: "dharmic",
+    category: "religion",
     question: "Do you believe in nirvana, an enlightenment that frees you from being reborn ever again?",
     verdict: "Meditation has measurable effects on stress and attention, but there is no evidence of rebirth or of a state that ends it. Neither can be observed or tested.",
     link: "https://en.wikipedia.org/wiki/Nirvana",
@@ -2519,7 +2515,7 @@ const CLAIMS = [
   {
     id: "pure-land",
     name: "Pure Land Rebirth",
-    category: "dharmic",
+    category: "religion",
     question: "Do you believe chanting the name of Amitabha Buddha leads to rebirth in his Pure Land paradise?",
     verdict: "There is no evidence for the Pure Land or rebirth there. The idea comes from Mahayana sutras written centuries after the Buddha's death.",
     link: "https://en.wikipedia.org/wiki/Pure_Land_Buddhism",
@@ -2527,7 +2523,7 @@ const CLAIMS = [
   {
     id: "tulku",
     name: "Reincarnated Lamas",
-    category: "dharmic",
+    category: "religion",
     question: "Do you believe lamas like the Dalai Lama are reborn and can be identified as children?",
     verdict: "There is no evidence any child is a former lama reborn. The process is open to politics: rival candidates were both proclaimed the 17th Karmapa in the 1990s, and China claims the right to pick the next Dalai Lama.",
     link: "https://en.wikipedia.org/wiki/Tulku",
@@ -2535,7 +2531,7 @@ const CLAIMS = [
   {
     id: "guru-granth",
     name: "Living Guru Scripture",
-    category: "dharmic",
+    category: "religion",
     question: "Do you believe the Guru Granth Sahib is the eternal living Guru carrying the word of God?",
     verdict: "There is no evidence of divine authorship. Guru Arjan compiled its first version in 1604, and it includes hymns by Hindu and Muslim poets, such as Kabir and Farid, alongside the Sikh Gurus.",
     link: "https://en.wikipedia.org/wiki/Guru_Granth_Sahib",
@@ -2543,7 +2539,7 @@ const CLAIMS = [
   {
     id: "jain-karma",
     name: "Karmic Particles",
-    category: "dharmic",
+    category: "religion",
     question: "Do you believe karma is made of fine physical particles that stick to your soul?",
     verdict: "Jain teaching describes karma as actual matter, but no such particles have ever been detected, and physics has found nothing that clings to people based on their actions.",
     link: "https://en.wikipedia.org/wiki/Karma_in_Jainism",
@@ -2551,7 +2547,7 @@ const CLAIMS = [
   {
     id: "bahai",
     name: "Bahá'u'lláh's Revelation",
-    category: "worldreligion",
+    category: "religion",
     question: "Do you believe Bahá'u'lláh was the latest messenger of God?",
     verdict: "There is no evidence for divine messengers. Bahá'u'lláh announced his mission in Baghdad in 1863 and died as an exile near Acre in 1892.",
     link: "https://en.wikipedia.org/wiki/Bah%C3%A1%27%C3%AD_Faith",
@@ -2559,7 +2555,7 @@ const CLAIMS = [
   {
     id: "kami",
     name: "Kami Spirits",
-    category: "worldreligion",
+    category: "religion",
     question: "Do you believe spirits called kami dwell in mountains, trees, rivers and shrines?",
     verdict: "There is no evidence kami exist. Shinto was organized into a state religion only in the 1800s, when the government separated it from Buddhism.",
     link: "https://en.wikipedia.org/wiki/Kami",
@@ -2567,7 +2563,7 @@ const CLAIMS = [
   {
     id: "chinvat-bridge",
     name: "Chinvat Bridge",
-    category: "worldreligion",
+    category: "religion",
     question: "Do you believe that after death your soul must cross the Chinvat Bridge, where the wicked fall into hell?",
     verdict: "There is no evidence for this or any afterlife judgment. Many scholars think Zoroastrian ideas of heaven, hell and a final resurrection influenced later Judaism, Christianity and Islam.",
     link: "https://en.wikipedia.org/wiki/Chinvat_Bridge",
@@ -2575,7 +2571,7 @@ const CLAIMS = [
   {
     id: "haile-selassie",
     name: "Haile Selassie Is God",
-    category: "worldreligion",
+    category: "religion",
     question: "Do you believe Ethiopian emperor Haile Selassie was God incarnate, as Rastafari teaches?",
     verdict: "Haile Selassie was a lifelong Ethiopian Orthodox Christian who did not claim to be God. He was overthrown in 1974 and died in custody in 1975.",
     link: "https://en.wikipedia.org/wiki/Haile_Selassie",
@@ -2583,7 +2579,7 @@ const CLAIMS = [
   {
     id: "spirit-possession",
     name: "Vodou Possession",
-    category: "worldreligion",
+    category: "religion",
     question: "Do you believe spirits called lwa take over worshippers' bodies during Vodou ceremonies?",
     verdict: "Researchers describe ritual trance as a dissociative state shaped by music, dance and learned expectation. No test has shown possessed people gain knowledge or abilities they did not already have.",
     link: "https://en.wikipedia.org/wiki/Haitian_Vodou",
@@ -2591,7 +2587,7 @@ const CLAIMS = [
   {
     id: "orishas",
     name: "Santería Orishas",
-    category: "worldreligion",
+    category: "religion",
     question: "Do you believe Santería's orishas grant help in return for offerings?",
     verdict: "There is no evidence that orishas exist or answer offerings. Santería formed in Cuba by blending Yoruba religion carried by enslaved Africans with Catholic saints.",
     link: "https://en.wikipedia.org/wiki/Santer%C3%ADa",
@@ -2615,7 +2611,7 @@ const CLAIMS = [
   {
     id: "ancestor-offerings",
     name: "Feeding Ancestor Spirits",
-    category: "worldreligion",
+    category: "religion",
     question: "Do you believe the spirits of your dead ancestors need offerings, like food and burned paper money, to be well in the afterlife?",
     verdict: "There is no evidence the dead persist as spirits who use offerings.",
     link: "https://en.wikipedia.org/wiki/Veneration_of_the_dead",
@@ -2844,7 +2840,7 @@ const CLAIMS = [
   {
     id: "reincarnation-rebirth",
     name: "Reincarnation",
-    category: "dharmic",
+    category: "religion",
     question: "Do you believe in reincarnation, that a person's soul is reborn into a new body after death?",
     verdict: "There's no evidence. Psychiatrist Ian Stevenson's famous cases of children 'remembering' past lives came mostly from cultures that already believed in rebirth, and were often recorded after families had already found a match. No way for memories to survive death is known.",
     link: "https://en.wikipedia.org/wiki/Reincarnation",
@@ -2876,7 +2872,7 @@ const CLAIMS = [
   {
     id: "doomsday-dates",
     name: "Predicting the End Times",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe Bible prophecy can reveal the date the world will end?",
     verdict: "Every predicted date has passed. William Miller's followers expected Christ's return in 1844, and radio host Harold Camping predicted the Rapture for May 21, 2011, then the end for October 21, 2011. Jesus himself is quoted saying no one knows the day or hour.",
     link: "https://en.wikipedia.org/wiki/List_of_dates_predicted_for_apocalyptic_events",
@@ -2884,7 +2880,7 @@ const CLAIMS = [
   {
     id: "holy-water",
     name: "Holy Water's Power",
-    category: "christianity",
+    category: "religion",
     question: "Do you believe blessed holy water has real spiritual power?",
     verdict: "There's no evidence. In every test anyone has done, blessed water behaves like ordinary water, and its power can't be detected apart from what people believe about it.",
     link: "https://en.wikipedia.org/wiki/Holy_water",

@@ -43,8 +43,8 @@ const CATEGORIES = {
   popsych: { label: "Pop Psychology", short: "Pop Psych", icon: "🧠" },
   christianity: { label: "Christianity", icon: "✝️" },
   worldreligion: { label: "World Religions", icon: "🕉️" },
-  newreligion: { label: "New Religions & Cults", short: "Cults", icon: "🛐" },
-  magic: { label: "Witchcraft & Superstition", short: "Superstition", icon: "🧙" },
+  newreligion: { label: "New Religious Movements", short: "New Religions", icon: "🛐" },
+  magic: { label: "Witchcraft & Folk Magic", short: "Folk Magic", icon: "🧙" },
 };
 
 const CLAIMS = [
@@ -128,7 +128,7 @@ const CLAIMS = [
     name: "Faith Healers",
     category: "medicine",
     question: "Do you believe faith healers can cure disease by the laying on of hands?",
-    verdict: "No documented cures survive scrutiny. Peter Popoff was caught receiving 'divine' information through an earpiece from his wife.",
+    verdict: "No documented cures survive scrutiny. Peter Popoff was caught receiving information through an earpiece from his wife.",
     link: "https://en.wikipedia.org/wiki/Faith_healing",
   },
   {
@@ -208,7 +208,7 @@ const CLAIMS = [
     name: "Essential Oil Cures",
     category: "medicine",
     question: "Do you believe essential oils can cure serious illnesses?",
-    verdict: "They can smell nice. The FDA has warned sellers for claiming they treat cancer, Ebola and COVID-19.",
+    verdict: "The FDA has warned sellers for claiming they treat cancer, Ebola and COVID-19.",
     link: "https://en.wikipedia.org/wiki/Aromatherapy",
   },
   {
@@ -373,7 +373,7 @@ const CLAIMS = [
   // Christianity and new religions
   {
     id: "mormonism",
-    name: "Mormonism",
+    name: "Golden Plates",
     category: "christianity",
     question: "Do you believe Joseph Smith translated the Book of Mormon from golden plates by the power of God?",
     verdict: "No plates were ever produced for inspection. Archaeology and DNA studies find no trace of the Book of Mormon's Israelite civilizations in the Americas.",
@@ -389,7 +389,7 @@ const CLAIMS = [
   },
   {
     id: "catholicism",
-    name: "Catholicism",
+    name: "Bread and Wine Become Christ",
     category: "christianity",
     question: "Do you believe the bread and wine truly become the body and blood of Christ during Mass?",
     verdict: "After consecration, the bread and wine remain chemically bread and wine; the doctrine says only their unobservable 'substance' changes.",
@@ -397,7 +397,7 @@ const CLAIMS = [
   },
   {
     id: "lutheranism",
-    name: "Lutheranism",
+    name: "Christ Present in Communion",
     category: "christianity",
     question: "Do you believe Christ's body is truly present 'in, with and under' the bread and wine of communion?",
     verdict: "Like transubstantiation, the claim is defined so that it can't be observed or tested.",
@@ -405,7 +405,7 @@ const CLAIMS = [
   },
   {
     id: "methodism",
-    name: "Methodism",
+    name: "Perfect Love in This Life",
     category: "christianity",
     question: "Do you believe the Holy Spirit can make you perfect in love in this life, as John Wesley taught?",
     verdict: "A supernatural claim with no testable evidence behind it.",
@@ -429,7 +429,7 @@ const CLAIMS = [
   },
   {
     id: "jehovahs-witnesses",
-    name: "Jehovah's Witnesses",
+    name: "Living in the Last Days",
     category: "christianity",
     question: "Do you believe Bible prophecy shows we are living in the last days, as Jehovah's Witnesses teach?",
     verdict: "The movement has predicted or strongly implied the end for 1914, 1925 and 1975. It didn't come.",
@@ -448,7 +448,7 @@ const CLAIMS = [
     name: "Prosperity Gospel",
     category: "christianity",
     question: "Do you believe God rewards those who give money to a preacher's ministry with wealth?",
-    verdict: "The reliable result is that the preachers get rich. Several have bought private jets with donations.",
+    verdict: "No study shows giving to a ministry makes donors wealthier. Several preachers have bought private jets with donations.",
     link: "https://en.wikipedia.org/wiki/Prosperity_theology",
   },
   {
@@ -1897,7 +1897,7 @@ const CLAIMS = [
   },
   {
     id: "pentecostal-gifts",
-    name: "Pentecostalism",
+    name: "Miraculous Gifts Today",
     category: "christianity",
     question: "Do you believe the Holy Spirit gives believers today miraculous gifts like prophecy and healing?",
     verdict: "No controlled study has shown supernatural prophecy or healing. Modern Pentecostalism began with Charles Parham in 1901 and the 1906 Azusa Street Revival, whose early members believed tongues were real foreign languages; missionaries who went abroad found they were not.",
@@ -1913,7 +1913,7 @@ const CLAIMS = [
   },
   {
     id: "assemblies-of-god",
-    name: "Assemblies of God",
+    name: "Tongues as Proof of the Spirit",
     category: "christianity",
     question: "Do you believe speaking in tongues is the evidence that someone has been baptized in the Holy Spirit?",
     verdict: "Glossolalia is a learnable behavior: in a 1980s study, psychologist Nicholas Spanos found most volunteers could speak fluent 'tongues' after brief training. The Assemblies of God lists this 'initial evidence' doctrine among its official fundamental truths.",
@@ -1924,7 +1924,7 @@ const CLAIMS = [
     name: "Slain in the Spirit",
     category: "christianity",
     question: "Do you believe the power of the Holy Spirit makes people fall down when a preacher touches them?",
-    verdict: "Similar collapses happened at 18th-century Mesmerism sessions and occur in non-Christian rituals; researchers attribute them to suggestion and group expectation. Churches station 'catchers' behind people in advance.",
+    verdict: "Similar collapses happened at 18th-century Mesmerism sessions and occur in non-Christian rituals; researchers attribute them to suggestion and group expectation.",
     link: "https://en.wikipedia.org/wiki/Slain_in_the_Spirit",
   },
   {
@@ -1956,7 +1956,7 @@ const CLAIMS = [
     name: "Apostolic Succession",
     category: "christianity",
     question: "Do you believe bishops hold spiritual authority passed down in an unbroken line from Jesus's apostles?",
-    verdict: "No reliable records link the earliest bishop lists to the apostles. Churches can't even agree among themselves: in 1896 Pope Leo XIII declared Anglican ordinations 'absolutely null and utterly void.'",
+    verdict: "No reliable records link the earliest bishop lists to the apostles. Churches disagree: in 1896 Pope Leo XIII declared Anglican ordinations 'absolutely null and utterly void.'",
     link: "https://en.wikipedia.org/wiki/Apostolic_succession",
   },
   {
@@ -1980,7 +1980,7 @@ const CLAIMS = [
     name: "Ellen White's Visions",
     category: "christianity",
     question: "Do you believe Seventh-day Adventist founder Ellen G. White's visions were true prophecies from God?",
-    verdict: "Researchers, including Adventist pastor Walter Rea in The White Lie (1982), documented extensive copying from other authors in her writings. She suffered a serious head injury at age nine, which some researchers link to her visions.",
+    verdict: "Researchers, including Adventist pastor Walter Rea in The White Lie (1982), documented extensive copying from other authors in her writings.",
     link: "https://en.wikipedia.org/wiki/Ellen_G._White",
   },
   {
@@ -1996,7 +1996,7 @@ const CLAIMS = [
     name: "Amish & Mennonite Ways",
     category: "christianity",
     question: "Do you believe God wants the faithful to live apart from the modern world, as the Amish do?",
-    verdict: "There is no evidence God has any view on technology. Amish rules (the Ordnung) are set by each local church district, differ between communities, and change over time; many now use propane, solar panels and phones.",
+    verdict: "There is no way to test it. Amish rules (the Ordnung) are set by each local church district, differ between communities, and change over time; many now use propane, solar panels and phones.",
     link: "https://en.wikipedia.org/wiki/Amish",
   },
   {
@@ -2049,7 +2049,7 @@ const CLAIMS = [
   },
   {
     id: "iglesia-ni-cristo",
-    name: "Iglesia ni Cristo",
+    name: "Manalo as Last Messenger",
     category: "christianity",
     question: "Do you believe Felix Manalo was God's last messenger, sent to restore the true church?",
     verdict: "There is no evidence. The church points to its registration in the Philippines on July 27, 1914, the eve of World War I, as fulfilled prophecy, but the Bible verses it cites never name Manalo or the Philippines.",
@@ -2076,7 +2076,7 @@ const CLAIMS = [
     name: "Walking on Water",
     category: "christianity",
     question: "Do you believe Jesus literally walked on the surface of the Sea of Galilee?",
-    verdict: "There is no evidence. The story appears only in gospels written decades after Jesus's death, and water cannot support a standing human's weight.",
+    verdict: "There is no evidence. The story appears only in gospels written decades after Jesus's death.",
     link: "https://en.wikipedia.org/wiki/Jesus_walking_on_water",
   },
   {
@@ -2089,10 +2089,10 @@ const CLAIMS = [
   },
   {
     id: "garden-of-eden",
-    name: "Talking Snake in Eden",
+    name: "Serpent in Eden",
     category: "christianity",
     question: "Do you believe a talking serpent tempted Eve in the Garden of Eden?",
-    verdict: "No archaeological trace of Eden has been found, and snakes lack the vocal anatomy for speech. A serpent stealing a plant of immortality also appears in the older Mesopotamian Epic of Gilgamesh.",
+    verdict: "No archaeological trace of Eden has been found,. A serpent stealing a plant of immortality also appears in the older Mesopotamian Epic of Gilgamesh.",
     link: "https://en.wikipedia.org/wiki/Garden_of_Eden",
   },
   {
@@ -2252,7 +2252,7 @@ const CLAIMS = [
     name: "Holy Relics",
     category: "christianity",
     question: "Do you believe the bones and belongings of saints have miraculous healing power?",
-    verdict: "No relic has shown healing effects under testing. Medieval churches displayed several different heads of John the Baptist, and John Calvin quipped that True Cross fragments could fill a ship.",
+    verdict: "No relic has shown healing effects under testing. Medieval churches displayed several different heads of John the Baptist.",
     link: "https://en.wikipedia.org/wiki/Relic",
   },
   {
@@ -2340,7 +2340,7 @@ const CLAIMS = [
     name: "Bible Has No Errors",
     category: "christianity",
     question: "Do you believe the Bible is completely without error in everything it says?",
-    verdict: "The Bible contains clear contradictions, such as two different genealogies of Jesus in Matthew and Luke and two accounts of Judas's death. No original manuscripts survive, and thousands of copies differ.",
+    verdict: "Scholars point to passages that are hard to reconcile, such as two different genealogies of Jesus in Matthew and Luke and two accounts of Judas's death. No original manuscripts survive, and thousands of copies differ.",
     link: "https://en.wikipedia.org/wiki/Biblical_inerrancy",
   },
   {
@@ -2438,7 +2438,7 @@ const CLAIMS = [
     name: "The Hidden Imam",
     category: "worldreligion",
     question: "Do you believe the Twelfth Imam, born in 869, is still alive in hiding?",
-    verdict: "There is no evidence he is alive; it would make him over 1,150 years old. After his father died in 874, the father's brother Ja'far denied any son existed, and the Shia community split into rival factions.",
+    verdict: "There is no evidence he is alive. After his father died in 874, the father's brother Ja'far denied any son existed, and the Shia community split into rival factions.",
     link: "https://en.wikipedia.org/wiki/Muhammad_al-Mahdi",
   },
   {
@@ -2470,7 +2470,7 @@ const CLAIMS = [
     name: "Karma",
     category: "worldreligion",
     question: "Do you believe in karma, that the universe pays you back for your good and bad deeds?",
-    verdict: "There is no evidence of a cosmic force balancing deeds; good and bad events befall people regardless of how they behave. Psychologists call the opposite expectation the 'just-world' belief, and find it leads people to blame victims.",
+    verdict: "There is no evidence of a cosmic force balancing deeds; good and bad events befall people regardless of how they behave.",
     link: "https://en.wikipedia.org/wiki/Karma",
   },
   {
@@ -2478,7 +2478,7 @@ const CLAIMS = [
     name: "Ganges Washes Sins",
     category: "worldreligion",
     question: "Do you believe bathing in the Ganges river washes away your sins?",
-    verdict: "There is no evidence water can remove moral wrongdoing. Water quality tests on many stretches of the Ganges find fecal bacteria far above safe bathing limits.",
+    verdict: "There is no evidence water can remove moral wrongdoing.",
     link: "https://en.wikipedia.org/wiki/Ganges",
   },
   {
@@ -2622,7 +2622,7 @@ const CLAIMS = [
     name: "Feeding Ancestor Spirits",
     category: "worldreligion",
     question: "Do you believe the spirits of your dead ancestors need offerings, like food and burned paper money, to be well in the afterlife?",
-    verdict: "There is no evidence the dead persist as spirits who use offerings. Food offerings simply spoil or are eaten by the living, and burned paper offerings leave only ash.",
+    verdict: "There is no evidence the dead persist as spirits who use offerings.",
     link: "https://en.wikipedia.org/wiki/Veneration_of_the_dead",
   },
   {
@@ -2650,7 +2650,7 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/Evil_eye",
   },
 
-  // New Religions & Cults (added)
+  // New Religious Movements (added)
   {
     id: "raelism",
     name: "Raëlism",
@@ -2757,7 +2757,7 @@ const CLAIMS = [
   },
   {
     id: "osho",
-    name: "Osho",
+    name: "Osho's Enlightenment",
     category: "newreligion",
     question: "Do you believe Osho (Bhagwan Shree Rajneesh) was a fully enlightened spiritual master?",
     verdict: "Enlightenment cannot be tested. At his Oregon commune, followers carried out the 1984 salmonella poisoning of salad bars in The Dalles, sickening 751 people, the largest bioterror attack in US history.",
@@ -2796,13 +2796,13 @@ const CLAIMS = [
     link: "https://en.wikipedia.org/wiki/Sathya_Sai_Baba",
   },
 
-  // Witchcraft & Superstition (added)
+  // Witchcraft & Folk Magic (added)
   {
     id: "love-spells",
     name: "Love Spells",
     category: "magic",
     question: "Do you believe a love spell can make a specific person fall in love with you?",
-    verdict: "No spell or potion has ever been shown to change someone's feelings. Paid love-spell services are a common scam, often asking for more money to 'finish' or 'strengthen' the spell when it doesn't work.",
+    verdict: "No spell or potion has ever been shown to change someone's feelings. Paid love-spell services often ask for more money to 'finish' or 'strengthen' the spell when it doesn't work.",
     link: "https://en.wikipedia.org/wiki/Love_magic",
   },
   {
@@ -2810,7 +2810,7 @@ const CLAIMS = [
     name: "Psychic Curse Removal",
     category: "magic",
     question: "Do you believe psychics can remove a curse from you for a fee?",
-    verdict: "This is one of the best-known psychic frauds: the client is told a curse explains their troubles, then charged ever-larger sums to remove it. Police warn that a real psychic wouldn't need to keep asking for money.",
+    verdict: "This is a well-known pattern: the client is told a curse explains their troubles, then charged ever-larger sums to remove it. Police warn that a real psychic wouldn't need to keep asking for money.",
     link: "https://en.wikipedia.org/wiki/Fortune_telling_fraud",
   },
   {

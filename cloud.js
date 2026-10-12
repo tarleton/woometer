@@ -889,7 +889,7 @@
     const s = theirs && scoreOf(theirs);
     $("invite-title").textContent =
       s && s.answered
-        ? `${who} is ${s.pct}% woo, rejecting ${s.rejectPct}% of the ${s.answered} claims they've answered.`
+        ? `${who} is ${s.pct}% woo.`
         : `${who} shared their woometer with you.`;
     $("invite-text").textContent = "Answer some claims yourself to see where you agree and differ.";
     $("invite-compare").textContent = `See ${name ? `${name}'s` : "their"} answers`;

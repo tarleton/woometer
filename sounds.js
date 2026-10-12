@@ -192,7 +192,7 @@ const Sounds = (function () {
   // Links between woometer's pages get a tick. The sound has to start while the
   // click is still being handled (phones block audio on a page that has just
   // loaded), so the page change waits a moment for the tick to be heard.
-  const SUBPAGE = /\/(about|privacy|terms|stats)(\.html)?$/;
+  const SUBPAGE = /\/(about|privacy|terms|stats|woo)(\.html)?$/;
   function navSoundFor(link) {
     const url = new URL(link.href, location.href);
     if (url.origin !== location.origin) return null;

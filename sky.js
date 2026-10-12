@@ -56,7 +56,10 @@
   let stars = [];
   let lines = [];
 
+  // The /woo playground can show a pretend set of answers instead (its slider).
+  let previewIds = null;
   function readIds() {
+    if (previewIds) return previewIds;
     try {
       return Object.keys(JSON.parse(localStorage.getItem(STORAGE_KEY)) || {});
     } catch {
@@ -179,6 +182,7 @@
 
   new ResizeObserver(resize).observe(header);
   window.addEventListener("woometer:answers", () => { refresh(true); schedule(); });
+  window.addEventListener("woometer:sky-preview", (e) => { previewIds = e.detail.ids; refresh(false); schedule(); });
   window.addEventListener("storage", (e) => { if (e.key === STORAGE_KEY) { refresh(false); schedule(); } });
   document.addEventListener("visibilitychange", schedule);
   still.addEventListener?.("change", () => { draw(performance.now()); schedule(); });

@@ -406,6 +406,7 @@ button { font: inherit; cursor: pointer; }
   border-radius: var(--radius);
   color: var(--muted);
 }
+.done .btn { margin-top: 2px; }
 
 /* Bins */
 

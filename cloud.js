@@ -213,40 +213,51 @@
 
   // Answers
 
-  // Merge this browser's answers with the account's. Answers given, changed or
-  // put back on the board here since the last visit are sent up; everything
-  // else comes from the account, so a change made on another device wins over
-  // this browser's old copy. The first time an account is seen in this
-  // browser (say, just after signing in), this browser wins wherever both
-  // have an answer.
+  // Merge this browser's answers with the account's. Answers given or changed
+  // here since the last visit are sent up; everything else comes from the
+  // account, so a change made on another device wins over this browser's old
+  // copy. Where both sides changed the same claim, or the account is new to
+  // this browser (say, just after signing in), the newer answer wins. An
+  // answer from before woometer kept times counts as this browser's.
   async function syncAnswers() {
-    const { data, error } = await db.from("answers").select("claim_id, answer").eq("user_id", user.id).range(0, 9999);
+    const { data, error } = await db.from("answers").select("claim_id, answer, updated_at").eq("user_id", user.id).range(0, 9999);
     if (error) throw error;
     const server = Object.fromEntries(data.map((r) => [r.claim_id, r.answer]));
+    const serverAt = Object.fromEntries(data.map((r) => [r.claim_id, Date.parse(r.updated_at) || 0]));
     const local = W.getAnswers();
+    const localAt = W.getAnswerTimes();
     const last = lastSynced();
     synced = { ...server };
     const merged = {};
+    const at = {};
     const toSend = [];
     const toRemove = [];
+    const fromServer = (id) => {
+      merged[id] = server[id];
+      if (serverAt[id]) at[id] = serverAt[id];
+    };
     for (const [id, value] of Object.entries(local)) {
       if (last && last[id] === value) {
         // Not changed here: keep whatever the account has now, if anything.
-        if (id in server) merged[id] = server[id];
+        if (id in server) fromServer(id);
+      } else if (id in server && server[id] !== value && !(last && last[id] === server[id]) && serverAt[id] > (localAt[id] || Infinity)) {
+        // Changed here and on the account, which has the newer answer.
+        fromServer(id);
       } else {
         merged[id] = value;
-        if (server[id] !== value) toSend.push(row(id, value));
+        at[id] = localAt[id] || Date.now();
+        if (server[id] !== value) toSend.push(row(id, value, at[id]));
       }
     }
     for (const [id, value] of Object.entries(server)) {
       if (id in merged) continue;
       if (last && id in last && !(id in local) && last[id] === value) toRemove.push(id);
-      else merged[id] = value;
+      else fromServer(id);
     }
     if (toSend.length) answersNotSaved(await saveRows(toSend));
     if (toRemove.length) logError({ error: await removeRows(toRemove) });
     keepSynced();
-    W.setAnswers(merged);
+    W.setAnswers(merged, at);
   }
 
   // Brings the account in line with this browser: sends new and changed
@@ -256,9 +267,10 @@
     if (!(await stillSignedIn())) return { message: "not signed in" };
     await sendName();
     const local = W.getAnswers();
+    const at = W.getAnswerTimes();
     const send = Object.entries(local)
       .filter(([id, value]) => synced[id] !== value)
-      .map(([id, value]) => row(id, value));
+      .map(([id, value]) => row(id, value, at[id]));
     // Answers to retired claims stay on the server; this page never shows them.
     const drop = Object.keys(synced).filter((id) => byId[id] && !(id in local));
     if (send.length) {
@@ -375,8 +387,10 @@
     keepSynced();
   }
 
-  function row(id, value) {
-    return { user_id: user.id, claim_id: id, answer: value, updated_at: new Date().toISOString() };
+  // at: when the answer was given (ms), if known. The account keeps it, so
+  // the newer answer wins when two devices disagree (see syncAnswers).
+  function row(id, value, at) {
+    return { user_id: user.id, claim_id: id, answer: value, updated_at: new Date(at || Date.now()).toISOString() };
   }
 
   function wireEvents() {

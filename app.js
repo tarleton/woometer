@@ -1,5 +1,8 @@
 (function () {
   const STORAGE_KEY = "woometer.answers.v1";
+  // When each answer was given (ms, this device's clock), so signing in can
+  // keep the newer of two different answers to the same claim (cloud.js).
+  const TIMES_KEY = "woometer.answerTimes.v1";
   const SHOW_ANSWERED_KEY = "woometer.showAnswered.v1";
 
   const $ = (id) => document.getElementById(id);
@@ -30,6 +33,7 @@
   // answers: { [claimId]: "yes" | "no" | "unsure" }, in the order they were given.
   // "unsure" is Don't Know: off the board, and counted in the woo score like No.
   let answers = load();
+  let times = loadTimes();
   let activeCategory = "all";
   let query = "";
   // "Show answered" puts answered claims back on the board, after the rest.
@@ -49,9 +53,19 @@
     }
   }
 
+  function loadTimes() {
+    try {
+      return JSON.parse(localStorage.getItem(TIMES_KEY)) || {};
+    } catch {
+      return {};
+    }
+  }
+
   function save() {
+    times = Object.fromEntries(Object.entries(times).filter(([id]) => id in answers));
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+      localStorage.setItem(TIMES_KEY, JSON.stringify(times));
     } catch {
       // Private mode or storage blocked: the page still works, it just won't remember.
     }
@@ -482,6 +496,7 @@
     // A changed answer counts as the newest one in its new pile.
     delete answers[id];
     answers[id] = value;
+    times[id] = Date.now();
     save();
     emit("answer", { id, value });
     if (value === "yes") Sounds.woo();
@@ -737,9 +752,12 @@
 
   window.Woometer = {
     getAnswers: () => ({ ...answers }),
-    // Replace every answer at once, e.g. after loading them from an account.
-    setAnswers(next) {
+    getAnswerTimes: () => ({ ...times }),
+    // Replace every answer at once, e.g. after loading them from an account,
+    // along with when each was given, if known.
+    setAnswers(next, nextTimes) {
       answers = Object.fromEntries(Object.entries(next).filter(([id]) => byId[id]));
+      if (nextTimes) times = { ...nextTimes };
       save();
       renderAll();
     },

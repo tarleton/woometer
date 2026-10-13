@@ -676,7 +676,7 @@ body > main { width: 100%; flex: 1 0 auto; }
   .mini-cat { cursor: pointer; border-radius: 6px; }
   .mini-cat svg { display: block; width: 34px; height: auto; }
   /* Clear of the bottom bar on the home page. */
-  .minibar ~ .foot { margin-bottom: calc(66px + env(safe-area-inset-bottom)); }
+  .minibar ~ .foot { margin-bottom: var(--minibar-h, calc(58px + env(safe-area-inset-bottom))); }
   .toast { bottom: calc(76px + env(safe-area-inset-bottom)); }
 }
 

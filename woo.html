@@ -13,9 +13,15 @@
   <script>
     // woometer.com/woo: a hidden playground. It shows the real home page, fetched
     // fresh so it always matches, with a header slider to pretend any share of
-    // claims is answered and a button to send a shooting star right away.
+    // claims is answered, a button to send a shooting star right away and a
+    // switch between background styles.
     (async () => {
+      // /woo shows the Meander style unless ?style=lace asks for the home
+      // page's lace; a header button flips between the two.
+      const style = new URLSearchParams(location.search).get("style") === "lace" ? "lace" : "meander";
+      const other = style === "lace" ? "meander" : "lace";
       const HEAD = `
+  <script>window.WOO_STYLE = "${style}";<\/script>
   <meta name="robots" content="noindex">
   <style>
     /* The reveal slider: pretend you've answered this share of the claims. */
@@ -26,6 +32,10 @@
     .shoot { flex: none; width: 32px; height: 32px; padding: 0; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); display: grid; place-items: center; }
     .shoot:hover { border-color: var(--accent); }
     .shoot svg { width: 18px; height: 18px; }
+    /* Flips the field between the Meander and the lace to compare. */
+    .style-flip { flex: none; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: 13px; text-decoration: none; white-space: nowrap; }
+    .style-flip:hover { border-color: var(--accent); color: var(--ink); }
+    .style-flip b { color: var(--ink); }
   </style>
 `;
       const SLIDER = `
@@ -35,6 +45,7 @@
       <output id="reveal-out" for="reveal">0%</output>
     </label>
     <button type="button" class="shoot" title="Send a shooting star" aria-label="Send a shooting star" onclick="window.dispatchEvent(new Event('woometer:shooting-star'))"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 5.6l1.9 4 4.3.5-3.2 2.9.9 4.3L12 15.1l-3.9 2.2.9-4.3-3.2-2.9 4.3-.5z" fill="currentColor"/></svg></button>
+    <a class="style-flip" href="woo?style=${other}" title="Switch the background style"><b>${style === "lace" ? "Lace" : "Meander"}</b> · switch</a>
     <div class="top-actions">`;
       try {
         const reply = await fetch("./", { cache: "no-cache" });

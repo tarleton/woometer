@@ -48,7 +48,7 @@
   if (!gl) return; // the dark field stays as it is
 
   const VERT = "attribute vec2 p; void main() { gl_Position = vec4(p, 0.0, 1.0); }";
-  const FRAG = `
+  const LACE = `
     precision highp float;
     uniform vec2 res;
     uniform float t;
@@ -185,6 +185,119 @@
       col += vec3(0.035, 0.02, 0.06) * mix(0.65, 1.0 - r * 0.7, wake);
       gl_FragColor = vec4(col, 1.0);
     }`;
+
+  // The Meander style: Kaleido - Meander from the MePlush backdrop, by the
+  // same owner. Glowing worm-like ribbons wind through mirrored wedges under
+  // a double domain warp and flow slowly outward. Here it grows the same way
+  // the lace does: nothing at first, then the ribbons' fine glowing spines,
+  // their bodies, folds, bead sparks, the warmer outer zones and finally the
+  // green rosette heart.
+  const MEANDER = `
+    precision highp float;
+    uniform vec2 res;
+    uniform float t;
+    uniform float rev;
+    const float TAU = 6.2831853;
+
+    // Trig-free hash: stays stable on every GPU, at any size of input.
+    float hash(vec2 p) {
+      vec3 q = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
+      q += dot(q, q.yzx + 33.33);
+      return fract((q.x + q.y) * q.z);
+    }
+    float noise(vec2 p) {
+      vec2 i = floor(p), f = fract(p);
+      f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+      return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
+                 mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+    }
+    float fbm(vec2 p) {
+      float a = 0.55, s = 0.0;
+      for (int i = 0; i < 3; i++) { s += a * noise(p); p *= 2.03; a *= 0.45; }
+      return s;
+    }
+    vec3 hueShift(vec3 c, float a) {
+      vec3 k = vec3(0.57735);
+      float ca = cos(a), sa = sin(a);
+      return c * ca + cross(k, c) * sa + k * dot(k, c) * (1.0 - ca);
+    }
+
+    const vec2 SEEDV = vec2(4.2, 2.5);
+
+    vec3 meander(vec2 uv, float segs, float T) {
+      float ra = T * 0.018 + (fbm(vec2(T * 0.012, 0.9)) - 0.5) * 3.0;
+      uv = mat2(cos(ra), -sin(ra), sin(ra), cos(ra)) * uv;
+      float r = length(uv) + 1e-3;
+      float seg = TAU / segs;
+      float a = abs(mod(atan(uv.y, uv.x), seg) - seg * 0.5);
+      vec2 p = vec2(cos(a), sin(a)) * r * 4.0;
+      p.x -= T * 0.14; // the ribbons flow from the heart out to the rim
+
+      vec2 q = vec2(fbm(p * 0.8 + SEEDV + T * 0.020), fbm(p * 0.8 - SEEDV.yx - T * 0.016));
+      vec2 w = vec2(fbm(p * 1.1 + q * 2.6 + vec2(1.7, 9.2)), fbm(p * 1.1 + q * 2.6 + vec2(8.3, 2.8)));
+      float n = fbm(p * 1.15 + w * 3.1);
+      float b = abs(fract(n * 5.0 + T * 0.012) - 0.5) * 2.0;
+      // First only the fine glowing spines of the ribbons, then their
+      // bodies fill in, then the shadowed folds and bead sparks.
+      float spine = smoothstep(0.22, 0.0, b);
+      float tube = smoothstep(0.62, 0.42, b) * smoothstep(0.16, 0.36, rev);
+      float crease = smoothstep(0.46, 0.72, b) * smoothstep(0.3, 0.45, rev);
+      float bead = spine * (0.5 + 0.5 * sin(w.x * 34.0 + w.y * 21.0));
+      bead *= smoothstep(0.42, 0.56, rev);
+
+      // Amber at first; pink and magenta zones spread outward later on.
+      float zones = smoothstep(0.25, 0.5, rev);
+      vec3 zone = mix(vec3(1.0, 0.58, 0.10), vec3(0.95, 0.28, 0.52), smoothstep(0.50, 0.78, r) * zones);
+      zone = mix(zone, vec3(0.68, 0.10, 0.62), smoothstep(0.78, 1.05, r) * zones);
+      vec3 col = zone * (0.10 + 0.85 * tube) * smoothstep(0.16, 0.36, rev);
+      col *= 1.0 - crease * 0.78;
+      col += zone * spine * 0.45 + vec3(0.9, 0.85, 0.8) * spine * 0.10;
+      col += (zone * 0.6 + 0.4) * max(bead - 0.30, 0.0) * 0.9;
+
+      // Near the end, a dense green rosette fills the heart: the same
+      // ribbons at a finer scale.
+      float coreM = smoothstep(0.40, 0.20, r) * smoothstep(0.62, 0.82, rev);
+      float n2 = fbm(p * 3.0 + w * 2.2 + SEEDV * 1.7);
+      float b2 = abs(fract(n2 * 3.2 - T * 0.010) - 0.5) * 2.0;
+      float dot2 = smoothstep(0.52, 0.22, b2);
+      vec3 coreCol = vec3(0.05, 0.16, 0.06) + vec3(0.25, 0.85, 0.30) * dot2;
+      coreCol += vec3(0.55, 1.0, 0.5) * smoothstep(0.14, 0.0, b2) * 0.35;
+      col = mix(col, coreCol, coreM);
+      // Without the rosette yet, the field calms toward the centre.
+      col *= mix(smoothstep(0.03, 0.30, r), 1.0, coreM);
+      return col;
+    }
+
+    void main() {
+      vec2 uv = (2.0 * gl_FragCoord.xy - res) / min(res.x, res.y);
+      float r = length(uv);
+      float T = t * 0.6; // a little slower than the original: calm
+
+      // Mirrored wedges: 6 at first, then 8, 10 and 12, each step
+      // crossfading in over the last third of its stretch.
+      float level = min(rev * 3.0, 3.0);
+      float step6 = floor(level);
+      float segA = 6.0 + 2.0 * step6;
+      float blend = smoothstep(0.65, 1.0, level - step6);
+      vec3 col = meander(uv, segA, T);
+      if (blend > 0.001) col = mix(col, meander(uv, segA + 2.0, T), blend);
+
+      // A slow colour drift that is born at the heart and washes outward.
+      col = hueShift(col, t * 0.02 - r * 0.7);
+
+      // One calm brightness throughout, and nothing at all below 4%.
+      float wake = smoothstep(0.04, 0.12, rev);
+      col *= 0.38 * wake;
+      col *= 1.0 - smoothstep(0.72, 1.4, r) * 0.38; // soft vignette
+      col += vec3(0.035, 0.02, 0.06) * 0.65; // the field's own dark violet
+      col += (hash(gl_FragCoord.xy) - 0.5) * (1.5 / 255.0); // no banding
+      gl_FragColor = vec4(col, 1.0);
+    }`;
+
+  // Which style to paint: the lace (home page) unless the page or the
+  // address (?style=meander or ?style=lace) asks for another.
+  const STYLE = new URLSearchParams(location.search).get("style") || window.WOO_STYLE || "lace";
+  const FRAG = STYLE === "meander" ? MEANDER : LACE;
 
   function shader(type, source) {
     const s = gl.createShader(type);

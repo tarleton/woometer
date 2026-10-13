@@ -7,27 +7,25 @@
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#2a1a45">
   <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
   <script>
     // woometer.com/woo: a hidden playground. It shows the real home page, fetched
-    // fresh so it always matches, over the psychedelic field from woo.js, with a
-    // header slider to pretend any share of claims is answered.
+    // fresh so it always matches, with a header slider to pretend any share of
+    // claims is answered and a button to send a shooting star right away.
     (async () => {
       const HEAD = `
   <meta name="robots" content="noindex">
   <style>
-    body { background: transparent; }
-    .woo-field { position: fixed; inset: 0; z-index: -1; background: #0d0a14; pointer-events: none; }
-    .woo-field canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-    /* Soft dark backing so the words that sit straight on the field stay easy to read. */
-    .progress, .show-answered { padding: 3px 10px; border-radius: 999px; background: rgb(13 10 20 / 72%); box-shadow: 0 0 12px 6px rgb(13 10 20 / 55%); color: var(--ink); }
-    .done { background: rgb(13 10 20 / 80%); box-shadow: 0 0 18px 8px rgb(13 10 20 / 55%); color: var(--ink); }
     /* The reveal slider: pretend you've answered this share of the claims. */
-    .reveal { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; flex: 1 1 220px; max-width: 360px; }
+    .reveal { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; flex: 1 1 260px; max-width: 420px; }
     .reveal input { flex: 1; min-width: 0; accent-color: var(--accent); }
     .reveal output { min-width: 4.5ch; text-align: right; color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 700; }
+    /* Sends a shooting star over right now. */
+    .shoot { flex: none; width: 32px; height: 32px; padding: 0; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); display: grid; place-items: center; }
+    .shoot:hover { border-color: var(--accent); }
+    .shoot svg { width: 18px; height: 18px; }
   </style>
 `;
       const SLIDER = `
@@ -36,18 +34,14 @@
       <input type="range" id="reveal" min="0" max="100" step="0.5" value="0" aria-label="Pretend share of claims answered">
       <output id="reveal-out" for="reveal">0%</output>
     </label>
+    <button type="button" class="shoot" title="Send a shooting star" aria-label="Send a shooting star" onclick="window.dispatchEvent(new Event('woometer:shooting-star'))"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 5.6l1.9 4 4.3.5-3.2 2.9.9 4.3L12 15.1l-3.9 2.2.9-4.3-3.2-2.9 4.3-.5z" fill="currentColor"/></svg></button>
     <div class="top-actions">`;
-      const TAIL = `
-  <script src="woo.js?v=8"><\/script>
-</body>`;
       try {
         const reply = await fetch("./", { cache: "no-cache" });
         if (!reply.ok) throw new Error(reply.status);
         const html = (await reply.text())
           .replace("</head>", `${HEAD}</head>`)
-          .replace("<body>", `<body>\n  <div class="woo-field" aria-hidden="true"><canvas id="field"></canvas></div>`)
-          .replace(`<div class="top-actions">`, SLIDER)
-          .replace("</body>", TAIL);
+          .replace(`<div class="top-actions">`, SLIDER);
         document.open();
         document.write(html);
         document.close();

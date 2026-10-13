@@ -293,7 +293,7 @@ function paintSky(host, variant) {
     schedule();
   }
   function schedule() {
-    if (timer || still.matches || document.hidden || !stars.length) return;
+    if (timer || still.matches || document.hidden || (!stars.length && !meteor && !sparks.length)) return;
     // Every frame while a shooting star is out, otherwise a calm 20 a second.
     if (meteor || sparks.length) timer = requestAnimationFrame(tick);
     else timer = setTimeout(() => requestAnimationFrame(tick), FRAME_MS);
@@ -314,6 +314,12 @@ function paintSky(host, variant) {
     // On the /woo playground, sliding to 100% sends one over right away.
     if (meteors && !was && finished()) planMeteor(true);
     schedule();
+  });
+  // The /woo playground's star button sends one over on demand.
+  window.addEventListener("woometer:shooting-star", () => {
+    if (!meteors || still.matches) return;
+    launchMeteor(performance.now());
+    if (!timer) schedule();
   });
   window.addEventListener("storage", (e) => { if (e.key === STORAGE_KEY) { refresh(false); schedule(); } });
   document.addEventListener("visibilitychange", schedule);

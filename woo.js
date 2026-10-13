@@ -1,9 +1,9 @@
-// woometer.com/woo: a slow psychedelic "mind expanse" field to experiment on.
+// The home page's background: a slow psychedelic "mind expanse" field.
 // One GPU shader paints a glowing kaleidoscopic mandala that you drift into,
 // endlessly and slowly, with rainbow filigree, seeds of light, a breathing
 // light at its heart and a third eye that opens near the end. Its brightness
-// stays the same throughout: the header slider (or your real share of claims
-// answered) adds pieces to the design instead. With
+// stays the same throughout: your share of claims answered adds pieces to the
+// design instead (on the /woo playground, a header slider can pretend). With
 // reduced motion it holds one still frame.
 (() => {
   const canvas = document.getElementById("field");
@@ -29,8 +29,8 @@
   let pretending = false;
   function setReveal(pct, fromSlider) {
     reveal = pct / 100;
-    readout.textContent = `${pct % 1 ? pct.toFixed(1) : pct}%`;
-    if (!fromSlider) slider.value = pct;
+    if (readout) readout.textContent = `${pct % 1 ? pct.toFixed(1) : pct}%`;
+    if (slider && !fromSlider) slider.value = pct;
     if (fromSlider) {
       pretending = true;
       const n = Math.round(reveal * CLAIMS.length);
@@ -39,7 +39,7 @@
     if (still.matches) render();
   }
   setReveal(answeredPct(), false);
-  slider.addEventListener("input", () => setReveal(Number(slider.value), true));
+  slider?.addEventListener("input", () => setReveal(Number(slider.value), true));
   // Answering real claims on the page opens the field further, until the
   // slider takes over.
   window.addEventListener("woometer:answers", () => { if (!pretending) setReveal(answeredPct(), false); });
@@ -192,17 +192,23 @@
   };
 
   function resize() {
-    // Phones get a slightly softer resolution to stay cool and smooth.
-    const dpr = Math.min(window.devicePixelRatio || 1, innerWidth < 700 ? 1.5 : 2);
+    // A softer resolution (the field is all glow) keeps phones cool and smooth.
+    const dpr = Math.min(window.devicePixelRatio || 1, innerWidth < 700 ? 1 : 1.5);
     canvas.width = Math.round(canvas.clientWidth * dpr);
     canvas.height = Math.round(canvas.clientHeight * dpr);
     gl.viewport(0, 0, canvas.width, canvas.height);
     render();
   }
 
+  // The drift is slow, so about 30 frames a second is plenty and keeps
+  // phones cool.
   let running = false;
-  function frame() {
-    render();
+  let lastFrame = 0;
+  function frame(now) {
+    if (now - lastFrame >= 30) {
+      lastFrame = now;
+      render();
+    }
     if (!still.matches && !document.hidden) requestAnimationFrame(frame);
     else running = false;
   }

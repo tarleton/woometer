@@ -220,7 +220,10 @@
 
     const total = CLAIMS.length;
     const done = Object.keys(answers).length;
-    $("progress").textContent = `${done} of ${total} answered`;
+    // Rounded down, so it only reads 100% once every claim is answered.
+    const pct = Math.floor((done / total) * 100);
+    $("progress").textContent = `${done} of ${total} answered · ${pct}%`;
+    $("progress-bar").style.width = `${pct}%`;
     $("show-answered-label").hidden = done === 0;
     $("show-answered").checked = showAnswered;
     $("done").hidden = open.length > 0;

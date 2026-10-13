@@ -594,7 +594,10 @@ dialog a { color: var(--accent); }
    WebGL it stays plain dark. Words that sit straight on it get a soft dark
    backing so they stay easy to read. */
 body.has-field { background: transparent; }
-.woo-field { position: fixed; inset: 0; z-index: -1; background: #0d0a14; pointer-events: none; }
+/* Sized to the tallest the screen gets (address bar hidden), not inset: 0,
+   so a phone's address bar sliding in and out while scrolling never
+   resizes the field and makes it jump. */
+.woo-field { position: fixed; top: 0; left: 0; right: 0; height: 100vh; height: 100lvh; z-index: -1; background: #0d0a14; pointer-events: none; }
 .woo-field canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .has-field .progress, .has-field .show-answered { padding: 3px 10px; border-radius: 999px; background: rgb(13 10 20 / 72%); box-shadow: 0 0 12px 6px rgb(13 10 20 / 55%); color: var(--ink); }
 .has-field .done { background: rgb(13 10 20 / 80%); box-shadow: 0 0 18px 8px rgb(13 10 20 / 55%); color: var(--ink); }

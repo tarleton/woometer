@@ -1618,8 +1618,8 @@ const CLAIMS = [
     id: "pizzagate",
     name: "Pizzagate",
     category: "conspiracy",
-    question: "Do you believe a Washington pizzeria was the hub of a child-trafficking ring run by politicians?",
-    verdict: "Comet Ping Pong has no basement. In December 2016 a believer fired a rifle inside the restaurant, found no captive children, and was sentenced to four years in prison.",
+    question: "Do you believe leaked 2016 campaign emails revealed a child-trafficking ring run out of Comet Ping Pong, a pizzeria in Washington, D.C.?",
+    verdict: "Pizzagate read words like 'pizza' in the leaked emails as code for child abuse at Comet Ping Pong. The pizzeria has no basement, and a man who fired a rifle inside in December 2016 found no captive children. It's separate from the Jeffrey Epstein case, whose sex-trafficking crimes led to real convictions.",
     link: "https://en.wikipedia.org/wiki/Pizzagate_conspiracy_theory",
   },
   {

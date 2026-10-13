@@ -5,6 +5,7 @@
 (function () {
   const SUPABASE_JS = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js";
   const STORAGE_KEY = "woometer.answers.v1";
+  const SESSION_KEY = "woometer.session.v1";
   const LIST_SIZE = 10;
 
   const cfg = window.WOOMETER_CONFIG || {};
@@ -13,6 +14,9 @@
   const pct = (x) => `${Math.round(x * 100)}%`;
   // site_stats for everyone, kept so "All" can switch back to it.
   let everyone = null;
+  // What the page is showing now, so it can redraw after an answer here.
+  let current = { s: null, where: "" };
+  let db = null;
 
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
     notReady();
@@ -21,7 +25,8 @@
 
   loadScript(SUPABASE_JS)
     .then(async () => {
-      const db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+      db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+      db.auth.onAuthStateChange((event, session) => keepSession(session));
       // The map (and each continent's numbers) has its own function; if it
       // isn't in the database yet, the map just stays hidden.
       const mapLoad = db.rpc("map_stats");
@@ -68,6 +73,7 @@
   // (same shape). where is that continent's name, or "" for everyone.
   function render(s, where = "") {
     if (!s) return notReady();
+    current = { s, where };
     const mine = yourScore();
     document.querySelectorAll("#stats-body h2 .where").forEach((el) => (el.textContent = where && `in ${where}`));
 
@@ -77,11 +83,7 @@
     }
     $("people-count").textContent = s.people;
     $("people-label").textContent = s.people === 1 ? "person counted" : "people counted";
-    if (mine !== null) {
-      $("your-score").textContent = pct(mine);
-      $("your-tile").hidden = false;
-    }
-    renderSpread(scoreCounts(s), mine);
+    showMine(s, mine);
 
     // Claims removed from the site since people answered them are left out.
     const claims = (s.claims || [])
@@ -137,6 +139,15 @@
       return;
     }
     $("stats-body").hidden = false;
+  }
+
+  // Your own score tile, and your bar in the chart.
+  function showMine(s, mine = yourScore()) {
+    if (mine !== null) {
+      $("your-score").textContent = pct(mine);
+      $("your-tile").hidden = false;
+    }
+    renderSpread(scoreCounts(s), mine);
   }
 
   // Most people score low, so the ranges are narrow at the bottom and wide at
@@ -226,10 +237,12 @@
       ...items.map((c, i) => {
         const li = document.createElement("li");
         if (i >= SHOW_FIRST) li.className = "more";
-        const name = document.createElement("span");
+        const name = document.createElement("button");
+        name.type = "button";
         name.className = "name";
         name.textContent = `${CATEGORIES[c.claim.category].icon} ${c.claim.name}`;
         name.title = c.claim.name;
+        name.addEventListener("click", () => openCard(c));
 
         // Each color shows its own count, so even a sliver is wide enough for its number.
         const bar = document.createElement("span");
@@ -259,6 +272,106 @@
         return li;
       })
     );
+  }
+
+  // A claim's card, like the one on the main page: the evidence, how people
+  // here answered, and the same three buttons. Answering here saves it just
+  // like the main page does, and the totals catch up within about a minute.
+  const ANSWERS = [["yes", "Yes"], ["unsure", "Don't Know"], ["no", "No"]];
+  const SAID = { yes: "Yes", no: "No", unsure: "Don't Know" };
+
+  function savedAnswers() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    } catch {
+      return {};
+    }
+  }
+
+  function openCard(c) {
+    const claim = c.claim;
+    $("detail-cat").textContent = `${CATEGORIES[claim.category].icon} ${CATEGORIES[claim.category].label}`;
+    $("detail-name").textContent = claim.name;
+    $("detail-q").textContent = claim.question;
+    $("detail-verdict").textContent = claim.verdict;
+    $("detail-link").href = claim.link;
+    const total = c.yes + c.no + c.unsure;
+    const share = (n) => `${Math.round((n / total) * 100)}%`;
+    const people = `${total} ${total === 1 ? "person" : "people"}${current.where ? ` in ${current.where}` : ""}`;
+    $("detail-stats").textContent = c.unsure
+      ? `${share(c.yes)} of ${people} said Yes, ${share(c.no)} said No and ${share(c.unsure)} don't know.`
+      : `${share(c.yes)} of ${people} said Yes and ${share(c.no)} said No.`;
+    $("detail-saved").hidden = true;
+    showButtons(claim, savedAnswers()[claim.id]);
+    $("detail").showModal();
+  }
+
+  function showButtons(claim, given) {
+    $("detail-answer").replaceChildren(
+      ...ANSWERS.map(([value, label]) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = value;
+        b.textContent = label;
+        b.disabled = given === value;
+        if (b.disabled) b.title = "Your answer";
+        b.addEventListener("click", () => answer(claim, value));
+        return b;
+      })
+    );
+  }
+
+  async function answer(claim, value) {
+    const answers = savedAnswers();
+    const before = answers[claim.id];
+    // A changed answer counts as the newest one, as on the main page.
+    delete answers[claim.id];
+    answers[claim.id] = value;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+    } catch {}
+    if (typeof Sounds !== "undefined") ({ yes: Sounds.woo, no: Sounds.trash, unsure: Sounds.unsure })[value]();
+    showButtons(claim, value);
+    const saved = $("detail-saved");
+    saved.hidden = false;
+    saved.textContent = before
+      ? `Changed to ${SAID[value]}. The totals here catch up within about a minute.`
+      : `Saved as ${SAID[value]}. The totals here catch up within about a minute.`;
+    // Your own score and its bar on this page change straight away.
+    if (current.s) showMine(current.s);
+    // If the main page can't be reached now, it sends this answer up next
+    // time it opens, since this browser's copy is newer than the account's.
+    sendAnswer(claim.id, value).catch((err) => console.warn("woometer: answer will be saved next visit.", err));
+  }
+
+  // Only uses a sign-in this browser already has (never starts a new one), so
+  // someone who has never answered on the main page doesn't get an account here.
+  async function sendAnswer(id, value) {
+    if (!db) return;
+    let { data } = await db.auth.getSession();
+    if (!data.session) {
+      const spare = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+      if (!spare || !spare.refresh_token) return;
+      const res = await db.auth.setSession({ access_token: spare.access_token, refresh_token: spare.refresh_token });
+      if (res.error || !res.data.session) return;
+      data = res.data;
+    }
+    const { error } = await db
+      .from("answers")
+      .upsert({ user_id: data.session.user.id, claim_id: id, answer: value, updated_at: new Date().toISOString() });
+    if (error) throw error;
+  }
+
+  // The main page keeps a spare copy of its sign-in (see keepSession in
+  // cloud.js); a refresh here has to update it too, or that copy goes stale.
+  function keepSession(session) {
+    if (!session || !session.refresh_token) return;
+    try {
+      localStorage.setItem(
+        SESSION_KEY,
+        JSON.stringify({ user: session.user.id, access_token: session.access_token, refresh_token: session.refresh_token })
+      );
+    } catch {}
   }
 
   // World map: a star on each country people answered from, bigger for more

@@ -211,9 +211,12 @@
       return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
                  mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
     }
+    // Each finer layer is turned a little, so the noise's square grid never
+    // shows: the ribbons stay round and curvy instead of boxy.
+    const mat2 TURN = mat2(0.8, -0.6, 0.6, 0.8);
     float fbm(vec2 p) {
       float a = 0.55, s = 0.0;
-      for (int i = 0; i < 3; i++) { s += a * noise(p); p *= 2.03; a *= 0.45; }
+      for (int i = 0; i < 3; i++) { s += a * noise(p); p = TURN * p * 2.03 + 17.0; a *= 0.45; }
       return s;
     }
     // The same neon rainbow as the lace, so both styles share one palette.
@@ -229,7 +232,9 @@
       uv = mat2(cos(ra), -sin(ra), sin(ra), cos(ra)) * uv;
       float r = length(uv) + 1e-3;
       float seg = TAU / segs;
-      float a = abs(mod(atan(uv.y, uv.x), seg) - seg * 0.5);
+      // A soft mirror fold: the angle eases into each mirror line instead of
+      // bouncing off it, so ribbons curve through the seams with no sharp V.
+      float a = seg * 0.25 * (1.0 - cos(segs * atan(uv.y, uv.x)));
       vec2 p = vec2(cos(a), sin(a)) * r * 4.0;
       p.x -= t * 0.03; // the ribbons drift from the heart out to the rim
 

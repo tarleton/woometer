@@ -460,6 +460,37 @@ button { font: inherit; cursor: pointer; }
   text-decoration: none;
 }
 .fun-stat:hover { border-color: var(--accent); }
+/* Hidden until 10 Yes or No answers, the bar for being counted on /stats. */
+.fun-stat[hidden] { display: none; }
+.fun-stat { position: relative; }
+.fun-stat.unlocked { animation: unlock-in 0.7s ease-out; }
+@keyframes unlock-in { from { opacity: 0; transform: scale(0.96); } }
+.unlock-spark { position: absolute; color: #ffd86b; font-size: 14px; line-height: 1; pointer-events: none; text-shadow: 0 0 6px rgb(255 216 107 / 80%); animation: unlock-spark 1.4s ease-out forwards; }
+@keyframes unlock-spark {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.3); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1); }
+}
+/* "Now you're counted": a quiet note that fades on its own, above any toast. */
+.unlock-note {
+  position: fixed;
+  left: 50%;
+  bottom: 74px;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid #ffd86b;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  text-align: center;
+  z-index: 60;
+  pointer-events: none;
+  animation: unlock-note 6s ease-in-out forwards;
+}
+@keyframes unlock-note { 0% { opacity: 0; } 8%, 85% { opacity: 1; } 100% { opacity: 0; } }
 .fun-stat-head { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; }
 .fun-stat-more { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--accent); }
 .fun-stat-text { display: block; margin-top: 6px; font-size: 14px; line-height: 1.4; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity 0.3s; }
@@ -677,6 +708,7 @@ body > main { width: 100%; flex: 1 0 auto; }
   /* Clear of the bottom bar on the home page. */
   .minibar ~ .foot { margin-bottom: var(--minibar-h, calc(58px + env(safe-area-inset-bottom))); }
   .toast { bottom: calc(76px + env(safe-area-inset-bottom)); }
+  .unlock-note { bottom: calc(126px + env(safe-area-inset-bottom)); }
 }
 
 @media (prefers-reduced-motion: reduce) {

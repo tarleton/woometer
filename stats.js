@@ -17,6 +17,10 @@
   // What the page is showing now, so it can redraw after an answer here.
   let current = { s: null, where: "" };
   let db = null;
+  // How many claims people have answered (answered_stats), and which
+  // continent is picked, or null for everyone.
+  let answered = null;
+  let regionKey = null;
 
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
     notReady();
@@ -30,6 +34,13 @@
       // The map (and each continent's numbers) has its own function; if it
       // isn't in the database yet, the map just stays hidden.
       const mapLoad = db.rpc("map_stats");
+      // Only claims on the site now count, not retired ones. If this function
+      // isn't in the database yet, its section just stays hidden.
+      db.rpc("answered_stats", { current_ids: CLAIMS.map((c) => c.id) }).then(({ data, error }) => {
+        if (error) return console.warn("woometer: answered counts aren't available.", error);
+        answered = data;
+        renderAnswered();
+      });
       const { data, error } = await db.rpc("site_stats");
       if (error) throw error;
       everyone = data;
@@ -139,6 +150,7 @@
       $("stats-status").textContent = "Not enough people have answered yet to show stats. Please check back soon.";
       return;
     }
+    renderAnswered();
     $("stats-body").hidden = false;
   }
 
@@ -149,6 +161,22 @@
       $("your-tile").hidden = false;
     }
     renderSpread(scoreCounts(s), mine);
+  }
+
+  // "How far people get": for everyone, or the picked continent once it has
+  // 3 people. Only counts, never anyone's own.
+  function renderAnswered() {
+    const a = answered && (regionKey ? (answered.continents || {})[regionKey] : answered);
+    $("answered-section").hidden = !a || !a.people;
+    if (!a || !a.people) return;
+    const total = answered.claims;
+    $("claim-total").textContent = total;
+    $("answered-avg").textContent = Math.round(a.average);
+    $("answered-avg-label").textContent = `of ${total} answered on average`;
+    $("answered-median").textContent = Math.round(a.median);
+    $("answered-median-label").textContent = `of ${total} typical (median)`;
+    $("answered-all").textContent = a.answered_all;
+    $("answered-all-label").textContent = a.answered_all === 1 ? "person answered every claim" : "people answered every claim";
   }
 
   // Most people score low, so the ranges are narrow at the bottom and wide at
@@ -406,6 +434,7 @@
     const lands = {};
     const chips = {};
     const pick = (key) => {
+      regionKey = key;
       Object.entries(lands).forEach(([k, l]) => l.classList.toggle("on", k === key));
       Object.entries(chips).forEach(([k, b]) => b.setAttribute("aria-pressed", String(k === (key || "all"))));
       if (!key) render(everyone);

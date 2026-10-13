@@ -1,8 +1,9 @@
 // woometer.com/woo: a slow psychedelic "mind expanse" field to experiment on.
 // One GPU shader paints a glowing kaleidoscopic mandala that you drift into,
-// endlessly and slowly, with rainbow filigree, a breathing light at its heart
-// and a third eye that opens near the top of the reveal. The header slider (or
-// your real share of claims answered) sets how much of it is revealed. With
+// endlessly and slowly, with rainbow filigree, seeds of light, a breathing
+// light at its heart and a third eye that opens near the end. Its brightness
+// stays the same throughout: the header slider (or your real share of claims
+// answered) adds pieces to the design instead. With
 // reduced motion it holds one still frame.
 (() => {
   const canvas = document.getElementById("field");
@@ -61,13 +62,16 @@
     }
 
     // The lace: a kaleidoscopic fold of the plane, repeated. Each pass leaves
-    // a thin glowing line along its creases; more passes, finer lace.
-    vec3 lace(vec2 q, float depth, float passes, float fw) {
+    // a thin glowing line along its creases. Passes are added one at a time
+    // as more claims are answered: at first one simple fold, at the end eight.
+    vec3 lace(vec2 q, float depth, float fw, float grow) {
       vec3 col = vec3(0.0);
       vec2 z = q;
       vec2 c = vec2(0.86 + 0.05 * sin(t * 0.011), 0.52 + 0.05 * cos(t * 0.009));
       for (int i = 0; i < 8; i++) {
-        if (float(i) >= passes) break;
+        float at = float(i) * 0.12;
+        float here = smoothstep(at - 0.06, at + 0.04, grow);
+        if (here <= 0.0) break;
         // Each fold also stretches the pixel's footprint by the same amount.
         float k = clamp(dot(z, z), 0.12, 6.0);
         z = abs(z) / k - c;
@@ -79,9 +83,13 @@
         float crease = min(abs(z.x), abs(z.y));
         float line = exp(-crease / w) * (0.03 / w);
         float ring = exp(-abs(length(z) - 0.7) / (w * 1.3)) * (0.03 / w);
-        col += rainbow(float(i) * 0.13 + depth * 0.22 + t * 0.004) * (line * 0.7 + ring * 0.25) * (1.0 - float(i) * 0.1);
+        col += rainbow(float(i) * 0.13 + depth * 0.22 + t * 0.004) * (line * 0.7 + ring * 0.25) * (1.0 - float(i) * 0.1) * here;
       }
       return col;
+    }
+
+    float hash(vec2 p) {
+      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
     }
 
     void main() {
@@ -89,7 +97,7 @@
       float r = length(uv);
       float a = atan(uv.y, uv.x);
 
-      // Kaleidoscope: 6 mirrored segments at first, up to 12 at full reveal.
+      // Kaleidoscope: 6 mirrored segments at first, 8, 10, then 12 near the end.
       float seg = 6.0 + 2.0 * floor(rev * 3.0 + 0.001);
       float s = TAU / seg;
       float fa = abs(mod(a + t * 0.003, s) - 0.5 * s);
@@ -101,37 +109,48 @@
       // How much of the lace one pixel covers: the closer to the heart, the
       // more the pattern is squeezed into each pixel.
       float fw = 1.4 / (max(r, 0.001) * min(res.x, res.y));
-      float passes = 3.0 + floor(rev * 5.0 + 0.001);
-      vec3 col = lace(q, depth, passes, fw) * (0.04 + 1.0 * pow(rev, 1.4));
 
-      // A finer second veil turning the other way, only once things open up.
+      // The same calm brightness at every level: answering adds to the design
+      // rather than turning it up.
+      const float GLOW = 0.42;
+      vec3 col = lace(q, depth, fw, rev) * GLOW;
+
+      // A finer second veil turning the other way, added from about a third in.
       float fb = abs(mod(a - t * 0.005, s) - 0.5 * s);
       vec2 q2 = vec2((fract(depth * 0.55 + 0.5) - 0.5) * 2.4, fb * 2.6) * 1.25;
-      col += smoothstep(0.35, 1.0, rev) * 0.5 * lace(q2, depth + 0.5, passes - 1.0, fw * 1.25);
+      col += smoothstep(0.3, 0.55, rev) * 0.35 * GLOW * lace(q2, depth + 0.5, fw * 1.25, rev - 0.12);
+
+      // Seeds of light scattered through the field, more of them the more you
+      // answer, like the stars in the header. They drift inward with the lace.
+      vec2 sp = vec2(depth * 2.2, fa / s * 3.0);
+      vec2 cell = floor(sp);
+      float h = hash(cell + vec2(seg * 7.0, 0.0));
+      vec2 spot = vec2(0.25 + 0.5 * hash(cell + 3.1), 0.25 + 0.5 * hash(cell + 7.7));
+      float seed = exp(-length(fract(sp) - spot) * 26.0) * step(h, rev * 0.85);
+      float twinkle = 0.6 + 0.4 * sin(t * (0.5 + h * 1.5) + h * 40.0);
+      col += mix(vec3(1.0, 0.92, 0.8), rainbow(h), 0.4) * seed * twinkle * 0.35 * smoothstep(0.08, 0.3, r);
 
       // The lace fades into a calm, dark heart, and is a little softer in the
       // far corners.
       col *= smoothstep(0.03, 0.22, r) * (1.0 - 0.5 * smoothstep(0.7, 1.3, r));
 
-      // At the heart: one small, breathing point of white light with a thin
-      // halo, and fine rays reaching out between the mirrored segments.
+      // At the heart: one small, breathing point of white light, a thin halo
+      // once you've started, and fine rays reaching out from a quarter in.
       float breath = 0.5 + 0.5 * sin(t * TAU / 9.0);
       float rays = pow(abs(cos(fa * seg * 0.5 + 1.5708)), 40.0) * exp(-r * 6.0) * smoothstep(0.01, 0.06, r);
-      col += rainbow(t * 0.01 + r * 2.0) * rays * 0.25 * rev;
-      col += vec3(0.8, 0.7, 1.0) * exp(-abs(r - 0.035) * 140.0) * (0.1 + 0.15 * breath) * rev;
-      col += vec3(1.0, 0.96, 1.0) * exp(-r * 140.0) * (0.35 + 0.25 * breath) * (0.4 + 0.6 * rev);
+      col += rainbow(t * 0.01 + r * 2.0) * rays * 0.18 * smoothstep(0.2, 0.35, rev);
+      col += vec3(0.8, 0.7, 1.0) * exp(-abs(r - 0.035) * 140.0) * (0.08 + 0.1 * breath) * smoothstep(0.05, 0.15, rev);
+      col += vec3(1.0, 0.96, 1.0) * exp(-r * 140.0) * (0.3 + 0.2 * breath);
 
-      // Near full reveal, a third eye glows open above the heart.
+      // Near the end, a third eye opens above the heart.
       float eyeOpen = smoothstep(0.8, 1.0, rev);
       vec2 e = uv - vec2(0.0, 0.32);
       float span = clamp(1.0 - pow(e.x / 0.24, 2.0), 0.0, 1.0);
       float lid = abs(abs(e.y) - 0.075 * span);
-      col += vec3(0.8, 0.65, 1.0) * exp(-lid * 160.0) * step(abs(e.x), 0.24) * eyeOpen;
-      col += rainbow(t * 0.02 + r) * exp(-length(e) * 28.0) * 1.2 * eyeOpen;
+      col += vec3(0.8, 0.65, 1.0) * exp(-lid * 160.0) * step(abs(e.x), 0.24) * eyeOpen * 0.5;
+      col += rainbow(t * 0.02 + r) * exp(-length(e) * 28.0) * 0.5 * eyeOpen;
 
-      // Gentle at the top end: the more is revealed, the softer the glow, so a
-      // full field stays a backdrop rather than a light show.
-      col = (1.0 - exp(-col * 1.2)) * (1.0 - 0.45 * smoothstep(0.3, 1.0, rev));
+      col = 1.0 - exp(-col);
       col += vec3(0.035, 0.02, 0.06) * (1.0 - r * 0.7); // the field's own dark violet
       gl_FragColor = vec4(col, 1.0);
     }`;

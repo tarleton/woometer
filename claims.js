@@ -826,8 +826,8 @@ const CLAIMS = [
     id: "gua-sha",
     name: "Gua Sha",
     category: "medicine",
-    question: "Do you believe scraping the skin until it bruises (gua sha) releases toxins from the body?",
-    verdict: "The red marks are bruising from broken capillaries. There is no good evidence it removes toxins or treats disease, though it may feel like a massage.",
+    question: "Do you believe gua sha, stroking the skin with a smooth stone or tool, helps flush toxins out of your body?",
+    verdict: "Traditional body gua sha presses hard enough to raise red marks ('sha'), which are small broken capillaries. The gentle facial version is said to drain lymph. Massage can briefly ease puffiness or sore muscles, but neither style removes toxins. Your liver and kidneys do that.",
     link: "https://en.wikipedia.org/wiki/Gua_sha",
   },
   {

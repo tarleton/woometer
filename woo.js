@@ -211,13 +211,12 @@
       return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
                  mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
     }
-    // Each finer layer is turned a little, so the noise's square grid never
-    // shows: the ribbons stay round and curvy instead of boxy.
+    // Two broad layers only, the finer one turned a little so the noise's
+    // square grid never shows: the ribbons stay long, round and curvy
+    // instead of crinkled or boxy.
     const mat2 TURN = mat2(0.8, -0.6, 0.6, 0.8);
     float fbm(vec2 p) {
-      float a = 0.55, s = 0.0;
-      for (int i = 0; i < 3; i++) { s += a * noise(p); p = TURN * p * 2.03 + 17.0; a *= 0.45; }
-      return s;
+      return 0.63 * noise(p) + 0.28 * noise(TURN * p * 2.03 + 17.0);
     }
     // The same neon rainbow as the lace, so both styles share one palette.
     vec3 rainbow(float x) {
@@ -240,7 +239,7 @@
 
       vec2 q = vec2(fbm(p * 0.8 + SEEDV + T * 0.020), fbm(p * 0.8 - SEEDV.yx - T * 0.016));
       vec2 w = vec2(fbm(p * 1.1 + q * 2.6 + vec2(1.7, 9.2)), fbm(p * 1.1 + q * 2.6 + vec2(8.3, 2.8)));
-      float n = fbm(p * 1.15 + w * 3.1);
+      float n = fbm(p * 1.15 + w * 2.6);
       float b = abs(fract(n * 5.0 + T * 0.012) - 0.5) * 2.0;
       // First only the fine glowing spines of the ribbons, then their
       // bodies fill in, then the shadowed folds and bead sparks.

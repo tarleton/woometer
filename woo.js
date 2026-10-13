@@ -231,7 +231,7 @@
       float seg = TAU / segs;
       float a = abs(mod(atan(uv.y, uv.x), seg) - seg * 0.5);
       vec2 p = vec2(cos(a), sin(a)) * r * 4.0;
-      p.x -= T * 0.14; // the ribbons flow from the heart out to the rim
+      p.x -= t * 0.03; // the ribbons drift from the heart out to the rim
 
       vec2 q = vec2(fbm(p * 0.8 + SEEDV + T * 0.020), fbm(p * 0.8 - SEEDV.yx - T * 0.016));
       vec2 w = vec2(fbm(p * 1.1 + q * 2.6 + vec2(1.7, 9.2)), fbm(p * 1.1 + q * 2.6 + vec2(8.3, 2.8)));
@@ -277,7 +277,9 @@
     void main() {
       vec2 uv = (2.0 * gl_FragCoord.xy - res) / min(res.x, res.y);
       float r = length(uv);
-      float T = t * 0.04; // drifts no faster than the lace: slow and calm
+      // The folds reshape and turn slowly while the ribbons drift outward at
+      // a gentle, visible pace, like the lace's.
+      float T = t * 0.12;
 
       // Mirrored wedges: 6 at first, then 8 and finally 10 (no more, so the
       // full screen never gets dizzying), each step crossfading in over the

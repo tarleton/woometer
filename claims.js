@@ -1683,7 +1683,7 @@ const CLAIMS = [
     name: "Hidden Cancer Cure",
     category: "conspiracy",
     question: "Do you believe a proven cure for cancer already exists and drug companies are suppressing it to keep profiting from treatment?",
-    verdict: "Cancer is hundreds of different diseases, and many are now routinely cured, such as most testicular cancers. New treatments aren't secret: clinical trials are publicly registered. A company with a cure would make a fortune selling it, and executives' own families get cancer too.",
+    verdict: "There's no single cure to hide, because cancer is hundreds of different diseases. Treatments that do cure some of them, like those for most testicular cancers and childhood leukemia, are sold openly, since a cure makes a fortune. New treatments aren't secret either: clinical trials are publicly registered.",
     link: "https://en.wikipedia.org/wiki/Cancer",
   },
   {

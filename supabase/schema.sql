@@ -320,6 +320,25 @@ begin
   on conflict (id) do update set display_name = coalesce(excluded.display_name, profiles.display_name);
 end $$;
 
+-- "Get a new link" in Share: a fresh code for the caller's link, so the old
+-- link (say, one kept by someone they've since removed) stops working. Links
+-- of their other accounts lead to them too (see user_for_code), so those get
+-- fresh codes as well. Friends stay friends, since friend rows use account ids.
+create or replace function public.new_share_code()
+returns text
+language plpgsql security definer set search_path = public as $$
+declare
+  fresh text;
+begin
+  if auth.uid() is null then raise exception 'not signed in'; end if;
+  update profiles set share_code = substr(replace(gen_random_uuid()::text, '-', ''), 1, 12)
+  where duplicate_of = auth.uid();
+  update profiles set share_code = substr(replace(gen_random_uuid()::text, '-', ''), 1, 12)
+  where id = auth.uid()
+  returning share_code into fresh;
+  return fresh;
+end $$;
+
 -- The account behind a friend link: its own, or the one its link now leads to
 -- (see duplicate_of).
 create or replace function public.user_for_code(code text)
@@ -399,6 +418,14 @@ create or replace function public.name_for_code(code text)
 returns text
 language sql stable security definer set search_path = public as $$
   select display_name from profiles where id = user_for_code(code);
+$$;
+
+-- Whether a friend link leads to anyone, so an old or mistyped link can say
+-- it doesn't work instead of showing an empty result.
+create or replace function public.link_works(code text)
+returns boolean
+language sql stable security definer set search_path = public as $$
+  select user_for_code(code) is not null;
 $$;
 
 -- Tapping "Add as a friend" on someone's link adds each of you to the other's list.
@@ -800,10 +827,12 @@ grant execute on function public.answered_stats(text[]) to anon, authenticated;
 
 revoke execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
   public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
-  public.new_friends(), public.saw_friends(), public.delete_my_account(), public.start_move(), public.finish_move(text) from public, anon;
+  public.new_friends(), public.saw_friends(), public.delete_my_account(), public.start_move(), public.finish_move(text),
+  public.new_share_code(), public.link_works(text) from public, anon;
 grant execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
   public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
-  public.new_friends(), public.saw_friends(), public.delete_my_account(), public.start_move(), public.finish_move(text) to authenticated;
+  public.new_friends(), public.saw_friends(), public.delete_my_account(), public.start_move(), public.finish_move(text),
+  public.new_share_code(), public.link_works(text) to authenticated;
 
 -- These only run inside the functions above, never called directly.
 revoke execute on function public.record_visit(), public.ip_code(text), public.left_out_of_stats(uuid),

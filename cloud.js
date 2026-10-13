@@ -128,7 +128,7 @@
     if (error) throw error;
     profile = rows[0];
     if (!profile.display_name && !user.is_anonymous) {
-      const meta = user.user_metadata || {};
+      const meta = accountInfo(user);
       const name = (meta.full_name || meta.name || "").trim();
       if (name) await setName(name);
     }
@@ -628,7 +628,7 @@
     $("link-facebook").hidden = anon || !cfg.facebookSignIn || providersOf(user).includes("facebook");
     if (anon) return;
 
-    const meta = user.user_metadata || {};
+    const meta = accountInfo(user);
     const name = meta.full_name || meta.name || profile.display_name || "";
     const picture = meta.avatar_url || meta.picture;
     const avatar = $("avatar-pic");
@@ -704,6 +704,17 @@
     } catch {
       return null;
     }
+  }
+
+  // The Google (or Facebook) account's name and picture. Linking Google to
+  // answers already given here leaves them out of user_metadata, so on 13 Oct
+  // a new Google sign-in showed no name; the linked account's own copy fills in.
+  function accountInfo(u) {
+    const info = { ...u.user_metadata };
+    for (const i of u.identities || []) {
+      for (const [key, value] of Object.entries(i.identity_data || {})) if (!info[key]) info[key] = value;
+    }
+    return info;
   }
 
   // The sign-ins on this account: "google", "facebook" (anonymous has none).
@@ -848,7 +859,7 @@
     if (profile.display_name) return Promise.resolve(then());
     $("name-title").textContent = "What's your name?";
     $("name-hint").textContent = NAME_HINT;
-    const meta = user.user_metadata || {};
+    const meta = accountInfo(user);
     $("name-input").value = (meta.full_name || meta.name || "").trim().slice(0, 40);
     const both = cfg.googleSignIn && cfg.facebookSignIn;
     $("name-google").hidden = !(user.is_anonymous && (cfg.googleSignIn || cfg.facebookSignIn));
@@ -949,9 +960,9 @@
     const add = $("invite-add");
     add.textContent = `Add ${name || "them"} as a Friend`;
     add.disabled = false;
-    // Friends need a name to show in each other's lists.
-    add.hidden = !name;
-    if (!name) $("invite-text").textContent = "They haven't added their name yet. Once they do, you can add them as a friend.";
+    add.hidden = false;
+    // Having their link is enough. Their name shows once they add one.
+    if (!name) $("invite-text").textContent = "They haven't added their name yet. You can still add them, and give them a nickname with ✎ in Friends.";
     add.onclick = async () => {
       if (await addFriend(code, name)) {
         add.textContent = "Added to your friends ✓";
@@ -969,10 +980,6 @@
       W.toast("That's your own link.");
       return false;
     }
-    if (!name) {
-      W.toast("They haven't added their name on woometer yet. Once they do, ask them to send their link again.");
-      return false;
-    }
     return withName(() => addNamedFriend(code, name), { code, name });
   }
 
@@ -984,7 +991,7 @@
       return false;
     }
     rememberFriendCode(code);
-    W.toast(`${name || "Your friend"} is now in your friends.` + (keepFriendsNote() ? ` ${$("friends-google").textContent} to keep them safe on any device.` : ""));
+    W.toast((name ? `${name} is now in your friends.` : "Added to your friends. Tap ✎ to give them a nickname.") + (keepFriendsNote() ? ` ${$("friends-google").textContent} to keep them safe on any device.` : ""));
     refreshFriends();
     return true;
   }

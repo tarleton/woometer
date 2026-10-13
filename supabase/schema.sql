@@ -78,6 +78,25 @@ create table if not exists public.friends_seen (
   seen_at timestamptz not null default now()
 );
 
+-- Asking to be friends. Tapping Add on someone's link sends a request, and
+-- nobody joins anyone's friend list until the person asked taps Accept, so a
+-- link posted somewhere public can't fill a list with strangers. One row per
+-- direction. status is what the person asked did: pending, accepted or
+-- ignored. An ignored request still looks sent to whoever asked, so they
+-- aren't told, and asking again leaves it ignored. cancelled_at is when
+-- whoever asked took it back. Only the functions below touch it.
+create table if not exists public.friend_requests (
+  from_user uuid not null references auth.users (id) on delete cascade,
+  to_user uuid not null references auth.users (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  status text not null default 'pending' check (status in ('pending', 'accepted', 'ignored')),
+  answered_at timestamptz,
+  cancelled_at timestamptz,
+  primary key (from_user, to_user),
+  check (from_user <> to_user)
+);
+create index if not exists friend_requests_to_user_idx on public.friend_requests (to_user);
+
 -- Where people visit from, for the site owner to look at in the database,
 -- and later for a world map on the stats page. One row per account per IP
 -- address, refreshed on every visit. The country, region and city are
@@ -163,6 +182,7 @@ alter table public.visits enable row level security;
 alter table public.private_settings enable row level security;
 alter table public.ignored_ip_codes enable row level security;
 alter table public.friends_seen enable row level security;
+alter table public.friend_requests enable row level security;
 alter table public.stats_cache enable row level security;
 alter table public.moves enable row level security;
 
@@ -207,7 +227,7 @@ create policy "remove own friends" on public.friends
 -- Profiles are created and renamed only through the functions below.
 grant usage on schema public to anon, authenticated;
 revoke all on public.profiles, public.answers, public.friends from anon;
-revoke all on public.visits, public.private_settings, public.ignored_ip_codes, public.friends_seen, public.stats_cache, public.moves from anon, authenticated;
+revoke all on public.visits, public.private_settings, public.ignored_ip_codes, public.friends_seen, public.friend_requests, public.stats_cache, public.moves from anon, authenticated;
 revoke insert, update, delete on public.profiles from authenticated;
 revoke select, insert, update on public.friends from authenticated;
 grant select on public.profiles to authenticated;
@@ -385,8 +405,9 @@ end $$;
 
 -- When an account is marked as someone's duplicate (by finish_move or in the
 -- SQL editor), the account they use now takes over its friends, both ways and
--- with any nicknames, unless the pair is already friends. Friend lists leave
--- the duplicate out (see my_friends), so a friend sees that person once.
+-- with any nicknames, unless the pair is already friends, and its friend
+-- requests, sent and received. Friend lists and requests leave the duplicate
+-- out (see my_friends and my_requests), so a friend sees that person once.
 create or replace function public.duplicate_friends()
 returns trigger
 language plpgsql security definer set search_path = public as $$
@@ -405,6 +426,16 @@ begin
          case when f.added_by = new.id then new.duplicate_of else f.added_by end
   from friends f
   where f.friend_id = new.id and f.user_id <> new.duplicate_of
+  on conflict do nothing;
+  insert into friend_requests (from_user, to_user, created_at, status, answered_at, cancelled_at)
+  select new.duplicate_of, r.to_user, r.created_at, r.status, r.answered_at, r.cancelled_at
+  from friend_requests r
+  where r.from_user = new.id and r.to_user <> new.duplicate_of
+  on conflict do nothing;
+  insert into friend_requests (from_user, to_user, created_at, status, answered_at, cancelled_at)
+  select r.from_user, new.duplicate_of, r.created_at, r.status, r.answered_at, r.cancelled_at
+  from friend_requests r
+  where r.to_user = new.id and r.from_user <> new.duplicate_of
   on conflict do nothing;
   return null;
 end $$;
@@ -428,13 +459,30 @@ language sql stable security definer set search_path = public as $$
   select user_for_code(code) is not null;
 $$;
 
--- Tapping "Add as a friend" on someone's link adds each of you to the other's list.
--- Returns the friend's user id, or null for an unknown code or your own link.
--- You need a name, since you'll show up in their list. They don't: having
--- their link is enough, and they show as "Unnamed friend" until they add a
--- name or you give them a nickname.
-create or replace function public.add_friend(code text)
-returns uuid
+-- Puts each of you in the other's friend list and marks any request between
+-- you accepted. Only runs inside ask_friend and answer_request. added_by is
+-- whoever made it happen (by accepting, or by asking someone who had already
+-- asked them), so the other person's Friends badge counts the new friend.
+create or replace function public.make_friends(other uuid)
+returns void
+language sql security definer set search_path = public as $$
+  insert into friends (user_id, friend_id, added_by)
+  values (auth.uid(), other, auth.uid()), (other, auth.uid(), auth.uid())
+  on conflict do nothing;
+  update friend_requests set status = 'accepted', answered_at = now()
+  where status <> 'accepted'
+    and ((from_user = auth.uid() and to_user = other) or (from_user = other and to_user = auth.uid()));
+$$;
+
+-- Tapping "Add as a friend" on someone's link (or pasting it in Friends) asks
+-- them to be friends. You need a name, since it shows in their requests. They
+-- don't: having their link is enough, and once they accept they show as
+-- "Unnamed friend" until they add a name or you give them a nickname.
+-- Returns 'asked'; 'friends' if you already are, or if they had already asked
+-- you (you both want it, so it happens right away); or null for an unknown
+-- code or your own link.
+create or replace function public.ask_friend(code text)
+returns text
 language plpgsql security definer set search_path = public as $$
 declare
   other uuid;
@@ -445,10 +493,107 @@ begin
   end if;
   other := user_for_code(code);
   if other is null or other = auth.uid() then return null; end if;
-  insert into friends (user_id, friend_id, added_by)
-  values (auth.uid(), other, auth.uid()), (other, auth.uid(), auth.uid())
-  on conflict do nothing;
-  return other;
+  if exists (select 1 from friends where user_id = auth.uid() and friend_id = other) then
+    return 'friends';
+  end if;
+  if exists (select 1 from friend_requests
+             where from_user = other and to_user = auth.uid() and status <> 'accepted' and cancelled_at is null) then
+    perform make_friends(other);
+    return 'friends';
+  end if;
+  -- Nobody can tap Accept for a pretend test account like John Doe, so
+  -- asking one makes you friends at once.
+  if exists (select 1 from profiles where id = other and is_tester) then
+    perform make_friends(other);
+    return 'friends';
+  end if;
+  -- Asking again after you were friends (one of you removed the other) is a
+  -- new request. Asking again after being ignored stays ignored, quietly.
+  insert into friend_requests as r (from_user, to_user) values (auth.uid(), other)
+  on conflict (from_user, to_user) do update set
+    status = case when r.status = 'accepted' then 'pending' else r.status end,
+    answered_at = case when r.status = 'accepted' then null else r.answered_at end,
+    created_at = case when r.status = 'accepted' or r.cancelled_at is not null then now() else r.created_at end,
+    cancelled_at = null;
+  return 'asked';
+end $$;
+
+-- Your friend requests: people asking you, waiting for Accept or Ignore
+-- (incoming), and people you've asked who haven't accepted yet. One you
+-- ignored leaves your list but still shows as sent to whoever asked, so
+-- they aren't told. Leaves out duplicate accounts and anyone already a friend.
+create or replace function public.my_requests()
+returns table (other uuid, display_name text, asked_at timestamptz, incoming boolean)
+language sql stable security definer set search_path = public as $$
+  select r.from_user, p.display_name, r.created_at, true
+  from friend_requests r
+  left join profiles p on p.id = r.from_user
+  where r.to_user = auth.uid() and r.status = 'pending' and r.cancelled_at is null
+    and p.duplicate_of is null
+    and not exists (select 1 from friends f where f.user_id = auth.uid() and f.friend_id = r.from_user)
+  union all
+  select r.to_user, p.display_name, r.created_at, false
+  from friend_requests r
+  left join profiles p on p.id = r.to_user
+  where r.from_user = auth.uid() and r.status <> 'accepted' and r.cancelled_at is null
+    and p.duplicate_of is null
+    and not exists (select 1 from friends f where f.user_id = auth.uid() and f.friend_id = r.to_user)
+  order by 3 desc;
+$$;
+
+-- Accept or Ignore on a request in Friends. Accepting makes you friends.
+-- Ignoring takes it off your list without telling whoever asked. Returns
+-- 'friends' or 'ignored', or null if there's no such request (say, they
+-- took it back).
+create or replace function public.answer_request(other uuid, accept boolean)
+returns text
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'not signed in'; end if;
+  if not exists (select 1 from friend_requests
+                 where from_user = other and to_user = auth.uid() and status <> 'accepted' and cancelled_at is null) then
+    return null;
+  end if;
+  if accept then
+    perform make_friends(other);
+    return 'friends';
+  end if;
+  update friend_requests set status = 'ignored', answered_at = now()
+  where from_user = other and to_user = auth.uid() and status = 'pending';
+  return 'ignored';
+end $$;
+
+-- "Ignore all" in Friends, for a pile of requests from a link posted
+-- somewhere public. Returns how many it ignored.
+create or replace function public.ignore_requests()
+returns integer
+language plpgsql security definer set search_path = public as $$
+declare
+  n integer;
+begin
+  if auth.uid() is null then raise exception 'not signed in'; end if;
+  update friend_requests set status = 'ignored', answered_at = now()
+  where to_user = auth.uid() and status = 'pending' and cancelled_at is null;
+  get diagnostics n = row_count;
+  return n;
+end $$;
+
+-- Cancel on a request you sent, while they haven't accepted it.
+create or replace function public.cancel_request(other uuid)
+returns void
+language sql security definer set search_path = public as $$
+  update friend_requests set cancelled_at = now()
+  where from_user = auth.uid() and to_user = other and status <> 'accepted' and cancelled_at is null;
+$$;
+
+-- What the page called before requests, kept for pages left open from then:
+-- it asks too, and returns the friend's user id only once you're friends.
+create or replace function public.add_friend(code text)
+returns uuid
+language plpgsql security definer set search_path = public as $$
+begin
+  if ask_friend(code) = 'friends' then return user_for_code(code); end if;
+  return null;
 end $$;
 
 -- Your friends, with the nickname you gave each one (if any), leaving out
@@ -474,15 +619,20 @@ language sql security definer set search_path = public as $$
   where user_id = auth.uid() and friend_id = friend;
 $$;
 
--- The Friends badge: people who added you since you last opened Friends, on
--- any device. Opening Friends calls saw_friends().
+-- The Friends badge, on any device: people who became your friends since you
+-- last opened Friends (by accepting your request, or asking you after you
+-- asked them), and everyone whose request is waiting for your Accept or
+-- Ignore. Opening Friends calls saw_friends(), which clears the first kind;
+-- requests count until you answer them.
 create or replace function public.new_friends()
 returns setof uuid
 language sql stable security definer set search_path = public as $$
   select f.friend_id from friends f
   left join profiles p on p.id = f.friend_id
   where f.user_id = auth.uid() and f.added_by = f.friend_id and p.duplicate_of is null
-    and f.created_at > coalesce((select seen_at from friends_seen where user_id = auth.uid()), '-infinity');
+    and f.created_at > coalesce((select seen_at from friends_seen where user_id = auth.uid()), '-infinity')
+  union
+  select r.other from my_requests() r where r.incoming;
 $$;
 
 create or replace function public.saw_friends()
@@ -828,12 +978,15 @@ grant execute on function public.answered_stats(text[]) to anon, authenticated;
 revoke execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
   public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
   public.new_friends(), public.saw_friends(), public.delete_my_account(), public.start_move(), public.finish_move(text),
-  public.new_share_code(), public.link_works(text) from public, anon;
+  public.new_share_code(), public.link_works(text), public.ask_friend(text), public.my_requests(),
+  public.answer_request(uuid, boolean), public.ignore_requests(), public.cancel_request(uuid) from public, anon;
 grant execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
   public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
   public.new_friends(), public.saw_friends(), public.delete_my_account(), public.start_move(), public.finish_move(text),
-  public.new_share_code(), public.link_works(text) to authenticated;
+  public.new_share_code(), public.link_works(text), public.ask_friend(text), public.my_requests(),
+  public.answer_request(uuid, boolean), public.ignore_requests(), public.cancel_request(uuid) to authenticated;
 
 -- These only run inside the functions above, never called directly.
 revoke execute on function public.record_visit(), public.ip_code(text), public.left_out_of_stats(uuid),
-  public.left_out_users(), public.check_answers(), public.user_for_code(text), public.duplicate_friends() from public, anon, authenticated;
+  public.left_out_users(), public.check_answers(), public.user_for_code(text), public.duplicate_friends(),
+  public.make_friends(uuid) from public, anon, authenticated;

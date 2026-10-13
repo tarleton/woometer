@@ -25,7 +25,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="theme-color" content="#2a1a45">
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body class="has-field">
   <div class="woo-field" aria-hidden="true"><canvas id="field"></canvas></div>
@@ -197,8 +197,15 @@
   <dialog id="friends" class="friends wide">
     <form method="dialog">
       <h3><svg class="cat-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.2 9.5 L5 2.8 L9.6 6.2 Q12 5.5 14.4 6.2 L19 2.8 L19.8 9.5 Q21 12.5 20 15.5 Q18.4 21 12 21 Q5.6 21 4 15.5 Q3 12.5 4.2 9.5 Z" fill="#eda65c" stroke="#5a3a1e" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.1 5 L6.6 8 L8.4 6.8 Z M17.9 5 L17.4 8 L15.6 6.8 Z" fill="#f7c8a0"/><circle cx="9" cy="12.6" r="1.35" fill="#2a1a10"/><circle cx="15" cy="12.6" r="1.35" fill="#2a1a10"/><path d="M10.9 15.1 h2.2 l-1.1 1.2 z" fill="#d9707a"/><path d="M12 16.3 q-1 1.5 -2.5 0.8 M12 16.3 q1 1.5 2.5 0.8 M3 14 l4 .6 M3.4 16.6 l3.8 -.6 M21 14 l-4 .6 M20.6 16.6 l-3.8 -.6" fill="none" stroke="#5a3a1e" stroke-width="0.9" stroke-linecap="round"/></svg> Friends</h3>
+      <!-- People asking to be your friend (see showRequests in cloud.js). -->
+      <div class="friend-requests" id="friend-requests" hidden>
+        <p class="requests-title">Friend requests</p>
+        <p class="bin-hint">Accept to compare answers with each other. If you ignore a request, they aren't told.</p>
+        <ul class="request-list" id="request-list"></ul>
+        <button type="button" class="link-btn" id="ignore-all" hidden>Ignore all</button>
+      </div>
       <p class="bin-hint" id="friend-hint">Tap a friend to see how much you agree.</p>
-      <p class="bin-hint" id="friend-empty">No friends yet. Paste a friend's link below, or open it and tap Add as a Friend.</p>
+      <p class="bin-hint" id="friend-empty">No friends yet. Paste a friend's link below, or open it and tap Add as a Friend. You'll be friends once they accept.</p>
       <ul class="friend-list" id="friend-list"></ul>
       <!-- Not signed in: friends live with this browser's anonymous account. -->
       <p class="bin-hint friends-keep" id="friends-keep" hidden><button type="button" class="link-btn" id="friends-google">Sign in with Google</button> to keep your friends safe on any phone or computer.</p>
@@ -349,6 +356,18 @@
     </form>
   </dialog>
 
+  <!-- For a pile of requests, say after a link was posted somewhere public. -->
+  <dialog id="ignore-all-dialog" class="delete-dialog">
+    <form method="dialog">
+      <h3 id="ignore-all-title">Ignore all requests?</h3>
+      <p>They aren't told. If you change your mind about someone later, add them from their link.</p>
+      <div class="detail-actions">
+        <button class="btn ghost" value="cancel">Cancel</button>
+        <button type="button" class="btn" id="ignore-all-confirm">Ignore all</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Getting a new link makes the old one stop working, so this says so first. -->
   <dialog id="newlink-dialog" class="delete-dialog">
     <form method="dialog">
@@ -395,7 +414,7 @@
   <script src="score.js"></script>
   <script src="app.js?v=2"></script>
   <script src="config.js"></script>
-  <script src="cloud.js?v=3"></script>
+  <script src="cloud.js?v=4"></script>
   <script src="funstat.js"></script>
   <script src="woo.js?v=18"></script>
 </body>

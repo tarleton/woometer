@@ -947,6 +947,30 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 .friend-list .rename { width: auto; flex: none; padding: 0 12px; align-items: center; color: var(--muted); font-size: 15px; }
 .friend-list .rename:hover { color: var(--ink); }
 .friend-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* A request you sent: like a friend row, but dashed and quiet until they accept. */
+.friend-sent-row {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  padding: 9px 12px;
+  color: var(--muted);
+}
+.friend-list .friend-sent .rename { font-size: 13px; }
+
+/* People asking to be your friend, at the top of Friends, each with Accept and Ignore. */
+.friend-requests { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border: 1px solid var(--accent); border-radius: 12px; }
+.requests-title { margin: 0; font-weight: 700; }
+.request-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 30vh; overflow-y: auto; }
+.request-list li { display: flex; align-items: center; gap: 6px; }
+.request-list .friend-name { flex: 1; min-width: 0; }
+.request-list .btn { flex: none; padding: 5px 12px; font-size: 14px; }
+.request-list .btn:disabled { opacity: 0.6; cursor: progress; }
+#ignore-all { align-self: flex-start; }
 /* "75% agree" on the right of each friend. */
 .friend-meta { display: flex; align-items: baseline; gap: 5px; font-size: 12px; color: var(--muted); white-space: nowrap; }
 .friend-pct { font-size: 20px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }

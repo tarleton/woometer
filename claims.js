@@ -1682,8 +1682,8 @@ const CLAIMS = [
     id: "hidden-cancer-cure",
     name: "Hidden Cancer Cure",
     category: "conspiracy",
-    question: "Do you believe drug companies are hiding a cure for cancer to keep profiting from treatment?",
-    verdict: "Cancer is hundreds of different diseases, and many are now routinely cured, such as most testicular cancers. US five-year survival rose from about 49% in the mid-1970s to about 69%, and a company with a cure would make a fortune selling it.",
+    question: "Do you believe a proven cure for cancer already exists and drug companies are suppressing it to keep profiting from treatment?",
+    verdict: "Cancer is hundreds of different diseases, and many are now routinely cured, such as most testicular cancers. New treatments aren't secret: clinical trials are publicly registered. A company with a cure would make a fortune selling it, and executives' own families get cancer too.",
     link: "https://en.wikipedia.org/wiki/Cancer",
   },
   {

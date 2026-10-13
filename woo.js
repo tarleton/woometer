@@ -274,7 +274,7 @@
     void main() {
       vec2 uv = (2.0 * gl_FragCoord.xy - res) / min(res.x, res.y);
       float r = length(uv);
-      float T = t * 0.6; // a little slower than the original: calm
+      float T = t * 0.04; // drifts no faster than the lace: slow and calm
 
       // Mirrored wedges: 6 at first, then 8, 10 and 12, each step
       // crossfading in over the last third of its stretch.

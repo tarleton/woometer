@@ -194,31 +194,48 @@ function paintSky(host, variant) {
   }
   function launchMeteor(now) {
     // Enters at the top edge and slants down to leave at the bottom, from
-    // either side, at a steady medium pace.
+    // either side, at a steady medium pace. About one in three is a little
+    // odd: it wobbles, slows as if to look around, glints faintly green, then
+    // carries on. Shooting star or UFO? Hard to say.
     const dir = Math.random() < 0.5 ? 1 : -1;
     const angle = 0.35 + Math.random() * 0.25; // radians below level
-    const speed = 160; // pixels per second
     meteor = {
       x: width * (dir > 0 ? 0.1 + Math.random() * 0.5 : 0.4 + Math.random() * 0.5),
       y: -6,
-      vx: dir * Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
+      dx: dir * Math.cos(angle),
+      dy: Math.sin(angle),
+      speed: 160, // pixels per second
+      odd: Math.random() < 0.35,
+      phase: Math.random() * Math.PI * 2,
+      age: 0,
+      trail: [],
       last: now,
     };
   }
   function drawMeteor(now) {
     if (meteor) {
-      const dt = Math.min(0.05, (now - meteor.last) / 1000);
-      meteor.last = now;
-      meteor.x += meteor.vx * dt;
-      meteor.y += meteor.vy * dt;
+      const m = meteor;
+      const dt = Math.min(0.05, (now - m.last) / 1000);
+      m.last = now;
+      m.age += dt;
+      // The odd ones ease right down halfway across, then pick up again.
+      const across = m.y / height;
+      const pace = m.odd ? 0.25 + 0.75 * Math.min(1, Math.abs(across - 0.45) * 3.2) : 1;
+      m.x += m.dx * m.speed * pace * dt;
+      m.y += m.dy * m.speed * pace * dt;
+      // ...and drift side to side a touch as they go.
+      const wob = m.odd ? Math.sin(m.age * 7 + m.phase) * 2.2 : 0;
+      const hx = m.x - m.dy * wob;
+      const hy = m.y + m.dx * wob;
+      m.trail.unshift([hx, hy]);
+      if (m.trail.length > 14) m.trail.pop();
       // A few sparkles shed behind the head each frame.
       for (let i = 0; i < 2; i++) {
-        if (Math.random() < 0.7) {
+        if (Math.random() < 0.7 * pace) {
           sparks.push({
-            x: meteor.x - meteor.vx * 0.02 * Math.random(),
-            y: meteor.y - meteor.vy * 0.02 * Math.random(),
-            vx: (Math.random() - 0.5) * 14 - meteor.vx * 0.05,
+            x: hx - m.dx * 3 * Math.random(),
+            y: hy - m.dy * 3 * Math.random(),
+            vx: (Math.random() - 0.5) * 14 - m.dx * 8,
             vy: (Math.random() - 0.2) * 12,
             born: now,
             life: 500 + Math.random() * 700,
@@ -226,27 +243,26 @@ function paintSky(host, variant) {
           });
         }
       }
-      // The tail: a short streak fading back along the path.
-      const len = 0.16; // seconds of travel the tail covers
-      const tx = meteor.x - meteor.vx * len;
-      const ty = meteor.y - meteor.vy * len;
-      const tail = ctx.createLinearGradient(meteor.x, meteor.y, tx, ty);
-      tail.addColorStop(0, "rgba(255, 250, 235, 0.85)");
-      tail.addColorStop(0.3, "rgba(220, 200, 255, 0.35)");
-      tail.addColorStop(1, "rgba(200, 180, 255, 0)");
-      ctx.strokeStyle = tail;
+      // The tail follows the path it actually took, fading back.
       ctx.lineWidth = 1.2;
       ctx.lineCap = "round";
-      ctx.beginPath();
-      ctx.moveTo(meteor.x, meteor.y);
-      ctx.lineTo(tx, ty);
-      ctx.stroke();
-      const glow = ctx.createRadialGradient(meteor.x, meteor.y, 0, meteor.x, meteor.y, 5);
-      glow.addColorStop(0, "rgba(255, 252, 240, 0.95)");
-      glow.addColorStop(1, "rgba(255, 240, 220, 0)");
+      for (let i = 1; i < m.trail.length; i++) {
+        ctx.strokeStyle = `rgba(225, 210, 255, ${0.6 * (1 - i / m.trail.length)})`;
+        ctx.beginPath();
+        ctx.moveTo(m.trail[i - 1][0], m.trail[i - 1][1]);
+        ctx.lineTo(m.trail[i][0], m.trail[i][1]);
+        ctx.stroke();
+      }
+      // The head: a tiny glowing point, now and then tinged green.
+      const green = m.odd ? 0.5 + 0.5 * Math.sin(m.age * 5) : 0;
+      const r = Math.round(255 - 120 * green);
+      const b = Math.round(240 - 110 * green);
+      const glow = ctx.createRadialGradient(hx, hy, 0, hx, hy, 5);
+      glow.addColorStop(0, `rgba(${r}, 252, ${b}, 0.95)`);
+      glow.addColorStop(1, `rgba(${r}, 252, ${b}, 0)`);
       ctx.fillStyle = glow;
-      ctx.fillRect(meteor.x - 5, meteor.y - 5, 10, 10);
-      if (meteor.y - meteor.vy * len > height + 4 || meteor.x < -60 || meteor.x > width + 60) meteor = null;
+      ctx.fillRect(hx - 5, hy - 5, 10, 10);
+      if (m.y > height + 12 || m.x < -60 || m.x > width + 60) meteor = null;
     }
     // Sparkles drift, twinkle and fade.
     sparks = sparks.filter((p) => now - p.born < p.life);

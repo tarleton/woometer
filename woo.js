@@ -114,6 +114,9 @@
       // rather than turning it up.
       const float GLOW = 0.42;
       vec3 col = lace(q, depth, fw, rev) * GLOW;
+      // Before your first few answers nothing is added at all: just the plain
+      // dark field. The first fold fades in between 4% and 12%.
+      float wake = smoothstep(0.04, 0.12, rev);
 
       // A finer second veil turning the other way, added from about a third in.
       float fb = abs(mod(a - t * 0.005, s) - 0.5 * s);
@@ -132,15 +135,16 @@
 
       // The lace fades into a calm, dark heart, and is a little softer in the
       // far corners.
-      col *= smoothstep(0.03, 0.22, r) * (1.0 - 0.5 * smoothstep(0.7, 1.3, r));
+      col *= wake * smoothstep(0.03, 0.22, r) * (1.0 - 0.5 * smoothstep(0.7, 1.3, r));
 
-      // At the heart: one small, breathing point of white light, a thin halo
-      // once you've started, and fine rays reaching out from a quarter in.
+      // At the heart, from about a fifth in: one small, breathing point of
+      // white light with a thin halo, and fine rays reaching out a little later.
       float breath = 0.5 + 0.5 * sin(t * TAU / 9.0);
       float rays = pow(abs(cos(fa * seg * 0.5 + 1.5708)), 40.0) * exp(-r * 6.0) * smoothstep(0.01, 0.06, r);
       col += rainbow(t * 0.01 + r * 2.0) * rays * 0.18 * smoothstep(0.2, 0.35, rev);
-      col += vec3(0.8, 0.7, 1.0) * exp(-abs(r - 0.035) * 140.0) * (0.08 + 0.1 * breath) * smoothstep(0.05, 0.15, rev);
-      col += vec3(1.0, 0.96, 1.0) * exp(-r * 140.0) * (0.3 + 0.2 * breath);
+      float heart = smoothstep(0.15, 0.25, rev);
+      col += vec3(0.8, 0.7, 1.0) * exp(-abs(r - 0.035) * 140.0) * (0.08 + 0.1 * breath) * heart;
+      col += vec3(1.0, 0.96, 1.0) * exp(-r * 140.0) * (0.3 + 0.2 * breath) * heart;
 
       // Near the end, a third eye opens above the heart.
       float eyeOpen = smoothstep(0.8, 1.0, rev);
@@ -151,7 +155,9 @@
       col += rainbow(t * 0.02 + r) * exp(-length(e) * 28.0) * 0.5 * eyeOpen;
 
       col = 1.0 - exp(-col);
-      col += vec3(0.035, 0.02, 0.06) * (1.0 - r * 0.7); // the field's own dark violet
+      // The field's own dark violet: perfectly even at the start, gently
+      // brighter towards the middle once the design begins.
+      col += vec3(0.035, 0.02, 0.06) * mix(0.65, 1.0 - r * 0.7, wake);
       gl_FragColor = vec4(col, 1.0);
     }`;
 

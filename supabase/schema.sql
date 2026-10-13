@@ -33,7 +33,9 @@ alter table public.profiles add column if not exists is_tester boolean not null 
 -- exists (the answers move to that account, and the anonymous profile the
 -- browser had been using keeps a copy), or when a phone forgets its sign-in
 -- partway through a visit and starts over. finish_move sets it for the first
--- case; the SQL editor for anything else. Nothing is deleted.
+-- case; the SQL editor for anything else. Setting it also gives its friends
+-- to the account in use, and friend lists leave it out, so friends see that
+-- person once (see duplicate_friends). Nothing is deleted.
 alter table public.profiles add column if not exists duplicate_of uuid;
 
 create table if not exists public.answers (
@@ -184,13 +186,20 @@ drop policy if exists "remove own answers" on public.answers;
 create policy "remove own answers" on public.answers
   for delete to authenticated using (user_id = auth.uid());
 
+-- Each of a pair can read both rows of their friendship, but only who is in
+-- it: the grants below leave out the nickname and the rest, which come from
+-- my_friends, so each person sees just their own.
 drop policy if exists "read own friends" on public.friends;
 create policy "read own friends" on public.friends
-  for select to authenticated using (user_id = auth.uid());
+  for select to authenticated using (user_id = auth.uid() or friend_id = auth.uid());
 
+-- Removing a friend works both ways: either of the pair can take away both
+-- rows, so you can always leave the list of someone you no longer trust.
+-- (Postgres only removes rows the remover can also read, hence the policy
+-- above.)
 drop policy if exists "remove own friends" on public.friends;
 create policy "remove own friends" on public.friends
-  for delete to authenticated using (user_id = auth.uid());
+  for delete to authenticated using (user_id = auth.uid() or friend_id = auth.uid());
 
 -- Table access for signed-in users (anonymous visitors count as signed in).
 -- Granted explicitly so this works whether or not Supabase auto-exposes new
@@ -200,10 +209,10 @@ grant usage on schema public to anon, authenticated;
 revoke all on public.profiles, public.answers, public.friends from anon;
 revoke all on public.visits, public.private_settings, public.ignored_ip_codes, public.friends_seen, public.stats_cache, public.moves from anon, authenticated;
 revoke insert, update, delete on public.profiles from authenticated;
-revoke insert, update on public.friends from authenticated;
+revoke select, insert, update on public.friends from authenticated;
 grant select on public.profiles to authenticated;
 grant select, insert, update, delete on public.answers to authenticated;
-grant select, delete on public.friends to authenticated;
+grant select (user_id, friend_id), delete on public.friends to authenticated;
 
 -- Functions
 
@@ -355,6 +364,36 @@ begin
   update profiles set duplicate_of = coalesce(now_using, auth.uid()) where id = left_behind and duplicate_of is null;
 end $$;
 
+-- When an account is marked as someone's duplicate (by finish_move or in the
+-- SQL editor), the account they use now takes over its friends, both ways and
+-- with any nicknames, unless the pair is already friends. Friend lists leave
+-- the duplicate out (see my_friends), so a friend sees that person once.
+create or replace function public.duplicate_friends()
+returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if new.duplicate_of is null or new.duplicate_of = new.id or new.duplicate_of is not distinct from old.duplicate_of then
+    return null;
+  end if;
+  insert into friends (user_id, friend_id, created_at, nickname, added_by)
+  select new.duplicate_of, f.friend_id, f.created_at, f.nickname,
+         case when f.added_by = new.id then new.duplicate_of else f.added_by end
+  from friends f
+  where f.user_id = new.id and f.friend_id <> new.duplicate_of
+  on conflict do nothing;
+  insert into friends (user_id, friend_id, created_at, nickname, added_by)
+  select f.user_id, new.duplicate_of, f.created_at, f.nickname,
+         case when f.added_by = new.id then new.duplicate_of else f.added_by end
+  from friends f
+  where f.friend_id = new.id and f.user_id <> new.duplicate_of
+  on conflict do nothing;
+  return null;
+end $$;
+
+create or replace trigger duplicate_friends
+  after update of duplicate_of on public.profiles
+  for each row execute function public.duplicate_friends();
+
 -- The name behind a friend link, for the "X wants to compare" banner.
 create or replace function public.name_for_code(code text)
 returns text
@@ -385,8 +424,9 @@ begin
   return other;
 end $$;
 
--- Your friends, with the nickname you gave each one (if any). Dropped first
--- because the nickname column changed what it returns.
+-- Your friends, with the nickname you gave each one (if any), leaving out
+-- anyone's duplicate account (see duplicate_friends). Dropped first because
+-- the nickname column changed what it returns.
 drop function if exists public.my_friends();
 create function public.my_friends()
 returns table (friend_id uuid, display_name text, nickname text, added_at timestamptz, answered bigint)
@@ -395,7 +435,7 @@ language sql stable security definer set search_path = public as $$
          (select count(*) from answers a where a.user_id = f.friend_id)
   from friends f
   left join profiles p on p.id = f.friend_id
-  where f.user_id = auth.uid()
+  where f.user_id = auth.uid() and p.duplicate_of is null
   order by f.created_at desc;
 $$;
 
@@ -413,7 +453,8 @@ create or replace function public.new_friends()
 returns setof uuid
 language sql stable security definer set search_path = public as $$
   select f.friend_id from friends f
-  where f.user_id = auth.uid() and f.added_by = f.friend_id
+  left join profiles p on p.id = f.friend_id
+  where f.user_id = auth.uid() and f.added_by = f.friend_id and p.duplicate_of is null
     and f.created_at > coalesce((select seen_at from friends_seen where user_id = auth.uid()), '-infinity');
 $$;
 
@@ -679,4 +720,4 @@ grant execute on function public.ensure_profile(), public.set_display_name(text)
 
 -- These only run inside the functions above, never called directly.
 revoke execute on function public.record_visit(), public.ip_code(text), public.left_out_of_stats(uuid),
-  public.left_out_users(), public.check_answers(), public.user_for_code(text) from public, anon, authenticated;
+  public.left_out_users(), public.check_answers(), public.user_for_code(text), public.duplicate_friends() from public, anon, authenticated;

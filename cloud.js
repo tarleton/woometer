@@ -544,6 +544,7 @@
     });
     $("nickname-save").addEventListener("click", saveNickname);
     $("nickname-remove").addEventListener("click", removeFriend);
+    $("remove-confirm").addEventListener("click", confirmRemoveFriend);
     // Enter saves (the form's first button is Cancel, which Enter would pick).
     $("name-input").addEventListener("keydown", (e) => e.key === "Enter" && saveNameFromDialog(e));
     $("nickname-input").addEventListener("keydown", (e) => e.key === "Enter" && saveNickname(e));
@@ -1310,17 +1311,33 @@
     $("nickname-dialog").showModal();
   }
 
-  // Tucked away in the ✎ box, since people rarely want it.
-  async function removeFriend() {
+  // Tucked away in the ✎ box, since people rarely want it. Removing works both
+  // ways: they leave your list and you leave theirs, so someone you no longer
+  // trust can't keep comparing with you. The popup says so first.
+  function removeFriend() {
     const f = renaming;
     if (!f) return;
-    if (!confirm(`Remove ${friendName(f) || "this friend"} from your friend list?`)) return;
-    const { error } = await db.from("friends").delete().eq("user_id", user.id).eq("friend_id", f.friend_id);
+    const name = friendName(f);
+    $("remove-title").textContent = name ? `Remove ${name} from your friends?` : "Remove this friend?";
+    $("remove-text").textContent = `Removing works both ways: ${name ? `${name} leaves` : "they leave"} your friend list and you leave theirs, so neither of you can compare answers from Friends anymore. They aren't sent a message.`;
+    $("remove-dialog").showModal();
+  }
+
+  async function confirmRemoveFriend() {
+    const f = renaming;
+    if (!f) return;
+    const button = $("remove-confirm");
+    button.disabled = true;
+    // Both rows of the pair in one go ("remove own friends" in schema.sql).
+    const pair = (a, b) => `and(user_id.eq.${a},friend_id.eq.${b})`;
+    const { error } = await db.from("friends").delete().or(`${pair(user.id, f.friend_id)},${pair(f.friend_id, user.id)}`);
+    button.disabled = false;
     if (error) {
       logError({ error });
       W.toast("Couldn't remove them just now. Try again in a moment.");
       return;
     }
+    $("remove-dialog").close();
     $("nickname-dialog").close();
     renaming = null;
     refreshFriends();

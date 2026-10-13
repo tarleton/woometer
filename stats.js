@@ -123,8 +123,9 @@
     renderList("unsure", unsure, (c) => `${pct(c.unsure / (c.total + c.unsure))} don't know`, empty && "Nobody here has picked Don't Know enough yet.");
 
     $("method-note").textContent =
-      `How these are counted: woo is the share of all of a person's answers that were Yes, so ` +
-      `Don't Know counts the same as No. A person is included once they've answered at least ` +
+      `How these are counted: a person's woo % is the share of all their answers that were Yes, so in ` +
+      `that number Don't Know counts like No. In the claim lists, Don't Know is shown on its own in grey, ` +
+      `and the percentages there are of Yes and No answers only. A person is included once they've answered at least ` +
       `${s.min_person_answers} claims Yes or No, and a claim is listed once at least ` +
       `${s.min_claim_answers} people have answered it Yes or No.` +
       (where

@@ -26,6 +26,13 @@ create table if not exists public.profiles (
 -- can set it; nobody can mark themselves from the site.
 alter table public.profiles add column if not exists is_tester boolean not null default false;
 
+-- A leftover copy of someone else's answers, kept out of the stats the same
+-- way. It happens when a browser signs in with Google to an account that
+-- already exists: the answers move to that account, and the anonymous profile
+-- the browser had been using keeps a copy. Holds the real account's id. Only
+-- the SQL editor sets it, and nothing is deleted.
+alter table public.profiles add column if not exists duplicate_of uuid;
+
 create table if not exists public.answers (
   user_id uuid not null references auth.users (id) on delete cascade,
   claim_id text not null check (char_length(claim_id) between 1 and 100),
@@ -248,12 +255,12 @@ create or replace trigger check_answers
   after insert on public.answers
   for each statement execute function public.check_answers();
 
--- True for accounts kept out of the stats: testers, and anyone who has
--- visited from a network listed in ignored_ip_codes.
+-- True for accounts kept out of the stats: testers, leftover duplicates, and
+-- anyone who has visited from a network listed in ignored_ip_codes.
 create or replace function public.left_out_of_stats(uid uuid)
 returns boolean
 language sql stable security definer set search_path = public as $$
-  select exists (select 1 from profiles p where p.id = uid and p.is_tester)
+  select exists (select 1 from profiles p where p.id = uid and (p.is_tester or p.duplicate_of is not null))
       or exists (select 1 from visits v join ignored_ip_codes i using (ip_code) where v.user_id = uid);
 $$;
 
@@ -264,7 +271,7 @@ $$;
 create or replace function public.left_out_users()
 returns setof uuid
 language sql stable security definer set search_path = public as $$
-  select id from profiles where is_tester
+  select id from profiles where is_tester or duplicate_of is not null
   union
   select v.user_id from visits v join ignored_ip_codes i using (ip_code);
 $$;

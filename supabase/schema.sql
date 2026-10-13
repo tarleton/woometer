@@ -670,6 +670,78 @@ revoke execute on function public.map_stats_fresh() from public, anon, authentic
 revoke execute on function public.map_stats() from public;
 grant execute on function public.map_stats() to anon, authenticated;
 
+-- How many claims people have answered, for "How far people get" on /stats:
+-- the average and median count and how many answered every claim, for
+-- everyone and for each continent with 3 or more people (placed like
+-- map_stats). The same people as site_stats count. The page sends the claim
+-- ids on the site now, so answers to retired claims aren't counted. Read
+-- through answered_stats() below, which keeps the result for a minute.
+create or replace function public.answered_stats_fresh(current_ids text[])
+returns json
+language sql stable security definer set search_path = public as $$
+  with home as (
+    select distinct on (v.user_id) v.user_id, upper(v.country) as code
+    from visits v
+    where v.country is not null
+    order by v.user_id, v.last_seen desc
+  ),
+  people as (
+    select a.user_id, count(*) filter (where a.claim_id = any (current_ids)) as n
+    from answers a
+    where a.user_id not in (select left_out_users())
+    group by a.user_id
+    having count(*) filter (where a.answer in ('yes', 'no')) >= 10
+  ),
+  placed as (
+    select p.n, cc.continent
+    from people p
+    join home h on h.user_id = p.user_id
+    join country_continents cc on cc.code = h.code
+  ),
+  continents as (
+    select continent, count(*) as people, avg(n) as average,
+           percentile_cont(0.5) within group (order by n) as median,
+           count(*) filter (where n >= cardinality(current_ids)) as answered_all
+    from placed
+    group by continent
+    having count(*) >= 3
+  )
+  select json_build_object(
+    'claims', cardinality(current_ids),
+    'people', (select count(*) from people),
+    'average', (select avg(n) from people),
+    'median', (select percentile_cont(0.5) within group (order by n) from people),
+    'answered_all', (select count(*) from people where n >= cardinality(current_ids)),
+    'continents', coalesce((select json_object_agg(continent, json_build_object(
+                     'people', people, 'average', average, 'median', median, 'answered_all', answered_all))
+                   from continents), '{}'::json)
+  );
+$$;
+
+create or replace function public.answered_stats(current_ids text[])
+returns json
+language plpgsql security definer set search_path = public as $$
+declare
+  ids text[] := array(select distinct x from unnest(current_ids) x where x is not null order by x limit 2000);
+  cache_key text := 'answered:' || md5(array_to_string(ids, ','));
+  result json;
+begin
+  -- Everyone sends the same list, so one cached copy serves them all; any
+  -- other list replaces it rather than piling up.
+  select value into result from stats_cache
+  where name = 'answered' and made_at > now() - interval '1 minute' and value->>'key' = cache_key;
+  if result is null then
+    result := (answered_stats_fresh(ids)::jsonb || jsonb_build_object('key', cache_key))::json;
+    insert into stats_cache (name, value, made_at) values ('answered', result, now())
+    on conflict (name) do update set value = excluded.value, made_at = excluded.made_at;
+  end if;
+  return result;
+end $$;
+
+revoke execute on function public.answered_stats_fresh(text[]) from public, anon, authenticated;
+revoke execute on function public.answered_stats(text[]) from public;
+grant execute on function public.answered_stats(text[]) to anon, authenticated;
+
 revoke execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
   public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
   public.new_friends(), public.saw_friends(), public.delete_my_account(), public.start_move(), public.finish_move(text) from public, anon;

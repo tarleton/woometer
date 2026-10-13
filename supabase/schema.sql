@@ -32,8 +32,8 @@ alter table public.profiles add column if not exists is_tester boolean not null 
 -- It happens when a browser signs in with Google to an account that already
 -- exists (the answers move to that account, and the anonymous profile the
 -- browser had been using keeps a copy), or when a phone forgets its sign-in
--- partway through a visit and starts over. Only the SQL editor sets it, and
--- nothing is deleted.
+-- partway through a visit and starts over. finish_move sets it for the first
+-- case; the SQL editor for anything else. Nothing is deleted.
 alter table public.profiles add column if not exists duplicate_of uuid;
 
 create table if not exists public.answers (
@@ -143,6 +143,15 @@ create table if not exists public.stats_cache (
   made_at timestamptz not null default now()
 );
 
+-- A browser about to leave its anonymous account for an account that already
+-- exists (see start_move). Only start_move and finish_move touch it.
+create table if not exists public.moves (
+  secret text primary key,
+  from_user uuid not null references auth.users (id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+alter table public.moves add column if not exists used_at timestamptz;
+
 -- Row-level security
 
 alter table public.profiles enable row level security;
@@ -153,6 +162,7 @@ alter table public.private_settings enable row level security;
 alter table public.ignored_ip_codes enable row level security;
 alter table public.friends_seen enable row level security;
 alter table public.stats_cache enable row level security;
+alter table public.moves enable row level security;
 
 drop policy if exists "read own profile" on public.profiles;
 create policy "read own profile" on public.profiles
@@ -188,7 +198,7 @@ create policy "remove own friends" on public.friends
 -- Profiles are created and renamed only through the functions below.
 grant usage on schema public to anon, authenticated;
 revoke all on public.profiles, public.answers, public.friends from anon;
-revoke all on public.visits, public.private_settings, public.ignored_ip_codes, public.friends_seen, public.stats_cache from anon, authenticated;
+revoke all on public.visits, public.private_settings, public.ignored_ip_codes, public.friends_seen, public.stats_cache, public.moves from anon, authenticated;
 revoke insert, update, delete on public.profiles from authenticated;
 revoke insert, update on public.friends from authenticated;
 grant select on public.profiles to authenticated;
@@ -308,6 +318,42 @@ returns uuid
 language sql stable security definer set search_path = public as $$
   select coalesce(p.duplicate_of, p.id) from profiles p where p.share_code = code;
 $$;
+
+-- Signing in with Google where someone has been answering as a visitor links
+-- Google to that same account. If their Google account already has its own
+-- woometer account (say, from another device), the browser moves to that one
+-- instead and takes its answers along, and the visitor account stays behind
+-- with a copy. So before moving, the visitor account gets a secret from
+-- start_move, and once signed in to the other account the browser hands it
+-- to finish_move, which marks the one left behind as its duplicate. The
+-- secret shows the same browser held both sign-ins.
+create or replace function public.start_move()
+returns text
+language plpgsql security definer set search_path = public as $$
+declare
+  s text := replace(gen_random_uuid()::text, '-', '');
+begin
+  -- Only a visitor account is ever left behind this way.
+  if auth.uid() is null or coalesce(auth.jwt() ->> 'is_anonymous', 'false') <> 'true' then return null; end if;
+  insert into moves (secret, from_user) values (s, auth.uid());
+  return s;
+end $$;
+
+create or replace function public.finish_move(proof text)
+returns void
+language plpgsql security definer set search_path = public as $$
+declare
+  left_behind uuid;
+  now_using uuid;
+begin
+  if auth.uid() is null then return; end if;
+  update moves m set used_at = now()
+  where m.secret = proof and m.used_at is null and m.created_at > now() - interval '1 hour'
+  returning m.from_user into left_behind;
+  if left_behind is null or left_behind = auth.uid() then return; end if;
+  select coalesce(p.duplicate_of, p.id) into now_using from profiles p where p.id = auth.uid();
+  update profiles set duplicate_of = coalesce(now_using, auth.uid()) where id = left_behind and duplicate_of is null;
+end $$;
 
 -- The name behind a friend link, for the "X wants to compare" banner.
 create or replace function public.name_for_code(code text)
@@ -626,10 +672,10 @@ grant execute on function public.map_stats() to anon, authenticated;
 
 revoke execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
   public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
-  public.new_friends(), public.saw_friends(), public.delete_my_account() from public, anon;
+  public.new_friends(), public.saw_friends(), public.delete_my_account(), public.start_move(), public.finish_move(text) from public, anon;
 grant execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
   public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
-  public.new_friends(), public.saw_friends(), public.delete_my_account() to authenticated;
+  public.new_friends(), public.saw_friends(), public.delete_my_account(), public.start_move(), public.finish_move(text) to authenticated;
 
 -- These only run inside the functions above, never called directly.
 revoke execute on function public.record_visit(), public.ip_code(text), public.left_out_of_stats(uuid),

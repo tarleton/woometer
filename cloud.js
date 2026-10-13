@@ -497,6 +497,7 @@
     $("copy-friend-link").addEventListener("click", copyFriendLink);
     $("share-copy").addEventListener("click", copyShareText);
     $("share-native").addEventListener("click", sendShareText);
+    $("share-retry").addEventListener("click", checkLink);
     $("add-friend-btn").addEventListener("click", addFriendFromInput);
     $("add-friend-link").addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
@@ -765,14 +766,27 @@
   // sign in to that one instead; this browser's answers get merged in.
   async function useGoogleToken({ token, nonce }, session) {
     const creds = { provider: "google", token, nonce };
+    let move = null;
     if (session && session.user.is_anonymous) {
       const { error } = await db.auth.linkIdentity({ ...creds, options: await captcha() });
       if (!error) return null;
       console.warn("Woometer: linking Google failed, signing in instead.", error);
+      // This Google account already has its own woometer account, so this
+      // browser moves to it and the one it leaves behind keeps a copy of the
+      // answers. Marking that one as a duplicate (see start_move) keeps them
+      // from counting twice, and its link leads to the account in use.
+      move = await db.rpc("start_move").then((res) => res.data, () => null);
     }
     const { error } = await db.auth.signInWithIdToken({ ...creds, options: await captcha() });
-    if (error) console.warn(error);
-    return error || null;
+    if (error) {
+      console.warn(error);
+      return error;
+    }
+    if (move) {
+      const res = await db.rpc("finish_move", { proof: move }).then((r) => r, (error) => ({ error }));
+      if (res.error) console.warn("Woometer: couldn't mark the account left behind.", res.error);
+    }
+    return null;
   }
 
   function randomHex() {
@@ -1064,19 +1078,73 @@
   }
 
   // The Share box. Your link shows your name, so it asks for one first.
+  let canSend = false;
   function openShare() {
     withName(() => {
       $("my-name").value = profile.display_name || "";
       $("my-name-row").hidden = !user.is_anonymous;
-      $("share-preview").textContent = W.shareText();
       // Phones can hand the message straight to Messages, WhatsApp and so on.
       // Computers just copy: Windows' share box offers to email through
       // Outlook even when it isn't set up, then says it was sent.
-      const canSend = typeof navigator.share === "function" && matchMedia("(pointer: coarse)").matches;
-      $("share-native").hidden = !canSend;
+      canSend = typeof navigator.share === "function" && matchMedia("(pointer: coarse)").matches;
       $("share-copy").classList.toggle("ghost", canSend);
+      showLink("checking");
       $("share-dialog").showModal();
+      checkLink();
     });
+  }
+
+  // On 13 Oct a phone that had quietly lost its sign-in handed out a link to
+  // an account with no name and no answers. So the Share box shows your link
+  // only once woometer itself has your name and every answer from this page,
+  // saved to the account the link leads to. Until then there's nothing to copy.
+  let linkCheck = 0;
+  let linkState = "checking";
+  async function checkLink() {
+    const mine = ++linkCheck;
+    showLink("checking");
+    let ready = false;
+    try {
+      ready = await linkReady();
+    } catch (error) {
+      logError({ error });
+    }
+    if (mine === linkCheck) showLink(ready ? "ready" : "not saved");
+  }
+
+  // Sends anything still waiting, then asks woometer what it has.
+  async function linkReady() {
+    if (await inOrder(sendChanges)) return false;
+    if (unsentName !== null) return false;
+    const [mine, saved] = await Promise.all([
+      db.from("profiles").select("display_name, share_code").eq("id", user.id),
+      db.from("answers").select("claim_id", { count: "exact", head: true }).eq("user_id", user.id),
+    ]);
+    if (mine.error || saved.error) return false;
+    const p = (mine.data || [])[0];
+    const answered = Object.keys(W.getAnswers()).length;
+    // The account keeps answers to retired claims too, so it can have more.
+    return !!p && p.share_code === profile.share_code && !!(p.display_name || "").trim() && saved.count >= answered;
+  }
+
+  // "checking": the buttons wait. "ready": the link shows and the buttons
+  // work. "not saved": a note and Try again instead.
+  function showLink(state) {
+    const retrying = document.activeElement === $("share-retry");
+    linkState = state;
+    const ready = state === "ready";
+    const failed = state === "not saved";
+    $("share-preview").hidden = failed;
+    $("share-preview").textContent = ready ? W.shareText() : "Making sure your answers are saved";
+    $("share-status").hidden = !failed;
+    if (failed) $("share-status").textContent = "Your name and answers haven't reached woometer yet, so your link isn't ready. Try again in a moment, or reload the page.";
+    $("share-retry").hidden = !failed;
+    $("share-native").hidden = failed || !canSend;
+    $("share-copy").hidden = failed;
+    $("copy-friend-link").hidden = failed;
+    for (const id of ["share-native", "share-copy", "copy-friend-link"]) $(id).setAttribute("aria-disabled", String(!ready));
+    if (failed) $("share-retry").focus();
+    else if (retrying) $(canSend ? "share-native" : "share-copy").focus();
   }
 
   // Share buttons stop here while the name box is blank, since the link shows it.
@@ -1092,14 +1160,14 @@
   }
 
   async function copyShareText() {
-    if (!shareNameReady()) return;
+    if (linkState !== "ready" || !shareNameReady()) return;
     if (await W.copyText(W.shareText(), "Woo and link copied. Paste it anywhere.", "Copy your woo and link:")) {
       $("share-dialog").close();
     }
   }
 
   async function sendShareText() {
-    if (!shareNameReady()) return;
+    if (linkState !== "ready" || !shareNameReady()) return;
     try {
       await navigator.share({ text: W.shareText() });
       $("share-dialog").close();
@@ -1109,7 +1177,7 @@
   }
 
   function copyFriendLink() {
-    if (!shareNameReady()) return;
+    if (linkState !== "ready" || !shareNameReady()) return;
     withName(async () => {
       if (await W.copyText(friendLink(), "Link copied.", "Copy your link:")) $("share-dialog").close();
     });

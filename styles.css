@@ -903,6 +903,9 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
   overflow-wrap: anywhere;
 }
 
+/* Shown instead of the link if your answers aren't saved (see checkLink). */
+.share-status { margin: 0; font-size: 14px; color: var(--ink); }
+.share-dialog .btn[aria-disabled="true"] { opacity: 0.5; cursor: default; }
 
 
 .name-row { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }

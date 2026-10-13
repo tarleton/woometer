@@ -91,7 +91,7 @@
     document.querySelectorAll("#stats-body h2 .where").forEach((el) => (el.textContent = where && `in ${where}`));
 
     if (s.people > 0) {
-      $("avg-score").textContent = pct(s.average_score);
+      $("avg-score").textContent = s.average_score == null ? "–" : pct(s.average_score);
       $("median-score").textContent = s.median_score == null ? "–" : pct(s.median_score);
     }
     $("people-count").textContent = s.people;
@@ -138,8 +138,10 @@
     $("method-note").textContent =
       `How these are counted: a person's woo % is the share of all their answers that were Yes, so in ` +
       `that number Don't Know counts like No. In the claim lists, Don't Know is shown on its own in grey, ` +
-      `and the percentages there are of Yes and No answers only. A person is included once they've answered at least ` +
-      `${s.min_person_answers} claims Yes or No, and a claim is listed once at least ` +
+      `and the percentages there are of Yes and No answers only. A person is counted once they've answered at least ` +
+      `${s.min_person_answers} claims Yes or No. A woo % from only a few answers swings a lot, so the average, ` +
+      `typical and chart of woo % only include people with at least ${s.min_woo_answers || 50} Yes or No answers. ` +
+      `A claim is listed once at least ` +
       `${s.min_claim_answers} people have answered it Yes or No.` +
       (where
         ? ` Each person is placed by the country they last answered from, and a continent shows once ` +
@@ -226,7 +228,7 @@
         return span;
       })
     );
-    if (minePct !== null) $("spread-note").textContent = "How many people are at each woo %. Yours is in the highlighted bar.";
+    if (minePct !== null) $("spread-note").textContent = `How many people with ${current.s && current.s.min_woo_answers || 50}+ answers are at each woo %. Yours is in the highlighted bar.`;
   }
 
   // Tapping a bar segment shows its label; tapping anywhere else hides it.
@@ -523,6 +525,7 @@
         claims: c.claims || [],
         min_people: m.min_people,
         min_person_answers: m.min_person_answers,
+        min_woo_answers: m.min_woo_answers,
         min_claim_answers: m.min_claim_answers,
       },
       name

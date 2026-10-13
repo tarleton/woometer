@@ -518,8 +518,9 @@ end $$;
 -- across everyone, how many people have each score, and Yes / No / Don't Know totals
 -- per claim. A woo score is Yes out of all a person's answers, Don't Know
 -- included, like the site's meter (score.js). Only totals, never who answered what. Test accounts and ignored spam are left out.
--- To keep the numbers meaningful, a person counts toward the average once they
--- have 10 Yes or No answers, and a claim is listed once it has 5. Anyone can
+-- To keep the numbers meaningful, a person is counted once they have 10 Yes
+-- or No answers, but only people with 50 count toward the average, median and
+-- spread of woo %, and a claim is listed once it has 5. Anyone can
 -- read it, even before the site has signed them in anonymously, through
 -- site_stats() just below, which keeps the result for a minute.
 create or replace function public.site_stats_fresh()
@@ -531,10 +532,16 @@ language sql stable security definer set search_path = public as $$
     where a.user_id not in (select left_out_users())
   ),
   people as (
-    select count(*) filter (where answer = 'yes')::numeric / count(*) as score
+    select count(*) filter (where answer = 'yes')::numeric / count(*) as score,
+           count(*) filter (where answer in ('yes', 'no')) as decided
     from real_answers
     group by user_id
     having count(*) filter (where answer in ('yes', 'no')) >= 10
+  ),
+  -- A woo % from only a few answers swings a lot, so the average, median
+  -- and spread use people with 50 or more Yes or No answers.
+  woo_people as (
+    select score from people where decided >= 50
   ),
   claims as (
     select claim_id,
@@ -547,15 +554,17 @@ language sql stable security definer set search_path = public as $$
   )
   select json_build_object(
     'min_person_answers', 10,
+    'min_woo_answers', 50,
     'min_claim_answers', 5,
     'people', (select count(*) from people),
-    'average_score', (select avg(score) from people),
-    'median_score', (select percentile_cont(0.5) within group (order by score) from people),
+    'woo_people', (select count(*) from woo_people),
+    'average_score', (select avg(score) from woo_people),
+    'median_score', (select percentile_cont(0.5) within group (order by score) from woo_people),
     -- How many people have each whole-number score, 0 to 100, as
     -- [{"pct": 4, "n": 3}, ...]. The page groups these into ranges.
     'scores', coalesce((select json_agg(json_build_object('pct', pct, 'n', n) order by pct)
                         from (select round(score * 100)::int as pct, count(*) as n
-                              from people group by 1) x), '[]'::json),
+                              from woo_people group by 1) x), '[]'::json),
     'claims', coalesce((select json_agg(json_build_object(
                           'id', claim_id, 'yes', n_yes, 'no', n_no, 'unsure', n_unsure))
                         from claims), '[]'::json)
@@ -643,22 +652,26 @@ language sql stable security definer set search_path = public as $$
   ),
   people as (
     select p.continent,
-           count(*) filter (where a.answer = 'yes')::numeric / count(*) as score
+           count(*) filter (where a.answer = 'yes')::numeric / count(*) as score,
+           count(*) filter (where a.answer in ('yes', 'no')) as decided
     from placed p
     join answers a on a.user_id = p.user_id
     group by p.user_id, p.continent
     having count(*) filter (where a.answer in ('yes', 'no')) >= 10
   ),
+  -- Woo % numbers use people with 50 or more Yes or No answers, like site_stats.
   continents as (
-    select continent, count(*) as n, avg(score) as average_score,
-           percentile_cont(0.5) within group (order by score) as median_score
+    select continent, count(*) as n,
+           count(*) filter (where decided >= 50) as woo_n,
+           avg(score) filter (where decided >= 50) as average_score,
+           percentile_cont(0.5) within group (order by score) filter (where decided >= 50) as median_score
     from people
     group by continent
   ),
   scores as (
     select continent, round(score * 100)::int as pct, count(*) as n
     from people
-    where continent in (select continent from continents where n >= 3)
+    where decided >= 50 and continent in (select continent from continents where n >= 3 and woo_n >= 3)
     group by continent, round(score * 100)::int
   ),
   claims as (
@@ -675,14 +688,16 @@ language sql stable security definer set search_path = public as $$
   select json_build_object(
     'min_people', 3,
     'min_person_answers', 10,
+    'min_woo_answers', 50,
     'min_claim_answers', 5,
     'countries', coalesce((select json_agg(json_build_object('code', code, 'n', n))
                            from (select code, count(*) as n from placed group by code) x), '[]'::json),
     'continents', coalesce((select json_agg(json_build_object(
                      'key', c.continent,
                      'people', c.n,
-                     'average_score', case when c.n >= 3 then c.average_score end,
-                     'median_score', case when c.n >= 3 then c.median_score end,
+                     'woo_people', case when c.n >= 3 then c.woo_n end,
+                     'average_score', case when c.n >= 3 and c.woo_n >= 3 then c.average_score end,
+                     'median_score', case when c.n >= 3 and c.woo_n >= 3 then c.median_score end,
                      'scores', coalesce((select json_agg(json_build_object('pct', sc.pct, 'n', sc.n) order by sc.pct)
                                 from scores sc where sc.continent = c.continent), '[]'::json),
                      'claims', coalesce((select json_agg(json_build_object(

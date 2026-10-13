@@ -464,10 +464,6 @@ button { font: inherit; cursor: pointer; }
 .fun-stat-text.fade { opacity: 0; }
 /* "Why do these beliefs go together?": a link to /about, styled to match. */
 .why-box .fun-stat-head { font-size: 15px; }
-@media (max-width: 860px) {
-  /* One column: keep it up top, just under the score. */
-  .why-box { order: -1; }
-}
 
 .bin h2 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
 .bin .count {

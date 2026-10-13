@@ -240,8 +240,8 @@
       // First only the fine glowing spines of the ribbons, then their
       // bodies fill in, then the shadowed folds and bead sparks.
       float spine = smoothstep(0.22, 0.0, b);
-      float tube = smoothstep(0.62, 0.42, b) * smoothstep(0.16, 0.36, rev);
-      float crease = smoothstep(0.46, 0.72, b) * smoothstep(0.3, 0.45, rev);
+      float tube = smoothstep(0.78, 0.30, b) * smoothstep(0.16, 0.36, rev);
+      float crease = smoothstep(0.45, 0.85, b) * smoothstep(0.3, 0.45, rev);
       float bead = spine * (0.5 + 0.5 * sin(w.x * 34.0 + w.y * 21.0));
       bead *= smoothstep(0.42, 0.56, rev);
 
@@ -251,10 +251,10 @@
       float lr = log(r);
       float spread = smoothstep(0.25, 0.5, rev);
       vec3 zone = rainbow(lr * 0.22 - T * 0.0026 + n * (0.15 + 0.25 * spread) + t * 0.004);
-      vec3 col = zone * (0.10 + 0.85 * tube) * smoothstep(0.16, 0.36, rev);
-      col *= 1.0 - crease * 0.78;
-      col += zone * spine * 0.45 + vec3(0.9, 0.85, 0.8) * spine * 0.10;
-      col += (zone * 0.6 + 0.4) * max(bead - 0.30, 0.0) * 0.9;
+      vec3 col = zone * (0.22 + 0.50 * tube) * smoothstep(0.16, 0.36, rev);
+      col *= 1.0 - crease * 0.45;
+      col += zone * spine * 0.30 + vec3(0.9, 0.85, 0.8) * spine * 0.04;
+      col += (zone * 0.7 + 0.3) * max(bead - 0.30, 0.0) * 0.45;
 
       // Near the end, a dense rosette fills the heart: the same ribbons at a
       // finer scale, in the lace's colours.
@@ -263,8 +263,8 @@
       float b2 = abs(fract(n2 * 3.2 - T * 0.010) - 0.5) * 2.0;
       float dot2 = smoothstep(0.52, 0.22, b2);
       vec3 coreHue = rainbow(0.25 + n2 * 0.3 + t * 0.004);
-      vec3 coreCol = coreHue * (0.08 + 0.7 * dot2);
-      coreCol += coreHue * smoothstep(0.14, 0.0, b2) * 0.35;
+      vec3 coreCol = coreHue * (0.18 + 0.45 * dot2);
+      coreCol += coreHue * smoothstep(0.14, 0.0, b2) * 0.18;
       col = mix(col, coreCol, coreM);
       // Without the rosette yet, the field calms toward the centre.
       col *= mix(smoothstep(0.03, 0.30, r), 1.0, coreM);
@@ -285,9 +285,11 @@
       vec3 col = meander(uv, segA, T);
       if (blend > 0.001) col = mix(col, meander(uv, segA + 2.0, T), blend);
 
-      // One calm brightness throughout, and nothing at all below 4%.
+      // Subtle: softened colour, one calm brightness throughout, and
+      // nothing at all below 4%.
+      col = mix(vec3(dot(col, vec3(0.3, 0.5, 0.2))), col, 0.75);
       float wake = smoothstep(0.04, 0.12, rev);
-      col *= 0.38 * wake;
+      col *= 0.34 * wake;
       col *= 1.0 - smoothstep(0.72, 1.4, r) * 0.38; // soft vignette
       col += vec3(0.035, 0.02, 0.06) * 0.65; // the field's own dark violet
       col += (hash(gl_FragCoord.xy) - 0.5) * (1.5 / 255.0); // no banding

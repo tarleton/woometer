@@ -893,7 +893,7 @@ const CLAIMS = [
     name: "Ivermectin for COVID",
     category: "health",
     question: "Do you believe ivermectin is an effective treatment for COVID-19?",
-    verdict: "Large randomized trials, including TOGETHER (NEJM, 2022) and ACTIV-6, found ivermectin did not reduce hospitalization or speed recovery. Several early positive studies were later found to have serious data problems.",
+    verdict: "Early on, a 2020 lab study found ivermectin stopped the virus in a dish, at doses far higher than people can safely take, and some small trials looked promising. Larger randomized trials, including TOGETHER (2022) and ACTIV-6, then found it did not reduce hospitalization or speed recovery.",
     link: "https://en.wikipedia.org/wiki/Ivermectin",
   },
   {
@@ -901,7 +901,7 @@ const CLAIMS = [
     name: "Hydroxychloroquine for COVID",
     category: "health",
     question: "Do you believe hydroxychloroquine is an effective treatment for COVID-19?",
-    verdict: "The UK RECOVERY trial and the WHO Solidarity trial, both in 2020, found it did not reduce deaths among hospitalized COVID patients, and the FDA revoked its emergency authorization that June.",
+    verdict: "A small French study in March 2020 suggested it helped, and the FDA briefly authorized it for emergency use. Larger trials, including the UK RECOVERY trial and the WHO Solidarity trial, then found it did not reduce deaths in hospitalized patients, and the FDA withdrew the authorization that June.",
     link: "https://en.wikipedia.org/wiki/Hydroxychloroquine",
   },
   {

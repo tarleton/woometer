@@ -26,11 +26,14 @@ create table if not exists public.profiles (
 -- can set it; nobody can mark themselves from the site.
 alter table public.profiles add column if not exists is_tester boolean not null default false;
 
--- A leftover copy of someone else's answers, kept out of the stats the same
--- way. It happens when a browser signs in with Google to an account that
--- already exists: the answers move to that account, and the anonymous profile
--- the browser had been using keeps a copy. Holds the real account's id. Only
--- the SQL editor sets it, and nothing is deleted.
+-- Someone's other account, for people who ended up with two. Holds the id of
+-- the account they use now: the stats skip this one, and its link leads to
+-- that one (see user_for_code), so a link they already sent keeps working.
+-- It happens when a browser signs in with Google to an account that already
+-- exists (the answers move to that account, and the anonymous profile the
+-- browser had been using keeps a copy), or when a phone forgets its sign-in
+-- partway through a visit and starts over. Only the SQL editor sets it, and
+-- nothing is deleted.
 alter table public.profiles add column if not exists duplicate_of uuid;
 
 create table if not exists public.answers (
@@ -298,17 +301,26 @@ begin
   on conflict (id) do update set display_name = coalesce(excluded.display_name, profiles.display_name);
 end $$;
 
+-- The account behind a friend link: its own, or the one its link now leads to
+-- (see duplicate_of).
+create or replace function public.user_for_code(code text)
+returns uuid
+language sql stable security definer set search_path = public as $$
+  select coalesce(p.duplicate_of, p.id) from profiles p where p.share_code = code;
+$$;
+
 -- The name behind a friend link, for the "X wants to compare" banner.
 create or replace function public.name_for_code(code text)
 returns text
 language sql stable security definer set search_path = public as $$
-  select display_name from profiles where share_code = code;
+  select display_name from profiles where id = user_for_code(code);
 $$;
 
 -- Tapping "Add as a friend" on someone's link adds each of you to the other's list.
--- Returns the friend's user id, or null for an unknown code, your own link, or
--- someone who hasn't given a name yet. Both of you need a name, so nobody shows
--- up in a friend list as "Unnamed friend".
+-- Returns the friend's user id, or null for an unknown code or your own link.
+-- You need a name, since you'll show up in their list. They don't: having
+-- their link is enough, and they show as "Unnamed friend" until they add a
+-- name or you give them a nickname.
 create or replace function public.add_friend(code text)
 returns uuid
 language plpgsql security definer set search_path = public as $$
@@ -319,7 +331,7 @@ begin
   if not exists (select 1 from profiles where id = auth.uid() and btrim(display_name) <> '') then
     raise exception 'add your name first';
   end if;
-  select id into other from profiles where share_code = code and btrim(display_name) <> '';
+  other := user_for_code(code);
   if other is null or other = auth.uid() then return null; end if;
   insert into friends (user_id, friend_id, added_by)
   values (auth.uid(), other, auth.uid()), (other, auth.uid(), auth.uid())
@@ -383,8 +395,7 @@ returns table (claim_id text, answer text)
 language sql stable security definer set search_path = public as $$
   select a.claim_id, a.answer
   from answers a
-  join profiles p on p.id = a.user_id
-  where p.share_code = code;
+  where a.user_id = user_for_code(code);
 $$;
 
 -- Yes, No and Don't Know totals per claim across everyone, for "N% of people
@@ -622,4 +633,4 @@ grant execute on function public.ensure_profile(), public.set_display_name(text)
 
 -- These only run inside the functions above, never called directly.
 revoke execute on function public.record_visit(), public.ip_code(text), public.left_out_of_stats(uuid),
-  public.left_out_users(), public.check_answers() from public, anon, authenticated;
+  public.left_out_users(), public.check_answers(), public.user_for_code(text) from public, anon, authenticated;

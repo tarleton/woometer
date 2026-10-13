@@ -44,15 +44,15 @@
       .map((c) => ({ ...c, claim: byId[c.id], share: c.yes / (c.yes + c.no), all: c.yes + c.no + c.unsure }));
     const top = (list, score) => list.reduce((best, c) => (!best || score(c) > score(best) ? c : best), null);
 
-    if (s.people > 0) {
+    if (s.people > 0 && s.average_score != null) {
       const mine = yourScore();
       facts.push(
         mine === null
           ? `On average, people are <b>${pct(s.average_score)}</b> woo.`
           : `On average, people are <b>${pct(s.average_score)}</b> woo. You: <b>${pct(mine)}</b>`
       );
-      if (s.people > 1) facts.push(`<b>${s.people}</b> people have taken the woometer.`);
     }
+    if (s.people > 1) facts.push(`<b>${s.people}</b> people have taken the woometer.`);
     if (!claims.length) return facts;
 
     const believed = top(claims, (c) => c.yes + c.share / 2 - c.unsure / 1e6);

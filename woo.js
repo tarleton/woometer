@@ -92,31 +92,17 @@
       return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
     }
 
-    void main() {
-      vec2 uv = (gl_FragCoord.xy - 0.5 * res) / min(res.x, res.y);
-      float r = length(uv);
-      float a = atan(uv.y, uv.x);
-
-      // Kaleidoscope: 6 mirrored segments at first, 8, 10, then 12 near the end.
-      float seg = 6.0 + 2.0 * floor(rev * 3.0 + 0.001);
+    // Everything in the pattern that depends on how many mirrored segments
+    // there are: the lace, its second veil and the seeds of light.
+    vec3 field(float seg, float a, float r, float depth, float fw) {
       float s = TAU / seg;
       float fa = abs(mod(a + t * 0.003, s) - 0.5 * s);
-
-      // Drift inward forever: the log of the radius slides slowly with time,
-      // so the pattern keeps unfolding from the centre outward.
-      float depth = log(r + 0.0001) - t * 0.012;
       vec2 q = vec2((fract(depth * 0.55) - 0.5) * 2.4, fa * 2.6);
-      // How much of the lace one pixel covers: the closer to the heart, the
-      // more the pattern is squeezed into each pixel.
-      float fw = 1.4 / (max(r, 0.001) * min(res.x, res.y));
 
       // The same calm brightness at every level: answering adds to the design
       // rather than turning it up.
       const float GLOW = 0.42;
       vec3 col = lace(q, depth, fw, rev) * GLOW;
-      // Before your first few answers nothing is added at all: just the plain
-      // dark field. The first fold fades in between 4% and 12%.
-      float wake = smoothstep(0.04, 0.12, rev);
 
       // A finer second veil turning the other way, added from about a third in.
       float fb = abs(mod(a - t * 0.005, s) - 0.5 * s);
@@ -124,24 +110,63 @@
       col += smoothstep(0.3, 0.55, rev) * 0.35 * GLOW * lace(q2, depth + 0.5, fw * 1.25, rev - 0.12);
 
       // Seeds of light scattered through the field, more of them the more you
-      // answer, like the stars in the header. They drift inward with the lace.
+      // answer, like the stars in the header. Each one fades in on its own and
+      // they drift inward with the lace.
       vec2 sp = vec2(depth * 2.2, fa / s * 3.0);
       vec2 cell = floor(sp);
-      float h = hash(cell + vec2(seg * 7.0, 0.0));
+      float h = hash(cell);
       vec2 spot = vec2(0.25 + 0.5 * hash(cell + 3.1), 0.25 + 0.5 * hash(cell + 7.7));
-      float seed = exp(-length(fract(sp) - spot) * 26.0) * step(h, rev * 0.85);
+      float shown = clamp((rev * 0.85 - h) / 0.04, 0.0, 1.0);
+      float seed = exp(-length(fract(sp) - spot) * 26.0) * shown;
       float twinkle = 0.6 + 0.4 * sin(t * (0.5 + h * 1.5) + h * 40.0);
       col += mix(vec3(1.0, 0.92, 0.8), rainbow(h), 0.4) * seed * twinkle * 0.35 * smoothstep(0.08, 0.3, r);
+
+      return col;
+    }
+
+    // Fine rays reaching out from the heart between the segments.
+    float rays(float seg, float a, float r) {
+      float s = TAU / seg;
+      float fa = abs(mod(a + t * 0.003, s) - 0.5 * s);
+      return pow(abs(cos(fa * seg * 0.5 + 1.5708)), 40.0) * exp(-r * 6.0) * smoothstep(0.01, 0.06, r);
+    }
+
+    void main() {
+      vec2 uv = (gl_FragCoord.xy - 0.5 * res) / min(res.x, res.y);
+      float r = length(uv);
+      float a = atan(uv.y, uv.x);
+
+      // Drift inward forever: the log of the radius slides slowly with time,
+      // so the pattern keeps unfolding from the centre outward.
+      float depth = log(r + 0.0001) - t * 0.012;
+      // How much of the lace one pixel covers: the closer to the heart, the
+      // more the pattern is squeezed into each pixel.
+      float fw = 1.4 / (max(r, 0.001) * min(res.x, res.y));
+
+      // Kaleidoscope: 6 mirrored segments at first, then 8, 10 and 12. Each
+      // step crossfades from the old count to the new one over the last third
+      // of its stretch, so the pattern melts into more angles instead of
+      // jumping.
+      float level = min(rev * 3.0, 3.0);
+      float step6 = floor(level);
+      float segA = 6.0 + 2.0 * step6;
+      float blend = smoothstep(0.65, 1.0, level - step6);
+      vec3 col = field(segA, a, r, depth, fw);
+      if (blend > 0.001) col = mix(col, field(segA + 2.0, a, r, depth, fw), blend);
+
+      // Before your first few answers nothing is added at all: just the plain
+      // dark field. The first fold fades in between 4% and 12%.
+      float wake = smoothstep(0.04, 0.12, rev);
 
       // The lace fades into a calm, dark heart, and is a little softer in the
       // far corners.
       col *= wake * smoothstep(0.03, 0.22, r) * (1.0 - 0.5 * smoothstep(0.7, 1.3, r));
 
       // At the heart, from about a fifth in: one small, breathing point of
-      // white light with a thin halo, and fine rays reaching out a little later.
+      // white light with a thin halo, and fine rays a little later.
       float breath = 0.5 + 0.5 * sin(t * TAU / 9.0);
-      float rays = pow(abs(cos(fa * seg * 0.5 + 1.5708)), 40.0) * exp(-r * 6.0) * smoothstep(0.01, 0.06, r);
-      col += rainbow(t * 0.01 + r * 2.0) * rays * 0.18 * smoothstep(0.2, 0.35, rev);
+      float ray = mix(rays(segA, a, r), rays(segA + 2.0, a, r), blend);
+      col += rainbow(t * 0.01 + r * 2.0) * ray * 0.18 * smoothstep(0.2, 0.35, rev);
       float heart = smoothstep(0.15, 0.25, rev);
       col += vec3(0.8, 0.7, 1.0) * exp(-abs(r - 0.035) * 140.0) * (0.08 + 0.1 * breath) * heart;
       col += vec3(1.0, 0.96, 1.0) * exp(-r * 140.0) * (0.3 + 0.2 * breath) * heart;

@@ -250,11 +250,14 @@
       // extra colour spread outward once you're about a third in.
       float lr = log(r);
       float spread = smoothstep(0.25, 0.5, rev);
-      vec3 zone = rainbow(lr * 0.22 - T * 0.0026 + n * (0.15 + 0.25 * spread) + t * 0.004);
-      vec3 col = zone * (0.22 + 0.50 * tube) * smoothstep(0.16, 0.36, rev);
-      col *= 1.0 - crease * 0.45;
-      col += zone * spine * 0.30 + vec3(0.9, 0.85, 0.8) * spine * 0.04;
-      col += (zone * 0.7 + 0.3) * max(bead - 0.30, 0.0) * 0.45;
+      vec3 zone = rainbow(-0.25 + lr * 0.22 - T * 0.0026 + n * (0.15 + 0.25 * spread) + t * 0.004);
+      // Like the lace: mostly thin glowing lines over the dark field (each
+      // ribbon's spine, then its outline), with only a faint wash of body.
+      float body = smoothstep(0.16, 0.36, rev);
+      float outline = exp(-abs(b - 0.62) * 22.0) * body;
+      vec3 col = zone * (0.16 * tube * body + 0.55 * spine + 0.45 * outline);
+      col *= 1.0 - crease * 0.5;
+      col += zone * max(bead - 0.30, 0.0) * 0.5;
 
       // Near the end, a dense rosette fills the heart: the same ribbons at a
       // finer scale, in the lace's colours.
@@ -263,8 +266,8 @@
       float b2 = abs(fract(n2 * 3.2 - T * 0.010) - 0.5) * 2.0;
       float dot2 = smoothstep(0.52, 0.22, b2);
       vec3 coreHue = rainbow(0.25 + n2 * 0.3 + t * 0.004);
-      vec3 coreCol = coreHue * (0.18 + 0.45 * dot2);
-      coreCol += coreHue * smoothstep(0.14, 0.0, b2) * 0.18;
+      vec3 coreCol = coreHue * (0.04 + 0.25 * exp(-abs(b2 - 0.4) * 18.0));
+      coreCol += coreHue * smoothstep(0.14, 0.0, b2) * 0.5;
       col = mix(col, coreCol, coreM);
       // Without the rosette yet, the field calms toward the centre.
       col *= mix(smoothstep(0.03, 0.30, r), 1.0, coreM);
@@ -285,13 +288,13 @@
       vec3 col = meander(uv, segA, T);
       if (blend > 0.001) col = mix(col, meander(uv, segA + 2.0, T), blend);
 
-      // Subtle: softened colour, one calm brightness throughout, and
-      // nothing at all below 4%.
-      col = mix(vec3(dot(col, vec3(0.3, 0.5, 0.2))), col, 0.75);
+      // Subtle like the lace: one calm brightness throughout, and nothing
+      // at all below 4%.
       float wake = smoothstep(0.04, 0.12, rev);
-      col *= 0.34 * wake;
-      col *= 1.0 - smoothstep(0.72, 1.4, r) * 0.38; // soft vignette
-      col += vec3(0.035, 0.02, 0.06) * 0.65; // the field's own dark violet
+      col *= wake * (1.0 - 0.5 * smoothstep(0.7, 1.3, r));
+      col = 1.0 - exp(-col); // the lace's soft roll-off: nothing glares
+      // The field's own dark violet, as behind the lace.
+      col += vec3(0.035, 0.02, 0.06) * mix(0.65, 1.0 - r * 0.7, wake);
       col += (hash(gl_FragCoord.xy) - 0.5) * (1.5 / 255.0); // no banding
       gl_FragColor = vec4(col, 1.0);
     }`;

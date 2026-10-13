@@ -255,9 +255,9 @@
       // ribbon's spine, then its outline), with only a faint wash of body.
       float body = smoothstep(0.16, 0.36, rev);
       float outline = exp(-abs(b - 0.62) * 22.0) * body;
-      vec3 col = zone * (0.16 * tube * body + 0.55 * spine + 0.45 * outline);
+      vec3 col = zone * (0.06 * tube * body + 0.55 * spine + 0.45 * outline);
       col *= 1.0 - crease * 0.5;
-      col += zone * max(bead - 0.30, 0.0) * 0.5;
+      col += zone * max(bead - 0.30, 0.0) * 0.25;
 
       // Near the end, a dense rosette fills the heart: the same ribbons at a
       // finer scale, in the lace's colours.
@@ -279,9 +279,10 @@
       float r = length(uv);
       float T = t * 0.04; // drifts no faster than the lace: slow and calm
 
-      // Mirrored wedges: 6 at first, then 8, 10 and 12, each step
-      // crossfading in over the last third of its stretch.
-      float level = min(rev * 3.0, 3.0);
+      // Mirrored wedges: 6 at first, then 8 and finally 10 (no more, so the
+      // full screen never gets dizzying), each step crossfading in over the
+      // last third of its stretch.
+      float level = min(rev * 3.0, 2.0);
       float step6 = floor(level);
       float segA = 6.0 + 2.0 * step6;
       float blend = smoothstep(0.65, 1.0, level - step6);
@@ -291,7 +292,10 @@
       // Subtle like the lace: one calm brightness throughout, and nothing
       // at all below 4%.
       float wake = smoothstep(0.04, 0.12, rev);
+      // Past about a quarter, more detail comes in but the whole stays as
+      // calm and dim as it is at a quarter.
       col *= wake * (1.0 - 0.5 * smoothstep(0.7, 1.3, r));
+      col *= 1.0 - 0.25 * smoothstep(0.25, 0.6, rev);
       col = 1.0 - exp(-col); // the lace's soft roll-off: nothing glares
       // The field's own dark violet, as behind the lace.
       col += vec3(0.035, 0.02, 0.06) * mix(0.65, 1.0 - r * 0.7, wake);

@@ -17,8 +17,6 @@
   } catch {}
 
   const SUPABASE_JS = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js";
-  const FRIEND_CODES_KEY = "woometer.friendCodes.v1";
-  const LAST_USER_KEY = "woometer.lastUser.v1";
   // The answers this browser last knew the account to hold, and whose account.
   const SYNCED_KEY = "woometer.synced.v1";
   // The friend someone was adding when they left to sign in.
@@ -478,7 +476,12 @@
       });
     }
     $("friends-open").addEventListener("click", openFriends);
-    $("friends").addEventListener("close", () => clearInterval(friendsWatch));
+    $("friends").addEventListener("close", () => {
+      clearInterval(friendsWatch);
+      showNewFriends(false);
+    });
+    $("ignore-all").addEventListener("click", ignoreAll);
+    $("ignore-all-confirm").addEventListener("click", confirmIgnoreAll);
     // Your own link lives in the Share box; this saves hunting for Share up top.
     $("friends-share").addEventListener("click", () => {
       $("friends").close();
@@ -826,10 +829,11 @@
   function startFresh() {
     W.setAnswers({});
     try {
-      localStorage.removeItem(FRIEND_CODES_KEY);
-      localStorage.removeItem(LAST_USER_KEY);
       localStorage.removeItem(PENDING_FRIEND_KEY);
       localStorage.removeItem(SYNCED_KEY);
+      // Friend links this browser remembered before friend requests.
+      localStorage.removeItem("woometer.friendCodes.v1");
+      localStorage.removeItem("woometer.lastUser.v1");
     } catch {}
     location.replace(homeUrl());
   }
@@ -933,42 +937,15 @@
 
   // Friends
 
-  function friendCodes() {
-    try {
-      return JSON.parse(localStorage.getItem(FRIEND_CODES_KEY)) || [];
-    } catch {
-      return [];
-    }
-  }
-
-  function rememberFriendCode(code) {
-    try {
-      const codes = friendCodes();
-      if (!codes.includes(code)) localStorage.setItem(FRIEND_CODES_KEY, JSON.stringify(codes.concat(code)));
-    } catch {}
-  }
-
   // A shared link is woometer.com/?f=CODE (from the Share box).
-  // Opening one only shows the sharer's results; adding them as a friend is a
-  // separate tap. Friends added in this browser are remembered, so they can be
-  // re-added when this browser switches to a different (existing) account.
+  // Opening one only shows the sharer's results; asking to be friends is a
+  // separate tap.
   async function handleInvite() {
     const url = new URL(location.href);
     const code = url.searchParams.get("f");
     if (code) {
       url.searchParams.delete("f");
       history.replaceState(null, "", url.pathname + url.search + url.hash);
-    }
-
-    let lastUser = null;
-    try {
-      lastUser = localStorage.getItem(LAST_USER_KEY);
-      localStorage.setItem(LAST_USER_KEY, user.id);
-    } catch {}
-    if (lastUser && lastUser !== user.id) {
-      for (const c of friendCodes()) {
-        if (c !== code) await db.rpc("add_friend", { code: c });
-      }
     }
     if (!code) return;
 
@@ -1005,19 +982,27 @@
     add.disabled = false;
     add.hidden = false;
     // Having their link is enough. Their name shows once they add one.
-    if (!name) $("invite-text").textContent = "They haven't added their name yet. You can still add them, and give them a nickname with ✎ in Friends.";
-    add.onclick = async () => {
-      if (await addFriend(code, name)) {
-        add.textContent = "Added to your friends ✓";
-        add.disabled = true;
-      }
-    };
+    if (!name) $("invite-text").textContent = "They haven't added their name yet. You can still add them, and once they accept, give them a nickname with ✎ in Friends.";
+    add.onclick = async () => showAdded(await addFriend(code, name));
     $("invite").hidden = false;
   }
 
-  // Adding is mutual: you appear in their list too, so either of you can compare.
-  // Anyone can add a friend, signed in or not. Friends added in this browser
-  // come along if it later signs in to a Google account (see handleInvite).
+  // The banner's Add button, once you've asked them (from it or from the
+  // comparison it opens) or were already friends.
+  function showAdded(done) {
+    if (!done) return;
+    const add = $("invite-add");
+    add.textContent = done === "asked" ? "Request sent ✓" : "Added to your friends ✓";
+    add.disabled = true;
+  }
+
+  // Adding asks them first: nobody joins anyone's friend list until the person
+  // asked taps Accept in Friends, so a link posted somewhere public can't fill
+  // a list with strangers. Once they accept, it's mutual: you appear in their
+  // list too, so either of you can compare. Anyone can ask, signed in or not.
+  // Friends and requests come along if this browser later signs in to an
+  // existing account (duplicate_friends in supabase/schema.sql).
+  // Resolves to "asked", "friends" (already, or they had asked you too) or false.
   async function addFriend(code, name) {
     if (code === profile.share_code) {
       W.toast("That's your own link.");
@@ -1028,15 +1013,21 @@
 
   async function addNamedFriend(code, name) {
     await nameSaving;
-    const { data: friendId, error } = await db.rpc("add_friend", { code });
-    if (error || !friendId) {
+    let { data: result, error } = await db.rpc("ask_friend", { code });
+    // Before supabase/schema.sql has requests, adding is instant, as it was.
+    if (error && error.code === "PGRST202") {
+      const added = await db.rpc("add_friend", { code });
+      error = added.error;
+      result = added.data && "friends";
+    }
+    if (error || !result) {
       W.toast("That link didn't work. Ask them to send it again.");
       return false;
     }
-    rememberFriendCode(code);
-    W.toast((name ? `${name} is now in your friends.` : "Added to your friends. Tap ✎ to give them a nickname.") + (keepFriendsNote() ? ` ${$("friends-google").textContent} to keep them safe on any device.` : ""));
+    if (result === "asked") W.toast(`Request sent. You'll be friends once ${name ? `${name} accepts` : "they accept"}.`);
+    else W.toast((name ? `${name} is now in your friends.` : "Added to your friends. Tap ✎ to give them a nickname.") + (keepFriendsNote() ? ` ${$("friends-google").textContent} to keep them safe on any device.` : ""));
     refreshFriends();
-    return true;
+    return result;
   }
 
   // A gentle nudge for friends kept only by this browser's anonymous account.
@@ -1232,9 +1223,9 @@
     W.toast("You have a new link. Your old one doesn't work anymore.");
   }
 
-  // While Friends is open it checks now and then for anyone new, so someone
-  // adding you as you watch (say, sitting beside you as they sign in) shows
-  // up without closing and reopening it.
+  // While Friends is open it checks now and then for new friends and requests,
+  // so someone asking as you watch (say, sitting beside you as they sign in)
+  // shows up without closing and reopening it.
   let friendsWatch = 0;
   let sawFriends = null;
   function openFriends() {
@@ -1248,10 +1239,24 @@
 
   async function checkForNewFriends() {
     if (!db || document.hidden) return;
-    const { data, error } = await db.rpc("my_friends");
-    if (error || !data || data.map((f) => f.friend_id).join() === friendsListed) return;
+    const [{ data, error }, requests] = await Promise.all([db.rpc("my_friends"), friendRequests()]);
+    if (error || !data || listed(data, requests) === friendsListed) return;
     markFriendsSeen();
     refreshFriends(true);
+  }
+
+  // Who the Friends popup shows, to spot a change.
+  function listed(friends, requests) {
+    return `${friends.map((f) => f.friend_id).join()}|${requests.map((r) => `${r.incoming ? "<" : ">"}${r.other}`).join()}`;
+  }
+
+  // Requests to be friends, both ways (my_requests in supabase/schema.sql):
+  // people asking you, shown at the top of Friends with Accept and Ignore,
+  // and people you've asked, shown as sent until they accept. Before the
+  // database has requests there are none.
+  async function friendRequests() {
+    const { data, error } = await db.rpc("my_requests");
+    return error || !data ? [] : data;
   }
 
   // Tells the database you've looked at Friends, which clears the badge on
@@ -1270,13 +1275,15 @@
     if (!db) return;
     const run = ++friendsRefresh;
     await stillSignedIn();
-    const { data, error } = await db.rpc("my_friends");
+    const [{ data, error }, requests] = await Promise.all([db.rpc("my_friends"), friendRequests()]);
     if (error) return logError({ error });
     if (run !== friendsRefresh) return;
     const list = $("friend-list");
-    $("friend-empty").hidden = data.length > 0;
+    const sent = requests.filter((r) => !r.incoming);
+    showRequests(requests.filter((r) => r.incoming));
+    $("friend-empty").hidden = data.length > 0 || sent.length > 0;
     $("friend-hint").hidden = !data.length;
-    $("friends-keep").hidden = !(data.length && keepFriendsNote());
+    $("friends-keep").hidden = !((data.length || sent.length) && keepFriendsNote());
     showNewFriends(opening);
     const mine = W.getAnswers();
     const items = await Promise.all(
@@ -1323,8 +1330,109 @@
       })
     );
     if (run !== friendsRefresh) return;
-    list.replaceChildren(...items);
-    friendsListed = data.map((f) => f.friend_id).join();
+    list.replaceChildren(...items, ...sent.map(sentRow));
+    friendsListed = listed(data, requests);
+  }
+
+  // People asking to be your friend, newest first. Accepting lets you both
+  // compare; ignoring is quiet, since their request still looks sent to them.
+  function showRequests(incoming) {
+    $("friend-requests").hidden = !incoming.length;
+    $("ignore-all").hidden = incoming.length < 3;
+    $("request-list").replaceChildren(
+      ...incoming.map((r) => {
+        const li = document.createElement("li");
+        const name = document.createElement("span");
+        name.className = "friend-name";
+        name.textContent = r.display_name || "Someone";
+        const accept = document.createElement("button");
+        accept.type = "button";
+        accept.className = "btn";
+        accept.textContent = "Accept";
+        accept.setAttribute("aria-label", `Accept ${name.textContent}`);
+        accept.addEventListener("click", () => answerRequest(r, true, li));
+        const ignore = document.createElement("button");
+        ignore.type = "button";
+        ignore.className = "btn ghost";
+        ignore.textContent = "Ignore";
+        ignore.setAttribute("aria-label", `Ignore ${name.textContent}`);
+        ignore.addEventListener("click", () => answerRequest(r, false, li));
+        li.append(name, accept, ignore);
+        return li;
+      })
+    );
+  }
+
+  async function answerRequest(r, accept, li) {
+    const buttons = li.querySelectorAll("button");
+    for (const b of buttons) b.disabled = true;
+    const { data, error } = await db.rpc("answer_request", { other: r.other, accept });
+    if (error) {
+      logError({ error });
+      for (const b of buttons) b.disabled = false;
+      W.toast("Couldn't do that just now. Try again in a moment.");
+      return;
+    }
+    // null: they took the request back in the meantime.
+    if (!data) W.toast("That request isn't there anymore.");
+    else if (accept) W.toast(`${r.display_name || "They"} ${r.display_name ? "is" : "are"} now in your friends.`);
+    else W.toast("Ignored. They aren't told.");
+    refreshFriends(true);
+  }
+
+  function ignoreAll() {
+    const n = $("request-list").children.length;
+    $("ignore-all-title").textContent = `Ignore all ${n} requests?`;
+    $("ignore-all-dialog").showModal();
+  }
+
+  async function confirmIgnoreAll() {
+    const button = $("ignore-all-confirm");
+    button.disabled = true;
+    const { error } = await db.rpc("ignore_requests");
+    button.disabled = false;
+    if (error) {
+      logError({ error });
+      W.toast("Couldn't do that just now. Try again in a moment.");
+      return;
+    }
+    $("ignore-all-dialog").close();
+    W.toast("Ignored. They aren't told.");
+    refreshFriends(true);
+  }
+
+  // A request you sent, waiting for them to accept. Cancel takes it back.
+  function sentRow(r) {
+    const li = document.createElement("li");
+    li.className = "friend-sent";
+    const row = document.createElement("span");
+    row.className = "friend-sent-row";
+    const name = document.createElement("span");
+    name.className = "friend-name";
+    name.textContent = r.display_name || "No name yet";
+    const meta = document.createElement("span");
+    meta.className = "friend-meta";
+    meta.textContent = "Request sent";
+    row.append(name, meta);
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.className = "rename";
+    cancel.textContent = "Cancel";
+    cancel.setAttribute("aria-label", `Cancel your request to ${r.display_name || "them"}`);
+    cancel.addEventListener("click", async () => {
+      cancel.disabled = true;
+      const { error } = await db.rpc("cancel_request", { other: r.other });
+      if (error) {
+        logError({ error });
+        cancel.disabled = false;
+        W.toast("Couldn't do that just now. Try again in a moment.");
+        return;
+      }
+      W.toast("Request cancelled.");
+      refreshFriends(true);
+    });
+    li.append(row, cancel);
+    return li;
   }
 
   // The nickname you gave them, else the name they chose.
@@ -1393,9 +1501,11 @@
     refreshFriends();
   }
 
-  // The badge on the Friends button counts people who have added you (by
-  // tapping Add on your link) since you last opened Friends, on any device.
-  // Friends you added yourself never count. Opening Friends clears it.
+  // The badge on the Friends button counts requests waiting for your Accept
+  // or Ignore, and people who became your friends since you last opened
+  // Friends (say, by accepting your request), on any device. Friends you
+  // added yourself never count. Opening Friends hides it; closing brings back
+  // any requests still waiting.
   async function showNewFriends(opening) {
     let fresh = 0;
     if (!opening && !$("friends").open) {
@@ -1565,7 +1675,10 @@
     }
     if (friend.code) {
       $("compare-add").onclick = async () => {
-        if (await addFriend(friend.code, friend.display_name)) $("compare-add").hidden = true;
+        const done = await addFriend(friend.code, friend.display_name);
+        if (!done) return;
+        $("compare-add").hidden = true;
+        showAdded(done);
       };
     }
   }

@@ -5,6 +5,8 @@
 (function () {
   const SUPABASE_JS = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js";
   const STORAGE_KEY = "woometer.answers.v1";
+  // When each answer was given, kept alongside (see app.js and syncAnswers in cloud.js).
+  const TIMES_KEY = "woometer.answerTimes.v1";
   const SESSION_KEY = "woometer.session.v1";
   const LIST_SIZE = 10;
 
@@ -353,11 +355,15 @@
   async function answer(claim, value) {
     const answers = savedAnswers();
     const before = answers[claim.id];
+    const at = Date.now();
     // A changed answer counts as the newest one, as on the main page.
     delete answers[claim.id];
     answers[claim.id] = value;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+      const times = JSON.parse(localStorage.getItem(TIMES_KEY)) || {};
+      times[claim.id] = at;
+      localStorage.setItem(TIMES_KEY, JSON.stringify(times));
     } catch {}
     if (typeof Sounds !== "undefined") ({ yes: Sounds.woo, no: Sounds.trash, unsure: Sounds.unsure })[value]();
     showButtons(claim, value);
@@ -370,12 +376,12 @@
     if (current.s) showMine(current.s);
     // If the main page can't be reached now, it sends this answer up next
     // time it opens, since this browser's copy is newer than the account's.
-    sendAnswer(claim.id, value).catch((err) => console.warn("woometer: answer will be saved next visit.", err));
+    sendAnswer(claim.id, value, at).catch((err) => console.warn("woometer: answer will be saved next visit.", err));
   }
 
   // Only uses a sign-in this browser already has (never starts a new one), so
   // someone who has never answered on the main page doesn't get an account here.
-  async function sendAnswer(id, value) {
+  async function sendAnswer(id, value, at) {
     if (!db) return;
     let { data } = await db.auth.getSession();
     if (!data.session) {
@@ -387,7 +393,7 @@
     }
     const { error } = await db
       .from("answers")
-      .upsert({ user_id: data.session.user.id, claim_id: id, answer: value, updated_at: new Date().toISOString() });
+      .upsert({ user_id: data.session.user.id, claim_id: id, answer: value, updated_at: new Date(at).toISOString() });
     if (error) throw error;
   }
 

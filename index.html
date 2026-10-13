@@ -335,6 +335,17 @@
       <button type="button" id="nickname-remove" class="link-btn danger-link">Remove from my friends</button>
     </form>
   </dialog>
+  <!-- Removing a friend works both ways, so this says so first (see removeFriend). -->
+  <dialog id="remove-dialog" class="delete-dialog">
+    <form method="dialog">
+      <h3 id="remove-title">Remove this friend?</h3>
+      <p id="remove-text"></p>
+      <div class="detail-actions">
+        <button class="btn ghost" value="cancel">Cancel</button>
+        <button type="button" class="btn danger" id="remove-confirm">Remove</button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- Sign in: Google or Facebook (only when facebookSignIn is on). -->
   <dialog id="signin-choice" class="signin-choice">
@@ -368,9 +379,9 @@
   <script src="sky.js?v=7"></script>
   <script src="cat.js"></script>
   <script src="score.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=2"></script>
   <script src="config.js"></script>
-  <script src="cloud.js"></script>
+  <script src="cloud.js?v=2"></script>
   <script src="funstat.js"></script>
   <script src="woo.js?v=18"></script>
 </body>

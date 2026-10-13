@@ -190,8 +190,8 @@
   // same owner. Glowing worm-like ribbons wind through mirrored wedges under
   // a double domain warp and flow slowly outward. Here it grows the same way
   // the lace does: nothing at first, then the ribbons' fine glowing spines,
-  // their bodies, folds, bead sparks, the warmer outer zones and finally the
-  // green rosette heart.
+  // their bodies, folds, bead sparks, wider colour bands and finally the
+  // rosette heart. It is painted in the lace's neon rainbow.
   const MEANDER = `
     precision highp float;
     uniform vec2 res;
@@ -216,10 +216,10 @@
       for (int i = 0; i < 3; i++) { s += a * noise(p); p *= 2.03; a *= 0.45; }
       return s;
     }
-    vec3 hueShift(vec3 c, float a) {
-      vec3 k = vec3(0.57735);
-      float ca = cos(a), sa = sin(a);
-      return c * ca + cross(k, c) * sa + k * dot(k, c) * (1.0 - ca);
+    // The same neon rainbow as the lace, so both styles share one palette.
+    vec3 rainbow(float x) {
+      vec3 c = 0.5 + 0.5 * cos(TAU * (x + vec3(0.0, 0.33, 0.67)));
+      return pow(c, vec3(1.6)) * 1.3;
     }
 
     const vec2 SEEDV = vec2(4.2, 2.5);
@@ -245,23 +245,26 @@
       float bead = spine * (0.5 + 0.5 * sin(w.x * 34.0 + w.y * 21.0));
       bead *= smoothstep(0.42, 0.56, rev);
 
-      // Amber at first; pink and magenta zones spread outward later on.
-      float zones = smoothstep(0.25, 0.5, rev);
-      vec3 zone = mix(vec3(1.0, 0.58, 0.10), vec3(0.95, 0.28, 0.52), smoothstep(0.50, 0.78, r) * zones);
-      zone = mix(zone, vec3(0.68, 0.10, 0.62), smoothstep(0.78, 1.05, r) * zones);
+      // The lace's colours: hues ride outward with the flow (by the log of
+      // the radius, like the lace) and shift along each ribbon. Bands of
+      // extra colour spread outward once you're about a third in.
+      float lr = log(r);
+      float spread = smoothstep(0.25, 0.5, rev);
+      vec3 zone = rainbow(lr * 0.22 - T * 0.0026 + n * (0.15 + 0.25 * spread) + t * 0.004);
       vec3 col = zone * (0.10 + 0.85 * tube) * smoothstep(0.16, 0.36, rev);
       col *= 1.0 - crease * 0.78;
       col += zone * spine * 0.45 + vec3(0.9, 0.85, 0.8) * spine * 0.10;
       col += (zone * 0.6 + 0.4) * max(bead - 0.30, 0.0) * 0.9;
 
-      // Near the end, a dense green rosette fills the heart: the same
-      // ribbons at a finer scale.
+      // Near the end, a dense rosette fills the heart: the same ribbons at a
+      // finer scale, in the lace's colours.
       float coreM = smoothstep(0.40, 0.20, r) * smoothstep(0.62, 0.82, rev);
       float n2 = fbm(p * 3.0 + w * 2.2 + SEEDV * 1.7);
       float b2 = abs(fract(n2 * 3.2 - T * 0.010) - 0.5) * 2.0;
       float dot2 = smoothstep(0.52, 0.22, b2);
-      vec3 coreCol = vec3(0.05, 0.16, 0.06) + vec3(0.25, 0.85, 0.30) * dot2;
-      coreCol += vec3(0.55, 1.0, 0.5) * smoothstep(0.14, 0.0, b2) * 0.35;
+      vec3 coreHue = rainbow(0.25 + n2 * 0.3 + t * 0.004);
+      vec3 coreCol = coreHue * (0.08 + 0.7 * dot2);
+      coreCol += coreHue * smoothstep(0.14, 0.0, b2) * 0.35;
       col = mix(col, coreCol, coreM);
       // Without the rosette yet, the field calms toward the centre.
       col *= mix(smoothstep(0.03, 0.30, r), 1.0, coreM);
@@ -281,9 +284,6 @@
       float blend = smoothstep(0.65, 1.0, level - step6);
       vec3 col = meander(uv, segA, T);
       if (blend > 0.001) col = mix(col, meander(uv, segA + 2.0, T), blend);
-
-      // A slow colour drift that is born at the heart and washes outward.
-      col = hueShift(col, t * 0.02 - r * 0.7);
 
       // One calm brightness throughout, and nothing at all below 4%.
       float wake = smoothstep(0.04, 0.12, rev);

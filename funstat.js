@@ -13,6 +13,69 @@
   const pct = (x) => `${Math.round(x * 100)}%`;
   const label = (claim) => `${CATEGORIES[claim.category].icon} ${claim.name}`;
 
+  // The box shows once this browser has 10 Yes or No answers, the same bar
+  // /stats uses to count someone. Crossing it by answering shows a few
+  // sparkles and a quiet note, once; anyone already past it just sees the box.
+  const COUNTED_AT = 10;
+  const UNLOCKED_KEY = "woometer.statsUnlocked.v1";
+  let answeredNow = false;
+  const decided = () =>
+    Object.entries(saved()).filter(([id, v]) => byId[id] && (v === "yes" || v === "no")).length;
+  const celebrated = () => {
+    try {
+      return localStorage.getItem(UNLOCKED_KEY) === "1";
+    } catch {
+      return true;
+    }
+  };
+  function updateLock() {
+    const counted = decided() >= COUNTED_AT;
+    const wasHidden = box.hidden;
+    box.hidden = !counted;
+    if (!counted || !wasHidden) return;
+    if (answeredNow && !celebrated()) celebrate();
+    try {
+      localStorage.setItem(UNLOCKED_KEY, "1");
+    } catch {}
+  }
+  // A tap on an answer fires "woometer:answer" just after the save, so wait a
+  // moment to tell a tap from answers arriving from an account.
+  document.addEventListener("woometer:answer", () => (answeredNow = true));
+  window.addEventListener("woometer:answers", () =>
+    setTimeout(() => {
+      updateLock();
+      answeredNow = false;
+    })
+  );
+  updateLock();
+
+  function celebrate() {
+    box.classList.add("unlocked");
+    for (let i = 0; i < 8; i++) {
+      const spark = document.createElement("span");
+      spark.className = "unlock-spark";
+      spark.setAttribute("aria-hidden", "true");
+      spark.textContent = "✦";
+      const angle = (Math.PI * 2 * i) / 8 + Math.random() * 0.4;
+      spark.style.left = `${50 + Math.cos(angle) * 30}%`;
+      spark.style.top = `${50 + Math.sin(angle) * 30}%`;
+      spark.style.setProperty("--dx", `${Math.cos(angle) * 40}px`);
+      spark.style.setProperty("--dy", `${Math.sin(angle) * 28}px`);
+      spark.style.animationDelay = `${i * 60}ms`;
+      box.append(spark);
+      setTimeout(() => spark.remove(), 2000);
+    }
+    // A shooting star across the header, like the one for finishing the list.
+    window.dispatchEvent(new Event("woometer:shooting-star"));
+    const note = document.createElement("div");
+    note.className = "unlock-note";
+    note.setAttribute("role", "status");
+    note.textContent = "Now that you've answered 10, you're counted on the stats page. ✨";
+    document.body.append(note);
+    setTimeout(() => note.remove(), 6200);
+    setTimeout(() => box.classList.remove("unlocked"), 2000);
+  }
+
   fetch(`${cfg.supabaseUrl}/rest/v1/rpc/site_stats`, {
     method: "POST",
     headers: { apikey: cfg.supabaseAnonKey, "Content-Type": "application/json" },
@@ -25,10 +88,17 @@
     })
     .catch((err) => console.warn("woometer: fun stats aren't available.", err));
 
+  function saved() {
+    try {
+      return JSON.parse(localStorage.getItem("woometer.answers.v1")) || {};
+    } catch {
+      return {};
+    }
+  }
+
   function yourScore() {
     try {
-      const saved = JSON.parse(localStorage.getItem("woometer.answers.v1")) || {};
-      const values = Object.entries(saved).filter(([id]) => byId[id]).map(([, v]) => v);
+      const values = Object.entries(saved()).filter(([id]) => byId[id]).map(([, v]) => v);
       const s = WooScore.of(values);
       return s.decided >= 10 ? s.fraction : null;
     } catch {

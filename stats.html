@@ -40,6 +40,10 @@
     .ranked li.more { display: none; }
     .ranked.open li.more { display: grid; }
     .ranked .name { grid-area: name; font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* Each name opens that claim's card. */
+    .ranked button.name { min-width: 0; padding: 0; border: 0; background: none; color: inherit; font-family: inherit; text-align: left; cursor: pointer; }
+    .ranked button.name:hover, .ranked button.name:focus-visible { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+    .detail-saved { margin: 12px 0 0; text-align: center; color: var(--muted); font-size: 14px; }
     .ranked .split { grid-area: bar; display: flex; gap: 2px; height: 20px; }
     @media (min-width: 640px) {
       .ranked li { grid-template-columns: 18px minmax(0, 1fr) minmax(0, 1.1fr) 168px; grid-template-areas: "n name bar meta"; }
@@ -147,6 +151,22 @@
 
     <p style="margin-top: 32px"><a href="./">Back to woometer</a></p>
   </main>
+
+  <dialog id="detail">
+    <form method="dialog">
+      <p class="detail-cat" id="detail-cat"></p>
+      <h3 id="detail-name"></h3>
+      <p class="detail-q" id="detail-q"></p>
+      <p class="detail-verdict"><strong>The evidence:</strong> <span id="detail-verdict"></span></p>
+      <p class="detail-stats" id="detail-stats"></p>
+      <p><a id="detail-link" target="_blank" rel="noopener">Read more</a></p>
+      <div class="answer detail-answer" id="detail-answer"></div>
+      <p class="detail-saved" id="detail-saved" aria-live="polite" hidden></p>
+      <div class="detail-actions">
+        <button class="btn" value="close">Close</button>
+      </div>
+    </form>
+  </dialog>
 
   <footer class="foot">
     <p><a href="about" class="foot-link">About</a> · <a href="privacy" class="foot-link">Privacy</a> · <a href="terms" class="foot-link">Terms</a></p>

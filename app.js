@@ -324,6 +324,9 @@
     $("trash-count").textContent = s.trash;
     $("woo-count").textContent = s.woo;
     $("unsure-count").textContent = s.unsure;
+    showBin("trash-bin", s.trash > 0);
+    showBin("woo-bin", s.woo > 0);
+    showBin("unsure-bin", s.unsure > 0);
     $("mini-trash-count").textContent = s.trash;
     $("mini-woo-count").textContent = s.woo;
     $("mini-unsure-count").textContent = s.unsure;
@@ -331,6 +334,20 @@
     $("mini-pct").textContent = `${s.pct}%`;
     renderCat(Cat.stageFor(s.pct));
     meterDial.show(s);
+  }
+
+  // Each pile only shows once it holds an answer, and goes away again if it
+  // empties. Arriving after the page has loaded, it fades in gently.
+  let pilesReady = false;
+  function showBin(id, on) {
+    const bin = $(id);
+    if (bin.hidden === !on) return;
+    bin.hidden = !on;
+    if (on && pilesReady) {
+      bin.classList.remove("appear");
+      void bin.offsetWidth;
+      bin.classList.add("appear");
+    }
   }
 
   // Tapping the gauge flips it over to a pie chart of every answer given,
@@ -490,6 +507,7 @@
     updateFilterCounts();
     renderBins();
     renderMeter();
+    pilesReady = true;
   }
 
   // Answering
@@ -509,6 +527,8 @@
     // On narrow screens the bins are below the grid, so aim for the bottom bar instead.
     const BINS = { yes: ["woo-bin", "mini-woo"], no: ["trash-bin", "mini-trash"], unsure: ["unsure-bin", "mini-unsure"] };
     let bin = $(BINS[value][0]);
+    // A pile's first answer: show the pile now, so the card has somewhere to fly.
+    showBin(BINS[value][0], true);
     if (!isOnScreen(bin)) {
       // The bottom bar's Don't Know count only shows once it has something in it.
       if (value === "unsure") showMiniUnsure(true);

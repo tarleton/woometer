@@ -448,6 +448,10 @@ button { font: inherit; cursor: pointer; }
 .bin.unsure { background: var(--unsure-soft); border-color: var(--unsure); padding: 10px 14px; }
 .bin.unsure h2 { font-size: 16px; margin-bottom: 8px; }
 .bin.bump { transform: scale(1.04); }
+/* A pile only shows once it holds an answer; a new one fades in gently. */
+.bin[hidden] { display: none; }
+.bin.appear { animation: bin-appear 0.6s ease-out; }
+@keyframes bin-appear { from { opacity: 0; transform: translateY(6px); } }
 
 /* "Statistics": one fact about everyone's answers (funstat.js). */
 .fun-stat {

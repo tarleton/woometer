@@ -129,7 +129,9 @@
       col += vec3(0.8, 0.65, 1.0) * exp(-lid * 160.0) * step(abs(e.x), 0.24) * eyeOpen;
       col += rainbow(t * 0.02 + r) * exp(-length(e) * 28.0) * 1.2 * eyeOpen;
 
-      col = 1.0 - exp(-col * 1.2);
+      // Gentle at the top end: the more is revealed, the softer the glow, so a
+      // full field stays a backdrop rather than a light show.
+      col = (1.0 - exp(-col * 1.2)) * (1.0 - 0.45 * smoothstep(0.3, 1.0, rev));
       col += vec3(0.035, 0.02, 0.06) * (1.0 - r * 0.7); // the field's own dark violet
       gl_FragColor = vec4(col, 1.0);
     }`;

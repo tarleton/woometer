@@ -234,6 +234,8 @@
       <button type="button" id="share-native" class="btn" autofocus hidden>Send to a friend</button>
       <button type="button" id="share-copy" class="btn" autofocus>Copy my woo and link</button>
       <button type="button" id="copy-friend-link" class="btn ghost">Copy just the link</button>
+      <!-- Retires the link above for a fresh one (see newLink in cloud.js). -->
+      <button type="button" id="share-new-link" class="link-btn share-new-link" hidden>Get a new link</button>
       <div class="detail-actions">
         <button class="btn ghost" value="close">Close</button>
       </div>
@@ -347,6 +349,18 @@
     </form>
   </dialog>
 
+  <!-- Getting a new link makes the old one stop working, so this says so first. -->
+  <dialog id="newlink-dialog" class="delete-dialog">
+    <form method="dialog">
+      <h3>Get a new link?</h3>
+      <p>Your current link will stop working, so anyone who kept it can't open your answers anymore. Friends you've added stay friends. Send the new link to anyone you still want to share with.</p>
+      <div class="detail-actions">
+        <button class="btn ghost" value="cancel">Cancel</button>
+        <button type="button" class="btn" id="newlink-confirm">Get a new link</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Sign in: Google or Facebook (only when facebookSignIn is on). -->
   <dialog id="signin-choice" class="signin-choice">
     <form method="dialog">
@@ -381,7 +395,7 @@
   <script src="score.js"></script>
   <script src="app.js?v=2"></script>
   <script src="config.js"></script>
-  <script src="cloud.js?v=2"></script>
+  <script src="cloud.js?v=3"></script>
   <script src="funstat.js"></script>
   <script src="woo.js?v=18"></script>
 </body>

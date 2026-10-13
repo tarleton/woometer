@@ -512,6 +512,8 @@
     $("share-copy").addEventListener("click", copyShareText);
     $("share-native").addEventListener("click", sendShareText);
     $("share-retry").addEventListener("click", checkLink);
+    $("share-new-link").addEventListener("click", () => $("newlink-dialog").showModal());
+    $("newlink-confirm").addEventListener("click", newLink);
     $("add-friend-btn").addEventListener("click", addFriendFromInput);
     $("add-friend-link").addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
@@ -974,7 +976,19 @@
       W.toast("That's your own link. Send it to someone else!");
       return;
     }
-    const { data: name } = await db.rpc("name_for_code", { code });
+    const [{ data: works }, { data: name }] = await Promise.all([
+      db.rpc("link_works", { code }),
+      db.rpc("name_for_code", { code }),
+    ]);
+    // An old link (its owner got a new one) or a mistyped one leads nowhere.
+    const actions = $("invite").querySelector(".invite-actions");
+    actions.hidden = works === false;
+    if (works === false) {
+      $("invite-title").textContent = "This link doesn't work.";
+      $("invite-text").textContent = "Ask whoever sent it for their current link.";
+      $("invite").hidden = false;
+      return;
+    }
     const theirs = await answersForCode(code);
     const who = name || "Someone";
     const s = theirs && scoreOf(theirs);
@@ -1157,6 +1171,7 @@
     $("share-native").hidden = failed || !canSend;
     $("share-copy").hidden = failed;
     $("copy-friend-link").hidden = failed;
+    $("share-new-link").hidden = !ready;
     for (const id of ["share-native", "share-copy", "copy-friend-link"]) $(id).setAttribute("aria-disabled", String(!ready));
     if (failed) $("share-retry").focus();
     else if (retrying) $(canSend ? "share-native" : "share-copy").focus();
@@ -1196,6 +1211,25 @@
     withName(async () => {
       if (await W.copyText(friendLink(), "Link copied.", "Copy your link:")) $("share-dialog").close();
     });
+  }
+
+  // Someone who kept your link (say, a friend you've since removed) can still
+  // open your answers with it, so Share can swap it for a fresh one. The old
+  // link stops working and friends stay friends (new_share_code in schema.sql).
+  async function newLink() {
+    const button = $("newlink-confirm");
+    button.disabled = true;
+    const { data: code, error } = await db.rpc("new_share_code");
+    button.disabled = false;
+    if (error || !code) {
+      logError({ error });
+      W.toast("Couldn't get a new link just now. Try again in a moment.");
+      return;
+    }
+    profile.share_code = code;
+    $("newlink-dialog").close();
+    if (linkState === "ready") showLink("ready");
+    W.toast("You have a new link. Your old one doesn't work anymore.");
   }
 
   // While Friends is open it checks now and then for anyone new, so someone

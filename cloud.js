@@ -254,6 +254,7 @@
   // through earlier. Returns the error, if any.
   async function sendChanges() {
     if (!(await stillSignedIn())) return { message: "not signed in" };
+    await sendName();
     const local = W.getAnswers();
     const send = Object.entries(local)
       .filter(([id, value]) => synced[id] !== value)
@@ -281,18 +282,26 @@
   // signed out and was quietly refused, and signing in later made a brand-new
   // account with a new share link. So the page keeps a spare copy of its own
   // and puts the same sign-in back whenever supabase-js comes up empty.
+  //
+  // On 13 Oct an iPhone in Facebook's built-in browser lost that spare too,
+  // along with everything else the site had stored, partway through a visit.
+  // Only the answers survived, since every tap writes them again. Nothing it
+  // did after that reached woometer, its name included, and its next visit
+  // made a new account, so the link it had already sent showed no name. So
+  // the page holds the spare in memory as well; putting the sign-in back
+  // writes both copies to storage again.
+  let spareInPage = null;
   function keepSession(session) {
     if (leaving || !session || !session.refresh_token) return;
+    spareInPage = { user: session.user.id, access_token: session.access_token, refresh_token: session.refresh_token };
     try {
-      localStorage.setItem(
-        SESSION_KEY,
-        JSON.stringify({ user: session.user.id, access_token: session.access_token, refresh_token: session.refresh_token })
-      );
+      localStorage.setItem(SESSION_KEY, JSON.stringify(spareInPage));
     } catch {}
   }
 
   function forgetSession() {
     leaving = true;
+    spareInPage = null;
     try {
       localStorage.removeItem(SESSION_KEY);
     } catch {}
@@ -304,6 +313,7 @@
     try {
       spare = JSON.parse(localStorage.getItem(SESSION_KEY));
     } catch {}
+    spare ||= spareInPage;
     if (leaving || !spare || !spare.refresh_token || (who && spare.user !== who)) return null;
     const { data, error } = await db.auth.setSession({ access_token: spare.access_token, refresh_token: spare.refresh_token });
     if (error || !data.session) {
@@ -534,6 +544,7 @@
   }
 
   async function statsFor(id) {
+    await stillSignedIn();
     const { data, error } = await db.rpc("claim_stats", { only_ids: [id] });
     if (error) return logError({ error });
     const r = data[0];
@@ -806,11 +817,24 @@
     startFresh();
   }
 
-  async function setName(name) {
-    const clean = name.trim().slice(0, 40);
+  // The name goes out with the answers, in order, and stays waiting here
+  // until it gets through: each later save tries it again. The page uses it
+  // right away either way.
+  let unsentName = null;
+  function setName(name) {
+    unsentName = name.trim().slice(0, 40);
+    profile.display_name = unsentName || profile.display_name;
+    return inOrder(async () => {
+      if (await stillSignedIn()) await sendName();
+    });
+  }
+
+  async function sendName() {
+    if (unsentName === null) return;
+    const clean = unsentName;
     const { error } = await db.rpc("set_display_name", { new_name: clean });
     if (error) return logError({ error });
-    profile.display_name = clean || null;
+    if (unsentName === clean) unsentName = null;
   }
 
   // Your name goes with your link and into your friends' lists, so sharing a
@@ -1050,7 +1074,10 @@
 
   // Share buttons stop here while the name box is blank, since the link shows it.
   function shareNameReady() {
-    if ($("my-name").value.trim()) return true;
+    const typed = $("my-name").value.trim();
+    // The box saves when it loses focus, which a tap on Copy may not do first.
+    if (typed && typed !== profile.display_name) setName(typed);
+    if (typed) return true;
     $("my-name").setAttribute("aria-invalid", "true");
     $("my-name").focus();
     W.toast("Add a name first: friends see it with your link.");
@@ -1118,6 +1145,7 @@
   async function refreshFriends(opening = false) {
     if (!db) return;
     const run = ++friendsRefresh;
+    await stillSignedIn();
     const { data, error } = await db.rpc("my_friends");
     if (error) return logError({ error });
     if (run !== friendsRefresh) return;

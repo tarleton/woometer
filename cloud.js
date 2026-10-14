@@ -558,10 +558,12 @@
     W.withName = withName;
     W.openShare = openShare;
     document.addEventListener("visibilitychange", () => {
+      watchBadge();
       if (document.visibilityState !== "visible") return;
       // Back on the page: send anything that didn't get through, then refresh.
       inOrder(async () => answersNotSaved(await sendChanges())).then(() => refreshFriends());
     });
+    watchBadge();
   }
 
   async function statsFor(id) {
@@ -1519,12 +1521,30 @@
     if (!opening && !$("friends").open) {
       await sawFriends;
       const { data, error } = await db.rpc("new_friends");
-      // Before supabase/schema.sql has new_friends, show no badge rather than a wrong one.
-      if (!error && data) fresh = data.length;
+      // A check that didn't get through (say, a phone between signals) leaves
+      // the badge as it was, and so does Friends opening meanwhile.
+      if (error || !data || $("friends").open) return;
+      fresh = data.length;
     }
     $("friends-count").hidden = fresh === 0;
     $("friends-count").textContent = fresh;
     $("friends-open").setAttribute("aria-label", fresh ? `Friends, ${fresh} new` : "Friends");
+  }
+
+  // While the page is showing, the badge checks about once a minute, so a
+  // request that arrives while you read pops in without a reload. It rests
+  // while the page is hidden (coming back checks at once) and while Friends
+  // is open, which watches for itself. The Share box gives out your link only
+  // once you have a name, so until then nobody can ask and it doesn't check.
+  let badgeWatch = 0;
+  function watchBadge() {
+    clearInterval(badgeWatch);
+    badgeWatch = document.hidden ? 0 : setInterval(checkBadge, 60000);
+  }
+
+  function checkBadge() {
+    if (document.hidden || $("friends").open || !profile.display_name) return;
+    showNewFriends(false);
   }
 
   async function answersOf(friendId) {

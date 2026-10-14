@@ -104,7 +104,7 @@
       .map((c) => ({ ...c, claim: byId[c.id], share: c.yes / (c.yes + c.no), total: c.yes + c.no }));
     const byMost = (a, b) => b.total - a.total;
     // Ranked by how many people put it on that side, then by share, then by
-    // fewer Don't Knows: 8 believers beat 7, whatever else they answered.
+    // fewer Not Sures: 8 believers beat 7, whatever else they answered.
     const fewerUnsure = (a, b) => a.unsure - b.unsure;
     const believed = claims
       .filter((c) => c.yes > 0)
@@ -122,7 +122,7 @@
       .sort((a, b) => Math.abs(a.share - 0.5) - Math.abs(b.share - 0.5) || byMost(a, b))
       .slice(0, LIST_SIZE);
 
-    // Don't Know is its own question, so these may also be in the lists above.
+    // Not Sure is its own question, so these may also be in the lists above.
     const unsure = claims
       .filter((c) => c.unsure > 0)
       .sort((a, b) => b.unsure - a.unsure || b.unsure / (b.total + b.unsure) - a.unsure / (a.total + a.unsure))
@@ -133,11 +133,11 @@
     renderList("believed", believed, undefined, empty);
     renderList("rejected", rejected, undefined, empty);
     renderList("split", split, undefined, empty && "No claims are split here yet.");
-    renderList("unsure", unsure, (c) => `${pct(c.unsure / (c.total + c.unsure))} don't know`, empty && "Nobody here has picked Don't Know enough yet.");
+    renderList("unsure", unsure, (c) => `${pct(c.unsure / (c.total + c.unsure))} not sure`, empty && "Nobody here has picked Not Sure enough yet.");
 
     $("method-note").textContent =
       `How these are counted: a person's woo % is the share of all their answers that were Yes, so in ` +
-      `that number Don't Know counts like No. In the claim lists, Don't Know is shown on its own in grey, ` +
+      `that number Not Sure counts like No. In the claim lists, Not Sure is shown on its own in grey, ` +
       `and the percentages there are of Yes and No answers only. A person is counted once they've answered at least ` +
       `${s.min_person_answers} claims Yes or No. A woo % from only a few answers swings a lot, so the average, ` +
       `typical and chart of woo % only include people with at least ${s.min_woo_answers || 50} Yes or No answers. ` +
@@ -310,8 +310,8 @@
   // A claim's card, like the one on the main page: the evidence, how people
   // here answered, and the same three buttons. Answering here saves it just
   // like the main page does, and the totals catch up within about a minute.
-  const ANSWERS = [["yes", "Yes"], ["unsure", "Don't Know"], ["no", "No"]];
-  const SAID = { yes: "Yes", no: "No", unsure: "Don't Know" };
+  const ANSWERS = [["yes", "Yes"], ["unsure", "Not Sure"], ["no", "No"]];
+  const SAID = { yes: "Yes", no: "No", unsure: "Not Sure" };
 
   function savedAnswers() {
     try {
@@ -332,7 +332,7 @@
     const share = (n) => `${Math.round((n / total) * 100)}%`;
     const people = `${total} ${total === 1 ? "person" : "people"}${current.where ? ` in ${current.where}` : ""}`;
     $("detail-stats").textContent = c.unsure
-      ? `${share(c.yes)} of ${people} said Yes, ${share(c.no)} said No and ${share(c.unsure)} don't know.`
+      ? `${share(c.yes)} of ${people} said Yes, ${share(c.no)} said No and ${share(c.unsure)} aren't sure.`
       : `${share(c.yes)} of ${people} said Yes and ${share(c.no)} said No.`;
     $("detail-saved").hidden = true;
     showButtons(claim, savedAnswers()[claim.id]);

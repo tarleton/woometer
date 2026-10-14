@@ -397,13 +397,13 @@
       const error = await inOrder(sendChanges);
       if (error) return answersNotSaved(error);
       const s = await statsFor(id);
-      // Only the latest tap on a claim gets a message. No Don't Know count
+      // Only the latest tap on a claim gets a message. No Not Sure count
       // means the database isn't counting them yet.
       if (!s || W.getAnswers()[id] !== value || (value === "unsure" && !s.unsure)) return;
       const total = s.yes + s.no + s.unsure;
       const people = `${total.toLocaleString()} people`;
       if (total <= 1) W.toast("You're the first to answer this one.");
-      else if (value === "unsure") W.toast(`${pct(s.unsure, total)}% of ${people} don't know either.`);
+      else if (value === "unsure") W.toast(`${pct(s.unsure, total)}% of ${people} aren't sure either.`);
       else W.toast(`${pct(s[value], total)}% of ${people} agree with you.`);
     });
 
@@ -435,9 +435,9 @@
       const total = s.yes + s.no + s.unsure;
       const people = `${total.toLocaleString()} ${total === 1 ? "person" : "people"}`;
       const split = s.unsure
-        ? `${pct(s.yes, total)}% of ${people} said Yes, ${pct(s.no, total)}% said No and ${pct(s.unsure, total)}% don't know.`
+        ? `${pct(s.yes, total)}% of ${people} said Yes, ${pct(s.no, total)}% said No and ${pct(s.unsure, total)}% aren't sure.`
         : `${pct(s.yes, total)}% of ${people} said Yes and ${pct(s.no, total)}% said No.`;
-      // A database that isn't counting Don't Know yet hasn't counted yours either.
+      // A database that isn't counting Not Sure yet hasn't counted yours either.
       if (mine === "unsure" && !s.unsure) mine = null;
       if (!mine) el.textContent = total ? split : "Nobody has answered this one yet.";
       else if (total <= 1) el.textContent = "You're the only one who has answered this so far.";
@@ -1525,8 +1525,8 @@
     return Object.fromEntries(data.map((r) => [r.claim_id, r.answer]));
   }
 
-  // Common ground: only claims you've both answered Yes or No count, so Don't
-  // Know and anything still on either board stay out of it.
+  // Common ground: only claims you've both answered Yes or No count, so Not
+  // Sure and anything still on either board stay out of it.
   function compare(mine, theirs) {
     const agreements = [];
     const differences = [];

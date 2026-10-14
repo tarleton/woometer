@@ -134,7 +134,7 @@
       facts.push(`Most split: <b>${esc(label(split.claim))}</b> (${pct(split.share)} believe)`);
     }
     const unsure = top(claims.filter((c) => c.unsure), (c) => c.unsure / c.all);
-    if (unsure) facts.push(`Least sure: <b>${esc(label(unsure.claim))}</b> (${pct(unsure.unsure / unsure.all)} Don't Know)`);
+    if (unsure) facts.push(`Least sure: <b>${esc(label(unsure.claim))}</b> (${pct(unsure.unsure / unsure.all)} Not Sure)`);
 
     // The category with the highest share of Yes answers.
     const cats = {};

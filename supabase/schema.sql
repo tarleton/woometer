@@ -48,7 +48,7 @@ create table if not exists public.answers (
 
 create index if not exists answers_claim_id_idx on public.answers (claim_id);
 
--- 'unsure' is the Don't Know button. Databases set up before it existed only
+-- 'unsure' is the Not Sure button. Databases set up before it existed only
 -- allow 'yes' and 'no', so replace that rule.
 alter table public.answers drop constraint if exists answers_answer_check;
 alter table public.answers add constraint answers_answer_check check (answer in ('yes', 'no', 'unsure'));
@@ -662,9 +662,9 @@ language sql stable security definer set search_path = public as $$
   where a.user_id = user_for_code(code);
 $$;
 
--- Yes, No and Don't Know totals per claim across everyone, for "N% of people
+-- Yes, No and Not Sure totals per claim across everyone, for "N% of people
 -- agree". Pass a list of claim ids to get just those, or nothing for every claim.
--- Test accounts and ignored spam are left out. Dropped first because the Don't Know column
+-- Test accounts and ignored spam are left out. Dropped first because the Not Sure column
 -- changed what it returns.
 drop function if exists public.claim_stats(text[]);
 create function public.claim_stats(only_ids text[] default null)
@@ -692,8 +692,8 @@ begin
 end $$;
 
 -- The numbers on woometer.com/stats, as one bundle: the average woo score
--- across everyone, how many people have each score, and Yes / No / Don't Know totals
--- per claim. A woo score is Yes out of all a person's answers, Don't Know
+-- across everyone, how many people have each score, and Yes / No / Not Sure totals
+-- per claim. A woo score is Yes out of all a person's answers, Not Sure
 -- included, like the site's meter (score.js). Only totals, never who answered what. Test accounts and ignored spam are left out.
 -- To keep the numbers meaningful, a person is counted once they have 10 Yes
 -- or No answers, but only people with 50 count toward the average, median and

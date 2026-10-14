@@ -31,7 +31,7 @@
   }).observe(document.body, { attributes: true, attributeFilter: ["open"], subtree: true });
 
   // answers: { [claimId]: "yes" | "no" | "unsure" }, in the order they were given.
-  // "unsure" is Don't Know: off the board, and counted in the woo score like No.
+  // "unsure" is Not Sure: off the board, and counted in the woo score like No.
   let answers = load();
   let times = loadTimes();
   let activeCategory = "all";
@@ -72,7 +72,7 @@
     window.dispatchEvent(new Event("woometer:answers"));
   }
 
-  // The woo score is Yes out of every answer, Don't Know included (score.js).
+  // The woo score is Yes out of every answer, Not Sure included (score.js).
   function score() {
     return WooScore.of(Object.values(answers));
   }
@@ -144,7 +144,7 @@
   const PILES = {
     yes: { cls: "in-woo", label: "✨ You believe it", title: "✨ Believe It" },
     no: { cls: "in-trash", label: "🗑️ In your Trash Bin", title: "🗑️ Trash Bin" },
-    unsure: { cls: "in-unsure", label: "🤷 You don't know", title: "🤷 Don't Know" },
+    unsure: { cls: "in-unsure", label: "🤷 You're not sure", title: "🤷 Not Sure" },
   };
 
   function makeCard(claim) {
@@ -180,8 +180,8 @@
     const row = document.createElement("div");
     row.className = "answer";
     const given = answers[claim.id];
-    // Don't Know sits between Yes and No, on two lines so all three stay the same size.
-    for (const [value, label, cls, text] of [["yes", "Yes", "yes"], ["unsure", "Don't Know", "unsure", "Don't\nKnow"], ["no", "No", "no"]]) {
+    // Not Sure sits between Yes and No, on two lines so all three stay the same size.
+    for (const [value, label, cls, text] of [["yes", "Yes", "yes"], ["unsure", "Not Sure", "unsure", "Not\nSure"], ["no", "No", "no"]]) {
       const b = document.createElement("button");
       b.type = "button";
       b.className = cls;
@@ -236,7 +236,7 @@
   // Each bin shows its newest few claims so the side panel never needs its own
   // scrollbar; the rest open in a popup. On wide screens the panel stays put
   // while the board scrolls, so the previews shrink until all three bins fit.
-  // [Trash Bin and Believe It, Don't Know], tried in order until the panel fits.
+  // [Trash Bin and Believe It, Not Sure], tried in order until the panel fits.
   const PREVIEWS = [[6, 3], [5, 3], [4, 2], [3, 2], [3, 1], [3, 0], [2, 0], [1, 0]];
 
   function pileIds(kind) {
@@ -351,7 +351,7 @@
   }
 
   // Tapping the gauge flips it over to a pie chart of every answer given,
-  // Don't Know included, labelled with counts like the boxes below it. It
+  // Not Sure included, labelled with counts like the boxes below it. It
   // always starts on the gauge. The friend popup
   // gets a copy of the same dial for a friend's answers (Woometer.newDial).
   const PIE_SLICES = [
@@ -418,7 +418,7 @@
   }
   const meterDial = makeDial($("dial"), "your");
 
-  // The bottom bar's Don't Know count appears once there's something in it;
+  // The bottom bar's Not Sure count appears once there's something in it;
   // on small phones the other two then drop their words to make room.
   function showMiniUnsure(show) {
     $("mini-unsure").hidden = !show;
@@ -530,7 +530,7 @@
     // A pile's first answer: show the pile now, so the card has somewhere to fly.
     showBin(BINS[value][0], true);
     if (!isOnScreen(bin)) {
-      // The bottom bar's Don't Know count only shows once it has something in it.
+      // The bottom bar's Not Sure count only shows once it has something in it.
       if (value === "unsure") showMiniUnsure(true);
       bin = $(BINS[value][1]);
     }
@@ -601,7 +601,7 @@
     // tapping another moves the claim to that pile.
     const row = $("detail-answer");
     row.replaceChildren();
-    for (const [value, label, cls] of [["yes", "Yes", "yes"], ["unsure", "Don't Know", "unsure"], ["no", "No", "no"]]) {
+    for (const [value, label, cls] of [["yes", "Yes", "yes"], ["unsure", "Not Sure", "unsure"], ["no", "No", "no"]]) {
       const b = document.createElement("button");
       b.type = "button";
       b.className = cls;

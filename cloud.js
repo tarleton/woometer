@@ -1003,12 +1003,20 @@
   // Friends and requests come along if this browser later signs in to an
   // existing account (duplicate_friends in supabase/schema.sql).
   // Resolves to "asked", "friends" (already, or they had asked you too) or false.
+  // A second tap while the first is still on its way (a quick double tap)
+  // waits for that one instead of asking again, so one message shows.
+  let adding = null;
   async function addFriend(code, name) {
     if (code === profile.share_code) {
       W.toast("That's your own link.");
       return false;
     }
-    return withName(() => addNamedFriend(code, name), { code, name });
+    if (adding && adding.code === code) return adding.done;
+    const done = withName(() => addNamedFriend(code, name), { code, name }).finally(() => {
+      if (adding && adding.done === done) adding = null;
+    });
+    adding = { code, done };
+    return done;
   }
 
   async function addNamedFriend(code, name) {

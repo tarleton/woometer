@@ -460,7 +460,7 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 -- Puts each of you in the other's friend list and marks any request between
--- you accepted. Only runs inside ask_friend and answer_request. added_by is
+-- you accepted. Only runs inside ask_friend and answer_friend_request. added_by is
 -- whoever made it happen (by accepting, or by asking someone who had already
 -- asked them), so the other person's Friends badge counts the new friend.
 create or replace function public.make_friends(other uuid)
@@ -496,8 +496,13 @@ begin
   if exists (select 1 from friends where user_id = auth.uid() and friend_id = other) then
     return 'friends';
   end if;
-  if exists (select 1 from friend_requests
-             where from_user = other and to_user = auth.uid() and status <> 'accepted' and cancelled_at is null) then
+  -- They had already asked you, so you both want it and it happens now.
+  -- Their request is locked first, like Accept (see answer_friend_request),
+  -- so if they tap Cancel at the same moment, one waits for the other.
+  perform 1 from friend_requests
+  where from_user = other and to_user = auth.uid() and status <> 'accepted' and cancelled_at is null
+  for update;
+  if found then
     perform make_friends(other);
     return 'friends';
   end if;
@@ -542,16 +547,25 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 -- Accept or Ignore on a request in Friends. Accepting makes you friends.
--- Ignoring takes it off your list without telling whoever asked. Returns
--- 'friends' or 'ignored', or null if there's no such request (say, they
--- took it back).
-create or replace function public.answer_request(other uuid, accept boolean)
+-- Ignoring takes it off your list without telling whoever asked. The request
+-- is locked first, so if whoever asked taps Cancel at the same moment, one
+-- waits for the other and never both happen: a Cancel that lands first
+-- means no friends, and one that lands second finds you already are (see
+-- cancel_my_request). Returns 'friends' or 'ignored'; 'cancelled' if they
+-- took it back first; null if there's no such request.
+create or replace function public.answer_friend_request(other uuid, accept boolean)
 returns text
 language plpgsql security definer set search_path = public as $$
 begin
   if auth.uid() is null then raise exception 'not signed in'; end if;
-  if not exists (select 1 from friend_requests
-                 where from_user = other and to_user = auth.uid() and status <> 'accepted' and cancelled_at is null) then
+  perform 1 from friend_requests
+  where from_user = other and to_user = auth.uid() and status <> 'accepted' and cancelled_at is null
+  for update;
+  if not found then
+    if exists (select 1 from friend_requests
+               where from_user = other and to_user = auth.uid() and cancelled_at is not null) then
+      return 'cancelled';
+    end if;
     return null;
   end if;
   if accept then
@@ -562,6 +576,14 @@ begin
   where from_user = other and to_user = auth.uid() and status = 'pending';
   return 'ignored';
 end $$;
+
+-- What the page called before 14 Oct, kept for pages left open from then:
+-- the same, with null for a request taken back.
+create or replace function public.answer_request(other uuid, accept boolean)
+returns text
+language sql security definer set search_path = public as $$
+  select nullif(answer_friend_request(other, accept), 'cancelled');
+$$;
 
 -- "Ignore all" in Friends, for a pile of requests from a link posted
 -- somewhere public. Returns how many it ignored.
@@ -578,13 +600,31 @@ begin
   return n;
 end $$;
 
--- Cancel on a request you sent, while they haven't accepted it.
-create or replace function public.cancel_request(other uuid)
-returns void
-language sql security definer set search_path = public as $$
+-- Cancel on a request you sent. If they tap Accept at the same moment, one
+-- waits for the other (see answer_friend_request), so the two never both
+-- happen. Returns 'cancelled'; 'friends' if they had already accepted; null
+-- if there's nothing to cancel.
+create or replace function public.cancel_my_request(other uuid)
+returns text
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'not signed in'; end if;
   update friend_requests set cancelled_at = now()
   where from_user = auth.uid() and to_user = other and status <> 'accepted' and cancelled_at is null;
-$$;
+  if found then return 'cancelled'; end if;
+  if exists (select 1 from friends where user_id = auth.uid() and friend_id = other) then
+    return 'friends';
+  end if;
+  return null;
+end $$;
+
+-- What the page called before 14 Oct, kept for pages left open from then.
+create or replace function public.cancel_request(other uuid)
+returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  perform cancel_my_request(other);
+end $$;
 
 -- What the page called before requests, kept for pages left open from then:
 -- it asks too, and returns the friend's user id only once you're friends.
@@ -979,12 +1019,14 @@ revoke execute on function public.ensure_profile(), public.set_display_name(text
   public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
   public.new_friends(), public.saw_friends(), public.delete_my_account(), public.start_move(), public.finish_move(text),
   public.new_share_code(), public.link_works(text), public.ask_friend(text), public.my_requests(),
-  public.answer_request(uuid, boolean), public.ignore_requests(), public.cancel_request(uuid) from public, anon;
+  public.answer_request(uuid, boolean), public.ignore_requests(), public.cancel_request(uuid),
+  public.answer_friend_request(uuid, boolean), public.cancel_my_request(uuid) from public, anon;
 grant execute on function public.ensure_profile(), public.set_display_name(text), public.name_for_code(text),
   public.add_friend(text), public.my_friends(), public.set_friend_nickname(uuid, text), public.friend_answers(uuid), public.answers_for_code(text), public.claim_stats(text[]),
   public.new_friends(), public.saw_friends(), public.delete_my_account(), public.start_move(), public.finish_move(text),
   public.new_share_code(), public.link_works(text), public.ask_friend(text), public.my_requests(),
-  public.answer_request(uuid, boolean), public.ignore_requests(), public.cancel_request(uuid) to authenticated;
+  public.answer_request(uuid, boolean), public.ignore_requests(), public.cancel_request(uuid),
+  public.answer_friend_request(uuid, boolean), public.cancel_my_request(uuid) to authenticated;
 
 -- These only run inside the functions above, never called directly.
 revoke execute on function public.record_visit(), public.ip_code(text), public.left_out_of_stats(uuid),

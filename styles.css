@@ -683,10 +683,12 @@ body > main { width: 100%; flex: 1 0 auto; }
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    position: fixed;
-    left: 0;
-    right: 0;
+    /* Sticky, not fixed: it rides along with the page as a phone's toolbar
+       slides in and out (fixed bars jitter there), and at the very end it
+       rests right under the footer with no gap. */
+    position: sticky;
     bottom: 0;
+    flex-shrink: 0;
     z-index: 20;
     padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
     background: var(--surface);
@@ -710,7 +712,6 @@ body > main { width: 100%; flex: 1 0 auto; }
   .mini-cat { cursor: pointer; border-radius: 6px; }
   .mini-cat svg { display: block; width: 34px; height: auto; }
   /* Clear of the bottom bar on the home page. */
-  .minibar ~ .foot { margin-bottom: var(--minibar-h, calc(58px + env(safe-area-inset-bottom))); }
   .toast { bottom: calc(76px + env(safe-area-inset-bottom)); }
   .unlock-note { bottom: calc(126px + env(safe-area-inset-bottom)); }
 }

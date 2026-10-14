@@ -609,6 +609,10 @@ dialog::backdrop { background: rgb(20 10 30 / 50%); }
    back as it was. Faded rather than visibility: hidden so focus can return to it. */
 dialog.covered { opacity: 0; pointer-events: none; }
 dialog.covered::backdrop { background: transparent; }
+/* The page behind an open popup holds still (popups.js), and scrolling to the
+   end of a popup stops there instead of carrying on to the page. */
+body.pinned { position: fixed; left: 0; right: 0; }
+dialog { overscroll-behavior: contain; }
 dialog h3 { margin: 4px 0 8px; font-size: 22px; }
 .detail-cat { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
 .detail-q { color: var(--muted); }
@@ -925,7 +929,6 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 }
 .friends h3 { margin: 0; }
 .friends .bin-hint { margin: 0; }
-.friends .friend-list { max-height: 45vh; overflow-y: auto; }
 /* Adding a friend sits below the list, set off by a thin line. */
 .friends .add-friend { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 2px; }
 .friends-keep .link-btn { color: var(--accent); font: inherit; font-weight: 600; }
@@ -981,7 +984,7 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
   padding: 9px 12px;
 }
 .friend-list button:hover { border-color: var(--accent); }
-/* Each friend row: the friend (opens the comparison) and a small rename button. */
+/* Each row: a friend (opens the comparison), or a request you sent with its Cancel. */
 .friend-list li { display: flex; gap: 6px; }
 .friend-list li > button:first-child { flex: 1; min-width: 0; }
 .friend-list .rename { width: auto; flex: none; padding: 0 12px; align-items: center; color: var(--muted); font-size: 15px; }
@@ -1005,7 +1008,7 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 /* People asking to be your friend, at the top of Friends, each with Accept and Ignore. */
 .friend-requests { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border: 1px solid var(--accent); border-radius: 12px; }
 .requests-title { margin: 0; font-weight: 700; }
-.request-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 30vh; overflow-y: auto; }
+.request-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .request-list li { display: flex; align-items: center; gap: 6px; }
 .request-list .friend-name { flex: 1; min-width: 0; }
 .request-list .btn { flex: none; padding: 5px 12px; font-size: 14px; }
@@ -1089,6 +1092,13 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
   .pair-meter .dial { width: min(118px, 100%); margin-top: 8px; }
 }
 .compare-head { margin: 0; font-size: 20px; line-height: 1.25; text-align: center; }
+/* ✎ beside a friend's name: rename them (only you see it) or remove them.
+   Small, so "You and Jessamine agree on 67%" still fits one line on a phone,
+   with a tap area that reaches past the pencil. */
+.name-edit { position: relative; border: 0; background: none; color: var(--muted); font-size: 13px; font-weight: 400; padding: 0 1px; margin-left: 3px; vertical-align: 3px; border-radius: 4px; }
+.name-edit::before { content: ""; position: absolute; inset: -10px -8px; }
+.name-edit:hover { color: var(--ink); }
+.name-edit:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 #agree-on { white-space: nowrap; }
 .compare-pct { color: var(--accent); font-weight: 800; font-variant-numeric: tabular-nums; }
 @media (max-width: 520px) {

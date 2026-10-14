@@ -25,7 +25,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="theme-color" content="#2a1a45">
-  <link rel="stylesheet" href="styles.css?v=11">
+  <link rel="stylesheet" href="styles.css?v=13">
 </head>
 <body class="has-field">
   <div class="woo-field" aria-hidden="true"><canvas id="field"></canvas></div>
@@ -204,7 +204,6 @@
         <ul class="request-list" id="request-list"></ul>
         <button type="button" class="link-btn" id="ignore-all" hidden>Ignore all</button>
       </div>
-      <p class="bin-hint" id="friend-hint">Tap a friend to see how much you agree.</p>
       <p class="bin-hint" id="friend-empty">No friends yet. Paste a friend's link below, or open it and tap Add as a Friend. You'll be friends once they accept.</p>
       <ul class="friend-list" id="friend-list"></ul>
       <!-- Not signed in: friends live with this browser's anonymous account. -->
@@ -268,7 +267,7 @@
       </div>
       <!-- One tight line up top (how often you agree, out of the claims you've
            both answered Yes or No) so the lists below get the room. -->
-      <h3 class="compare-head">You and <span id="compare-name"></span><span id="agree-on" hidden> agree on <span class="compare-pct" id="compare-pct"></span></span></h3>
+      <h3 class="compare-head">You and <span id="compare-name"></span><button type="button" class="name-edit" id="compare-rename" hidden>✎</button><span id="agree-on" hidden> agree on <span class="compare-pct" id="compare-pct"></span></span></h3>
       <div class="compare-bar" id="compare-bar" aria-hidden="true">
         <span class="seg agree" id="compare-agree"></span>
       </div>
@@ -419,9 +418,10 @@
   <script src="sky.js?v=8"></script>
   <script src="cat.js"></script>
   <script src="score.js"></script>
+  <script src="popups.js"></script>
   <script src="app.js?v=4"></script>
   <script src="config.js"></script>
-  <script src="cloud.js?v=9"></script>
+  <script src="cloud.js?v=10"></script>
   <script src="funstat.js?v=3"></script>
   <script src="woo.js?v=18"></script>
 </body>

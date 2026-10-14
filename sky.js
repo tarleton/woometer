@@ -338,10 +338,4 @@ function paintSky(host, variant) {
   if (header && footer) {
     new ResizeObserver(() => (footer.style.minHeight = `${header.getBoundingClientRect().height}px`)).observe(header);
   }
-  // On phones the home page's bottom bar covers the page's end; the footer
-  // stops exactly at the bar's top edge, with no gap, whatever its height.
-  const bar = document.querySelector(".minibar");
-  if (bar) {
-    new ResizeObserver(() => document.documentElement.style.setProperty("--minibar-h", `${bar.getBoundingClientRect().height}px`)).observe(bar);
-  }
 }

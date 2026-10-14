@@ -469,7 +469,7 @@
     for (const name of ["answer", "remove", "reset"]) document.addEventListener(`woometer:${name}`, renderSaveNote);
     $("friends-google").addEventListener("click", signIn);
     // The comparison's lists work like an accordion: opening one closes the others.
-    const lists = ["agree-box", "differ-box", "their-pile"].map($);
+    const lists = ["agree-box", "differ-box", "their-pile", "unsure-box"].map($);
     for (const box of lists) {
       box.addEventListener("toggle", () => {
         if (box.open) for (const other of lists) if (other !== box) other.open = false;
@@ -1618,6 +1618,7 @@
     $("agree-box").hidden = true;
     $("differ-box").hidden = true;
     $("their-pile").hidden = true;
+    $("unsure-box").hidden = true;
     $("compare-add").hidden = Boolean(friend.friend_id);
     $("pair-meter").hidden = true;
     dlg.showModal();
@@ -1701,6 +1702,17 @@
       $("their-pile-list").replaceChildren(...chips(s.woo));
       $("their-pile").hidden = false;
     }
+    // Their Not Sure answers stay out of the agree %, so they get a list of
+    // their own, split by what you said, as a gentle way into a conversation.
+    const yours = W.getAnswers();
+    const unsure = CLAIMS.filter((claim) => theirs[claim.id] === "unsure").map((claim) => ({ claim, mine: yours[claim.id] }));
+    fill("unsure-box", "unsure-title", `${friend.display_name ? `${friend.display_name}'s` : "Their"} 🤷 Not Sure`, "compare-unsure", unsure, [
+      ["✨ You believe", (d) => d.mine === "yes"],
+      ["🤷 You're not sure either", (d) => d.mine === "unsure"],
+      ["🗑 You don't believe", (d) => d.mine === "no"],
+      ["You haven't answered yet", (d) => !d.mine],
+    ]);
+    $("unsure-hint").textContent = `Open questions for ${friend.display_name || "them"}, and good ones to talk about together.`;
     if (friend.code) {
       $("compare-add").onclick = async () => {
         const done = await addFriend(friend.code, friend.display_name);

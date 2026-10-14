@@ -285,6 +285,13 @@
         <summary id="their-pile-title"></summary>
         <ul class="pile" id="their-pile-list"></ul>
       </details>
+      <!-- Their Not Sure answers, split by what you said: the agree % leaves
+           them out, but they can be good things to talk about. -->
+      <details class="compare-list" id="unsure-box" hidden>
+        <summary id="unsure-title"></summary>
+        <p class="bin-hint" id="unsure-hint"></p>
+        <div class="chip-groups" id="compare-unsure"></div>
+      </details>
       <div class="detail-actions">
         <button type="button" class="btn ghost" id="compare-add" hidden>Add as a Friend</button>
         <button class="btn" value="close">Close</button>
@@ -414,7 +421,7 @@
   <script src="score.js"></script>
   <script src="app.js?v=4"></script>
   <script src="config.js"></script>
-  <script src="cloud.js?v=7"></script>
+  <script src="cloud.js?v=8"></script>
   <script src="funstat.js?v=3"></script>
   <script src="woo.js?v=18"></script>
 </body>

@@ -609,6 +609,10 @@ dialog::backdrop { background: rgb(20 10 30 / 50%); }
    back as it was. Faded rather than visibility: hidden so focus can return to it. */
 dialog.covered { opacity: 0; pointer-events: none; }
 dialog.covered::backdrop { background: transparent; }
+/* The page behind an open popup holds still (popups.js), and scrolling to the
+   end of a popup stops there instead of carrying on to the page. */
+body.pinned { position: fixed; left: 0; right: 0; }
+dialog { overscroll-behavior: contain; }
 dialog h3 { margin: 4px 0 8px; font-size: 22px; }
 .detail-cat { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
 .detail-q { color: var(--muted); }

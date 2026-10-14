@@ -1376,15 +1376,17 @@
   async function answerRequest(r, accept, li) {
     const buttons = li.querySelectorAll("button");
     for (const b of buttons) b.disabled = true;
-    const { data, error } = await db.rpc("answer_request", { other: r.other, accept });
+    const { data, error } = await db.rpc("answer_friend_request", { other: r.other, accept });
     if (error) {
       logError({ error });
       for (const b of buttons) b.disabled = false;
       W.toast("Couldn't do that just now. Try again in a moment.");
       return;
     }
-    // null: they took the request back in the meantime.
-    if (!data) W.toast("That request isn't there anymore.");
+    // 'cancelled': their Cancel landed first, so you aren't friends (the
+    // database makes Accept and Cancel take turns; see answer_friend_request).
+    if (data === "cancelled") W.toast(`${r.display_name || "They"} took that request back before you answered.`);
+    else if (!data) W.toast("That request isn't there anymore.");
     else if (accept) W.toast(`${r.display_name || "They"} ${r.display_name ? "is" : "are"} now in your friends.`);
     else W.toast("Ignored. They aren't told.");
     refreshFriends(true);
@@ -1431,14 +1433,17 @@
     cancel.setAttribute("aria-label", `Cancel your request to ${r.display_name || "them"}`);
     cancel.addEventListener("click", async () => {
       cancel.disabled = true;
-      const { error } = await db.rpc("cancel_request", { other: r.other });
+      const { data, error } = await db.rpc("cancel_my_request", { other: r.other });
       if (error) {
         logError({ error });
         cancel.disabled = false;
         W.toast("Couldn't do that just now. Try again in a moment.");
         return;
       }
-      W.toast("Request cancelled.");
+      // 'friends': their Accept landed first (see cancel_my_request).
+      if (data === "cancelled") W.toast("Request cancelled.");
+      else if (data === "friends") W.toast(`${r.display_name || "They"} had already accepted, so you're friends now.`);
+      else W.toast("That request isn't there anymore.");
       refreshFriends(true);
     });
     li.append(row, cancel);

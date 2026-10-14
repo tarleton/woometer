@@ -984,7 +984,7 @@
     add.disabled = false;
     add.hidden = false;
     // Having their link is enough. Their name shows once they add one.
-    if (!name) $("invite-text").textContent = "They haven't added their name yet. You can still add them, and once they accept, give them a nickname with ✎ in Friends.";
+    if (!name) $("invite-text").textContent = "They haven't added their name yet. You can still add them, and once they accept, tap them in Friends and use ✎ to give them a nickname.";
     add.onclick = async () => showAdded(await addFriend(code, name));
     $("invite").hidden = false;
   }
@@ -1035,7 +1035,7 @@
       return false;
     }
     if (result === "asked") W.toast(`Request sent. You'll be friends once ${name ? `${name} accepts` : "they accept"}.`);
-    else W.toast((name ? `${name} is now in your friends.` : "Added to your friends. Tap ✎ to give them a nickname.") + (keepFriendsNote() ? ` ${$("friends-google").textContent} to keep them safe on any device.` : ""));
+    else W.toast((name ? `${name} is now in your friends.` : "Added to your friends. To give them a nickname, tap them in Friends, then ✎.") + (keepFriendsNote() ? ` ${$("friends-google").textContent} to keep them safe on any device.` : ""));
     refreshFriends();
     return result;
   }
@@ -1292,7 +1292,6 @@
     const sent = requests.filter((r) => !r.incoming);
     showRequests(requests.filter((r) => r.incoming));
     $("friend-empty").hidden = data.length > 0 || sent.length > 0;
-    $("friend-hint").hidden = !data.length;
     $("friends-keep").hidden = !((data.length || sent.length) && keepFriendsNote());
     showNewFriends(opening);
     const mine = W.getAnswers();
@@ -1322,20 +1321,9 @@
           meta.textContent = "Nothing to compare yet";
         }
         b.append(name, meta);
-        b.addEventListener("click", () => openCompare({ ...f, display_name: friendName(f) }));
+        // Renaming or removing them is in their popup, from the ✎ by their name.
+        b.addEventListener("click", () => openCompare({ ...f, display_name: friendName(f) }, f));
         li.append(b);
-        // Nicknames need the current schema.sql; before that the list has no
-        // nickname column, so there's nothing to rename with.
-        if ("nickname" in f) {
-          const rename = document.createElement("button");
-          rename.type = "button";
-          rename.className = "rename";
-          rename.textContent = "✎";
-          rename.title = "Rename or remove (only you see the name)";
-          rename.setAttribute("aria-label", `Rename or remove ${friendName(f) || "this friend"}`);
-          rename.addEventListener("click", () => openNickname(f));
-          li.append(rename);
-        }
         return li;
       })
     );
@@ -1496,6 +1484,7 @@
     }
     $("remove-dialog").close();
     $("nickname-dialog").close();
+    if (comparing && comparing.row === f) $("compare").close();
     renaming = null;
     refreshFriends();
   }
@@ -1511,8 +1500,10 @@
       W.toast("Couldn't save that name just now. Try again in a moment.");
       return;
     }
+    f.nickname = nickname || null;
     $("nickname-dialog").close();
     renaming = null;
+    renamedInCompare(f);
     refreshFriends();
   }
 
@@ -1612,10 +1603,22 @@
     $("your-cat-name").hidden = !youToo;
   }
 
-  async function openCompare(friend) {
+  // The friend whose popup is open and their answers, so renaming them from
+  // there shows the new name without loading everything again.
+  let comparing = null;
+
+  // row: their line in your friend list, for ✎ (none for someone's link).
+  async function openCompare(friend, row) {
     const dlg = $("compare");
-    const them = friend.display_name || "Them";
+    comparing = null;
     $("compare-name").textContent = friend.display_name || "Unnamed friend";
+    // ✎ beside their name: rename or remove them. Hidden until the popup is
+    // open, so the popup still starts on Close rather than on ✎.
+    const rename = $("compare-rename");
+    rename.hidden = true;
+    rename.onclick = () => openNickname(row);
+    rename.title = "Rename or remove (only you see the name)";
+    rename.setAttribute("aria-label", `Rename or remove ${friend.display_name || "this friend"}`);
     $("agree-on").hidden = true;
     $("compare-bar").hidden = true;
     $("compare-woo").hidden = true;
@@ -1627,12 +1630,23 @@
     $("compare-add").hidden = Boolean(friend.friend_id);
     $("pair-meter").hidden = true;
     dlg.showModal();
+    // Nicknames need the current schema.sql; before that the list has no
+    // nickname column, so there's nothing to rename with.
+    rename.hidden = !(row && "nickname" in row);
 
     const theirs = friend.friend_id ? await answersOf(friend.friend_id) : await answersForCode(friend.code);
     if (!theirs) {
       $("compare-summary").textContent = "Couldn't load their answers. Try again in a moment.";
       return;
     }
+    comparing = { friend, row, theirs };
+    showCompare(friend, theirs);
+  }
+
+  function showCompare(friend, theirs) {
+    const them = friend.display_name || "Them";
+    $("compare-name").textContent = friend.display_name || "Unnamed friend";
+    $("compare-rename").setAttribute("aria-label", `Rename or remove ${friend.display_name || "this friend"}`);
     const c = compare(W.getAnswers(), theirs);
 
     const agreed = pct(c.agree, c.both);
@@ -1726,5 +1740,15 @@
         showAdded(done);
       };
     }
+  }
+
+  // Renamed from their popup: the new name all through it, and the list you
+  // had open stays open.
+  function renamedInCompare(row) {
+    if (!comparing || comparing.row !== row || !$("compare").open) return;
+    const open = ["agree-box", "differ-box", "their-pile", "unsure-box"].find((id) => $(id).open);
+    comparing.friend = { ...comparing.friend, display_name: friendName(row) };
+    showCompare(comparing.friend, comparing.theirs);
+    if (open) $(open).open = true;
   }
 })();

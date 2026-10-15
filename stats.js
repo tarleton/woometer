@@ -330,30 +330,39 @@
     $("detail-about-row").hidden = !claim.about;
     $("detail-verdict").textContent = claim.verdict;
     $("detail-link").href = claim.link;
+    // How everyone here answered, as the same bar as the main page's popup.
     const total = c.yes + c.no + c.unsure;
-    const share = (n) => `${Math.round((n / total) * 100)}%`;
-    const people = `${total} ${total === 1 ? "person" : "people"}${current.where ? ` in ${current.where}` : ""}`;
-    $("detail-stats").textContent = c.unsure
-      ? `${share(c.yes)} of ${people} said Yes, ${share(c.no)} said No and ${share(c.unsure)} aren't sure.`
-      : `${share(c.yes)} of ${people} said Yes and ${share(c.no)} said No.`;
+    const note = document.createElement("span");
+    note.className = "split-note";
+    note.textContent = `${total} ${total === 1 ? "person" : "people"}${current.where ? ` in ${current.where}` : ""} answered`;
+    const given = savedAnswers()[claim.id];
+    $("detail-stats").replaceChildren(AnswerSplit.bar(c, given), note);
     $("detail-saved").hidden = true;
-    showButtons(claim, savedAnswers()[claim.id]);
+    showButtons(claim, given);
     $("detail").showModal();
   }
 
+  // Yours is lit with a tick like on the main page, and outlined in the bar.
   function showButtons(claim, given) {
     $("detail-answer").replaceChildren(
       ...ANSWERS.map(([value, label]) => {
         const b = document.createElement("button");
         b.type = "button";
         b.className = value;
-        b.textContent = label;
-        b.disabled = given === value;
-        if (b.disabled) b.title = "Your answer";
-        b.addEventListener("click", () => answer(claim, value));
+        if (given === value) {
+          const tick = document.createElement("span");
+          tick.setAttribute("aria-hidden", "true");
+          tick.textContent = "✓ ";
+          b.append(tick);
+          b.title = "Your answer";
+        }
+        b.append(label);
+        if (given) b.setAttribute("aria-pressed", String(given === value));
+        b.addEventListener("click", () => savedAnswers()[claim.id] !== value && answer(claim, value));
         return b;
       })
     );
+    document.querySelectorAll("#detail-stats .answer-split > span").forEach((s) => s.classList.toggle("mine", s.classList.contains(`${given}-part`)));
   }
 
   async function answer(claim, value) {

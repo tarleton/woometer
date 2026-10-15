@@ -433,16 +433,22 @@
         return;
       }
       const total = s.yes + s.no + s.unsure;
-      const people = `${total.toLocaleString()} ${total === 1 ? "person" : "people"}`;
-      const split = s.unsure
-        ? `${pct(s.yes, total)}% of ${people} said Yes, ${pct(s.no, total)}% said No and ${pct(s.unsure, total)}% aren't sure.`
-        : `${pct(s.yes, total)}% of ${people} said Yes and ${pct(s.no, total)}% said No.`;
       // A database that isn't counting Not Sure yet hasn't counted yours either.
       if (mine === "unsure" && !s.unsure) mine = null;
-      if (!mine) el.textContent = total ? split : "Nobody has answered this one yet.";
-      else if (total <= 1) el.textContent = "You're the only one who has answered this so far.";
-      else if (mine === "unsure") el.textContent = split;
-      else el.textContent = `${split} ${pct(s[mine], total)}% agree with you.`;
+      if (!mine && !total) el.textContent = "Nobody has answered this one yet.";
+      else if (mine && total <= 1) el.textContent = "You're the only one who has answered this so far.";
+      else {
+        // The bar, then how many answered and how many share your answer.
+        const note = document.createElement("span");
+        note.className = "split-note";
+        note.append(`${total.toLocaleString()} ${total === 1 ? "person" : "people"} answered`);
+        if (mine) {
+          const b = document.createElement("b");
+          b.textContent = AnswerSplit.share(s[mine], total);
+          note.append(" · ", b, mine === "unsure" ? " aren't sure either" : " agree with you");
+        }
+        el.replaceChildren(AnswerSplit.bar(s, mine), note);
+      }
     });
 
     $("google-login").addEventListener("click", signIn);

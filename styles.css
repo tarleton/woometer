@@ -1054,6 +1054,32 @@ dialog.wide { width: min(640px, calc(100vw - 32px)); max-width: none; }
 
 .detail-stats { font-weight: 600; }
 
+/* How everyone answered, as a bar like the stats page's, each share inside
+   its color. Even a sliver keeps room for its number. Yours is outlined like
+   your button. */
+.answer-split { display: flex; gap: 2px; height: 26px; }
+.answer-split span {
+  flex: 1 1 0;
+  min-width: 38px;
+  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 26px;
+  text-align: center;
+  white-space: nowrap;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.answer-split span:first-child { border-radius: 6px 0 0 6px; }
+.answer-split span:last-child { border-radius: 0 6px 6px 0; }
+.answer-split span:only-child { border-radius: 6px; }
+.answer-split .yes-part { background: var(--woo); }
+.answer-split .unsure-part { background: var(--unsure); }
+.answer-split .no-part { background: var(--trash); }
+.answer-split .mine { box-shadow: inset 0 0 0 2px rgb(255 255 255 / 70%); }
+.split-note { display: block; margin-top: 6px; font-size: 14px; font-weight: 400; color: var(--muted); }
+.split-note b { color: var(--ink); }
+
 /* Their meter and yours at the top of the comparison: gauge, the two cats,
    gauge. Phones put the cats above the two gauges. Everything hangs from the
    top so the gauges and the cats stay level. */

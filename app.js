@@ -157,12 +157,12 @@
     cat.className = "card-cat";
     cat.textContent = `${CATEGORIES[claim.category].icon} ${CATEGORIES[claim.category].label}`;
 
-    // The title opens the evidence and everyone's answers, without answering.
+    // The title opens what the belief is, the evidence and everyone's answers, without answering.
     const h = document.createElement("h3");
     const info = document.createElement("button");
     info.type = "button";
     info.className = "card-info";
-    info.setAttribute("aria-label", `${claim.name}: what's the evidence?`);
+    info.setAttribute("aria-label", `${claim.name}: what it is and the evidence`);
     const title = document.createElement("span");
     title.textContent = claim.name;
     const why = document.createElement("span");
@@ -653,6 +653,8 @@
     $("detail-cat").textContent = `${CATEGORIES[c.category].icon} ${CATEGORIES[c.category].label}`;
     $("detail-name").textContent = c.name;
     $("detail-q").textContent = c.question;
+    $("detail-about").textContent = c.about || "";
+    $("detail-about-row").hidden = !c.about;
     $("detail-verdict").textContent = c.verdict;
     $("detail-link").href = c.link;
     // The same three buttons as the board. Once answered, yours is lit with a

@@ -326,6 +326,8 @@
     $("detail-cat").textContent = `${CATEGORIES[claim.category].icon} ${CATEGORIES[claim.category].label}`;
     $("detail-name").textContent = claim.name;
     $("detail-q").textContent = claim.question;
+    $("detail-about").textContent = claim.about || "";
+    $("detail-about-row").hidden = !claim.about;
     $("detail-verdict").textContent = claim.verdict;
     $("detail-link").href = claim.link;
     const total = c.yes + c.no + c.unsure;

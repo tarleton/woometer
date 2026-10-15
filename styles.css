@@ -620,6 +620,7 @@ dialog { overscroll-behavior: contain; }
 dialog h3 { margin: 4px 0 8px; font-size: 22px; }
 .detail-cat { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
 .detail-q { color: var(--muted); }
+.detail-about { margin-bottom: 6px; }
 .detail-verdict { border-left: 3px solid var(--trash); padding-left: 10px; }
 dialog a { color: var(--accent); }
 /* The answer buttons in the detail popup, centred under the evidence. */

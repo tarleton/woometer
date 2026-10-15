@@ -1550,19 +1550,23 @@
   }
 
   // Common ground: only claims you've both answered Yes or No count, so Not
-  // Sure and anything still on either board stay out of it.
+  // Sure and anything still on either board stay out of it. open: claims
+  // either of you is Not Sure about, which the friend popup says it leaves
+  // out (theirs match the count on their Not Sure list).
   function compare(mine, theirs) {
     const agreements = [];
     const differences = [];
+    let open = 0;
     const sure = (v) => (v === "yes" || v === "no" ? v : null);
     for (const c of CLAIMS) {
       const a = sure(mine[c.id]);
       const b = sure(theirs[c.id]);
       if (a && b) (a === b ? agreements : differences).push({ claim: c, mine: a, theirs: b });
+      else if (mine[c.id] === "unsure" || theirs[c.id] === "unsure") open++;
     }
     const agree = agreements.length;
     const differ = differences.length;
-    return { both: agree + differ, agree, differ, agreements, differences };
+    return { both: agree + differ, agree, differ, open, agreements, differences };
   }
 
   // Their meter and yours at the top of the comparison, the cats together in the middle.
@@ -1653,8 +1657,11 @@
     $("agree-on").hidden = !c.both;
     $("compare-bar").hidden = !c.both;
     $("compare-pct").textContent = `${agreed}%`;
+    // The open questions are said right by the %, so 100% doesn't read as
+    // agreeing on everything when one of you isn't sure about some.
+    const open = c.open ? `, not counting ${c.open === 1 ? "one open question" : `${c.open} open questions`}` : "";
     $("compare-summary").textContent = c.both
-      ? `Of the ${c.both === 1 ? "one claim" : `${c.both} claims`} you both answered Yes or No.`
+      ? `Of the ${c.both === 1 ? "one claim" : `${c.both} claims`} you both answered Yes or No${open}.`
       : "Nothing to compare yet. Once you've both answered some of the same claims Yes or No, you'll see how much you agree.";
     $("compare-agree").style.flexBasis = `${agreed}%`;
 

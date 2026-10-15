@@ -3,7 +3,8 @@
   // When each answer was given (ms, this device's clock), so signing in can
   // keep the newer of two different answers to the same claim (cloud.js).
   const TIMES_KEY = "woometer.answerTimes.v1";
-  const SHOW_ANSWERED_KEY = "woometer.showAnswered.v1";
+  // Set once "Change answers" has sparkled on screen (see noticeChange).
+  const CHANGE_SEEN_KEY = "woometer.changeSeen.v1";
 
   const $ = (id) => document.getElementById(id);
   const grid = $("grid");
@@ -36,11 +37,11 @@
   let times = loadTimes();
   let activeCategory = "all";
   let query = "";
-  // "Show answered" puts answered claims back on the board, after the rest.
+  // "Change answers" puts your answered claims back on the board, first, so
+  // you can pick a different answer. It starts unticked on every visit.
   let showAnswered = false;
-  try {
-    showAnswered = localStorage.getItem(SHOW_ANSWERED_KEY) === "1";
-  } catch {}
+  // The order your answers are listed in while it's ticked (see answeredFirst).
+  let changeOrder = null;
   let catStage = null;
 
   function load() {
@@ -208,14 +209,16 @@
   }
 
   function renderGrid() {
-    // Normally only unanswered claims are on the board; a search, or "Show
-    // answered", also brings back answered ones, listed after the rest.
+    // Normally only unanswered claims are on the board. "Change answers" also
+    // brings back answered ones, first; a search lists them after the rest.
     const open = CLAIMS.filter(
       (c) =>
         (query || showAnswered || !answers[c.id]) &&
         (activeCategory === "all" || c.category === activeCategory) &&
         (!query || `${c.name} ${c.question}`.toLowerCase().includes(query))
-    ).sort((a, b) => !!answers[a.id] - !!answers[b.id]);
+    );
+    if (showAnswered && !query) answeredFirst(open);
+    else open.sort((a, b) => !!answers[a.id] - !!answers[b.id]);
     grid.replaceChildren(...open.map(makeCard));
 
     const total = CLAIMS.length;
@@ -226,11 +229,66 @@
     $("progress-bar").style.width = `${pct}%`;
     $("show-answered-label").hidden = done === 0;
     $("show-answered").checked = showAnswered;
+    if (done) noticeChange();
     $("done").hidden = open.length > 0;
     $("done-share").hidden = !!query || done < total;
     $("done").querySelector("p").textContent = query
       ? "No claims match your search."
-      : `${done === total ? "That's every claim on the list." : "Nothing left in this category."} Tick “Show answered” to look over your answers or change them.`;
+      : `${done === total ? "That's every claim on the list." : "Nothing left in this category."} Tick “Change answers” to look over your answers or change them.`;
+  }
+
+  // Your answers newest first, then the claims you haven't answered. The order
+  // holds while "Change answers" stays ticked, so a card you change stays put;
+  // claims you answer meanwhile join at the top.
+  function answeredFirst(list) {
+    const kept = (changeOrder || []).filter((id) => answers[id]);
+    const added = Object.keys(answers).reverse().filter((id) => !kept.includes(id));
+    changeOrder = added.concat(kept);
+    const rank = new Map(changeOrder.map((id, i) => [id, i]));
+    list.sort((a, b) => (rank.get(a.id) ?? rank.size) - (rank.get(b.id) ?? rank.size));
+  }
+
+  // The first time "Change answers" is fully on screen, it glows and sparkles
+  // once, so people notice their answers aren't set in stone.
+  let changeNoticed = false;
+  try {
+    changeNoticed = localStorage.getItem(CHANGE_SEEN_KEY) === "1";
+  } catch {}
+  const changeWatch = new IntersectionObserver(
+    ([seen]) => {
+      if (!seen.isIntersecting) return;
+      changeWatch.disconnect();
+      try {
+        localStorage.setItem(CHANGE_SEEN_KEY, "1");
+      } catch {}
+      sparkle(seen.target);
+    },
+    { threshold: 1 }
+  );
+  function noticeChange() {
+    if (changeNoticed) return;
+    changeNoticed = true;
+    changeWatch.observe($("show-answered-label"));
+  }
+
+  function sparkle(el) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    el.classList.add("arrive");
+    setTimeout(() => el.classList.remove("arrive"), 2600);
+    for (let i = 0; i < 8; i++) {
+      const spark = document.createElement("span");
+      spark.className = "unlock-spark";
+      spark.setAttribute("aria-hidden", "true");
+      spark.textContent = "✦";
+      const angle = (Math.PI * 2 * i) / 8 + Math.random() * 0.4;
+      spark.style.left = `${50 + Math.cos(angle) * 44}%`;
+      spark.style.top = `${50 + Math.sin(angle) * 44}%`;
+      spark.style.setProperty("--dx", `${Math.cos(angle) * 30}px`);
+      spark.style.setProperty("--dy", `${Math.sin(angle) * 16}px`);
+      spark.style.animationDelay = `${i * 60}ms`;
+      el.append(spark);
+      setTimeout(() => spark.remove(), 2000);
+    }
   }
 
   // Each bin shows its newest few claims so the side panel never needs its own
@@ -597,18 +655,27 @@
     $("detail-q").textContent = c.question;
     $("detail-verdict").textContent = c.verdict;
     $("detail-link").href = c.link;
-    // The same three buttons as the board: the current answer is greyed out, and
-    // tapping another moves the claim to that pile.
+    // The same three buttons as the board. Once answered, yours is lit with a
+    // tick, a line above says so, and tapping another moves the claim to that pile.
+    const given = answers[id];
+    $("detail-mine").hidden = !given;
+    if (given) $("detail-mine").textContent = `${PILES[given].label}. Tap another answer to change it.`;
     const row = $("detail-answer");
     row.replaceChildren();
     for (const [value, label, cls] of [["yes", "Yes", "yes"], ["unsure", "Not Sure", "unsure"], ["no", "No", "no"]]) {
       const b = document.createElement("button");
       b.type = "button";
       b.className = cls;
-      b.textContent = label;
-      b.disabled = answers[id] === value;
-      if (b.disabled) b.title = "Your answer";
+      if (given === value) {
+        const tick = document.createElement("span");
+        tick.setAttribute("aria-hidden", "true");
+        tick.textContent = "✓ ";
+        b.append(tick);
+      }
+      b.append(label);
+      if (given) b.setAttribute("aria-pressed", String(given === value));
       b.addEventListener("click", () => {
+        if (answers[id] === value) return;
         detail.close();
         answer(id, value, null);
       });
@@ -717,9 +784,7 @@
 
   $("show-answered").addEventListener("change", (e) => {
     showAnswered = e.target.checked;
-    try {
-      localStorage.setItem(SHOW_ANSWERED_KEY, showAnswered ? "1" : "0");
-    } catch {}
+    changeOrder = null;
     renderGrid();
   });
 

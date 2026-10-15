@@ -25,7 +25,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="theme-color" content="#2a1a45">
-  <link rel="stylesheet" href="styles.css?v=13">
+  <link rel="stylesheet" href="styles.css?v=14">
 </head>
 <body class="has-field">
   <div class="woo-field" aria-hidden="true"><canvas id="field"></canvas></div>
@@ -82,7 +82,7 @@
       </div>
       <div class="progress-row">
         <p class="progress"><span id="progress"></span><span class="progress-bar" id="progress-bar" aria-hidden="true"></span></p>
-        <label class="show-answered" id="show-answered-label" hidden><input type="checkbox" id="show-answered"> Show answered</label>
+        <label class="show-answered" id="show-answered-label" hidden><input type="checkbox" id="show-answered"> Change answers</label>
       </div>
       <div class="grid" id="grid"></div>
       <div class="done" id="done" hidden>
@@ -166,6 +166,7 @@
       <p class="detail-verdict"><strong>The evidence:</strong> <span id="detail-verdict"></span></p>
       <p class="detail-stats" id="detail-stats" hidden></p>
       <p><a id="detail-link" target="_blank" rel="noopener">Read more</a></p>
+      <p class="detail-mine" id="detail-mine" hidden></p>
       <div class="answer detail-answer" id="detail-answer"></div>
       <div class="detail-actions">
         <button class="btn" value="close">Close</button>
@@ -419,7 +420,7 @@
   <script src="cat.js"></script>
   <script src="score.js"></script>
   <script src="popups.js"></script>
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
   <script src="config.js"></script>
   <script src="cloud.js?v=10"></script>
   <script src="funstat.js?v=3"></script>

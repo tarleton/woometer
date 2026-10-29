@@ -32,6 +32,8 @@ Everything on the grid comes from [`claims.js`](claims.js). Each claim looks lik
 
 New categories go in `CATEGORIES` at the top of the same file.
 
+Each claim also gets an entry in [`eras.js`](eras.js), keyed by its `id`: a rough year and a short note on when the idea first appeared, which the timeline page (`timeline.html`, at `/timeline`) groups into eras. Beliefs with no single starting point are "Age-old" (`y: null`), and faith teachings are dated by the scripture that first records them.
+
 ## Accounts, stats and friends (Supabase)
 
 [`cloud.js`](cloud.js) adds these on top of the static site:

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Through the ages · woometer</title>
+  <meta name="description" content="When each idea on woometer first appeared, from age-old folklore to beliefs born online.">
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="canonical" href="https://woometer.com/timeline">
+  <meta name="theme-color" content="#2a1a45">
+  <link rel="stylesheet" href="styles.css?v=15">
+  <style>
+    .policy { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; line-height: 1.5; }
+    .policy a { color: var(--accent); }
+    .policy .lede { color: var(--muted); margin: 4px 0 0; }
+    .top a.home { color: inherit; text-decoration: none; }
+
+    /* One line down the left joins the eras, with a dot for each. */
+    .ages { list-style: none; margin: 24px 0 0; padding: 0 0 0 22px; position: relative; }
+    .ages::before { content: ""; position: absolute; left: 6px; top: 18px; bottom: 18px; width: 2px; border-radius: 1px; background: linear-gradient(var(--line), var(--accent) 50%, var(--line)); opacity: 0.7; }
+    .age { position: relative; margin: 0 0 10px; }
+    .age::before { content: ""; position: absolute; left: -21px; top: 17px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); box-sizing: border-box; }
+    .age.open::before { background: var(--accent); box-shadow: 0 0 10px rgb(167 139 250 / 60%); }
+
+    .age-head { display: block; width: 100%; padding: 10px 14px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+    .age-head:hover, .age-head:focus-visible { border-color: var(--accent); }
+    .age.open .age-head { border-radius: var(--radius) var(--radius) 0 0; border-bottom-color: transparent; }
+    .age-title { display: flex; align-items: baseline; gap: 10px; }
+    .age-name { font-size: 18px; font-weight: 700; }
+    .age-count { color: var(--muted); font-size: 14px; }
+    .age-chev { margin-left: auto; color: var(--accent); font-size: 14px; transition: transform 0.2s; }
+    .age.open .age-chev { transform: rotate(90deg); }
+    /* How many ideas began in each era, as a thin line. */
+    .age-bar { display: block; height: 2px; margin-top: 8px; border-radius: 1px; background: var(--line); overflow: hidden; }
+    .age-bar i { display: block; height: 100%; background: var(--accent); border-radius: 1px; }
+    .age-peek { display: block; margin-top: 6px; color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .age.open .age-peek { display: none; }
+
+    .age-list { list-style: none; margin: 0; padding: 2px 0 6px; border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--radius) var(--radius); background: var(--surface); }
+    .age-list[hidden] { display: none; }
+    .idea { display: grid; grid-template-columns: 66px minmax(0, 1fr) auto; align-items: start; gap: 2px 12px; width: 100%; padding: 9px 14px; border: 0; border-top: 1px solid var(--line); background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+    .age-list li:first-child .idea { border-top: 0; }
+    .idea:hover .idea-name, .idea:focus-visible .idea-name { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+    .idea-when { color: var(--accent); font-size: 13px; font-weight: 600; line-height: 1.5; padding-top: 1px; font-variant-numeric: tabular-nums; }
+    .idea-text { min-width: 0; }
+    .idea-name { display: block; font-weight: 600; font-size: 15px; }
+    .idea-note { display: block; color: var(--muted); font-size: 13px; line-height: 1.4; }
+    /* Your answer, as the pile it went in. */
+    .idea-mine { font-size: 15px; line-height: 1.5; }
+    @media (min-width: 640px) {
+      .idea { grid-template-columns: 96px minmax(0, 1fr) auto; }
+    }
+
+    .detail-when { margin: 10px 0 6px; padding: 8px 12px; border-radius: 10px; background: var(--bg); }
+    .detail-when strong { color: var(--accent); }
+    .detail-when .roots { display: block; color: var(--muted); font-size: 14px; }
+    .detail-yours { margin: 14px 0 0; color: var(--muted); font-size: 14px; }
+
+    .note { color: var(--muted); font-size: 14px; margin-top: 28px; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <div class="brand-row">
+        <a class="home" href="./" aria-label="Back to woometer"><h1 class="logo" aria-label="woometer"><span class="logo-woo" aria-hidden="true">w<svg class="eye eye-l" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 16.5C1.5 8.5 9 2.5 18 2.5 18.5 10.5 11 17.5 2.5 16.5z"/><ellipse class="glint" cx="13" cy="6.5" rx="2" ry="1.3" transform="rotate(-35 13 6.5)"/></svg><svg class="eye eye-r" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 16.5C1.5 8.5 9 2.5 18 2.5 18.5 10.5 11 17.5 2.5 16.5z"/><ellipse class="glint" cx="13" cy="6.5" rx="2" ry="1.3" transform="rotate(-35 13 6.5)"/></svg></span><span class="logo-meter" aria-hidden="true">meter</span></h1></a>
+        <p class="tagline">what do you believe?</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="policy">
+    <h2 style="font-size: 28px; margin: 8px 0 0">Through the ages</h2>
+    <p class="lede">When each idea on woometer first appeared. Dates are rough, since many ideas grew slowly. A date says when an idea began, not whether it's true.</p>
+
+    <ol class="ages" id="ages"></ol>
+
+    <p class="note">Faith teachings are dated by the scripture that first records them. Each card links to where the date comes from.</p>
+    <p style="margin-top: 24px"><a href="./">Back to woometer</a></p>
+  </main>
+
+  <dialog id="detail">
+    <form method="dialog">
+      <p class="detail-cat" id="detail-cat"></p>
+      <h3 id="detail-name"></h3>
+      <p class="detail-when"><strong id="detail-when"></strong> · <span id="detail-note"></span><span class="roots" id="detail-roots"></span></p>
+      <p class="detail-about"><strong>What it is:</strong> <span id="detail-about"></span></p>
+      <p class="detail-verdict"><strong>The evidence:</strong> <span id="detail-verdict"></span></p>
+      <p><a id="detail-link" target="_blank" rel="noopener">Read more</a><span id="detail-src-wrap"> · <a id="detail-src" target="_blank" rel="noopener">Where the date comes from</a></span></p>
+      <p class="detail-yours" id="detail-yours"></p>
+      <div class="detail-actions">
+        <button class="btn" value="close">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <footer class="foot">
+    <p><a href="about" class="foot-link">About</a> · <a href="privacy" class="foot-link">Privacy</a> · <a href="terms" class="foot-link">Terms</a></p>
+  </footer>
+
+  <script src="claims.js"></script>
+  <script src="eras.js?v=1"></script>
+  <script src="popups.js"></script>
+  <script src="timeline.js?v=1"></script>
+  <script src="sounds.js"></script>
+  <script src="sky.js?v=8"></script>
+</body>
+</html>
